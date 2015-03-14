@@ -92,7 +92,7 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 			conn.commit();
 		} catch (final SQLException e)
 		{
-			if (e.getErrorCode() != 1061)
+			if (e.getErrorCode() != SQLErrorCodes.CREATION_ERROR.getCode())
 			{
 				UsersDatabaseCreationException exp =
 					new UsersDatabaseCreationException();
@@ -131,7 +131,7 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 			conn.commit();
 		} catch (final SQLException e)
 		{
-			if (e.getErrorCode() == 1062)
+			if (e.getErrorCode() == SQLErrorCodes.ALREADY_EXISTS.getCode())
 			{
 				UsersDatabaseUserAlreadyExistsException exp =
 					new UsersDatabaseUserAlreadyExistsException();
