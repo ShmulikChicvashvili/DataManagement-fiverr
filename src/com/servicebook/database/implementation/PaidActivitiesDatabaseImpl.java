@@ -3,6 +3,8 @@ package com.servicebook.database.implementation;
 import java.sql.Connection;
 import java.util.List;
 
+import org.apache.tomcat.dbcp.dbcp.BasicDataSource;
+
 import com.servicebook.database.AbstractMySqlDatabase;
 import com.servicebook.database.PaidActivitiesDatabase;
 import com.servicebook.database.primitives.DBPaidService;
@@ -10,6 +12,12 @@ import com.servicebook.database.primitives.DBPaidTask;
 
 public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 		PaidActivitiesDatabase {
+
+	public PaidActivitiesDatabaseImpl(String table, String schema,
+			BasicDataSource datasource) {
+		super(schema, datasource);
+		// TODO Auto-generated constructor stub
+	}
 
 	@Override
 	public void addPaidService(DBPaidService service) {

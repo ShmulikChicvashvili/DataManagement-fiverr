@@ -14,7 +14,7 @@ public abstract class AbstractMySqlDatabase {
 	 * @param datasource
 	 *            the datasource
 	 */
-	public AbstractMySqlDatabase(BasicDataSource datasource) {
+	public AbstractMySqlDatabase(String schema, BasicDataSource datasource) {
 		super();
 		this.datasource = datasource;
 	}
