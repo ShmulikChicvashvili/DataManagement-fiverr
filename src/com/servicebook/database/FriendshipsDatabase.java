@@ -12,7 +12,7 @@ public interface FriendshipsDatabase {
 
 	/**
 	 * Adds a friendship relationship to the database. users must differ by
-	 * their username
+	 * their username. Does not validate users exist.
 	 *
 	 * @param user1
 	 *            the first user
@@ -22,7 +22,8 @@ public interface FriendshipsDatabase {
 	public void addFriendship(DBUser user1, DBUser user2);
 
 	/**
-	 * Adds a friendship relationship to the database. Usernames can't be equal
+	 * Adds a friendship relationship to the database. Usernames can't be equal.
+	 * Does not validate users exist.
 	 *
 	 * @param username1
 	 *            the first username
@@ -35,8 +36,8 @@ public interface FriendshipsDatabase {
 	 * Gets the friends for the given user.
 	 *
 	 * @param username
-	 *            the user's username
-	 * @return the friends of the user.
+	 *            the user's username.
+	 * @return the friends of the user. Empty list if the user has no friends.
 	 */
 	public List<DBUser> getFriends(String username);
 
@@ -44,8 +45,8 @@ public interface FriendshipsDatabase {
 	 * Gets the friends for the given user.
 	 *
 	 * @param user
-	 *            the user
-	 * @return the friends of the user.
+	 *            the user.
+	 * @return the friends of the user. Empty list if the user has no friends.
 	 */
 	public List<DBUser> getFriends(DBUser user);
 }
