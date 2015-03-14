@@ -18,10 +18,10 @@ import org.apache.tomcat.dbcp.dbcp.BasicDataSource;
 
 import com.servicebook.database.AbstractMySqlDatabase;
 import com.servicebook.database.UsersDatabase;
-import com.servicebook.database.exceptions.UsersDatabaseExceptions.UsersDatabaseCreationException;
-import com.servicebook.database.exceptions.UsersDatabaseExceptions.UsersDatabaseInvalidParamsException;
-import com.servicebook.database.exceptions.UsersDatabaseExceptions.UsersDatabaseUnkownFailureException;
-import com.servicebook.database.exceptions.UsersDatabaseExceptions.UsersDatabaseUserAlreadyExistsException;
+import com.servicebook.database.exceptions.DatabaseUnkownFailureException;
+import com.servicebook.database.exceptions.users.DatabaseCreationException;
+import com.servicebook.database.exceptions.users.DatabaseInvalidParamsException;
+import com.servicebook.database.exceptions.users.DatabaseAlreadyExistsException;
 import com.servicebook.database.primitives.DBUser;
 
 
@@ -70,14 +70,14 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 	 *            The scheme name
 	 * @param datasource
 	 *            The connection handler
-	 * @throws UsersDatabaseCreationException
+	 * @throws DatabaseCreationException
 	 *             The exception in case of failure
 	 */
 	@SuppressWarnings("nls")
 	public UsersDatabaseImpl(
 		String table,
 		String schema,
-		BasicDataSource datasource) throws UsersDatabaseCreationException
+		BasicDataSource datasource) throws DatabaseCreationException
 	{
 		super(schema, datasource);
 		this.table = schema + "." + "`" + table + "`";
@@ -94,11 +94,7 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 		{
 			if (e.getErrorCode() != SQLErrorCodes.CREATION_ERROR.getCode())
 			{
-				UsersDatabaseCreationException exp =
-					new UsersDatabaseCreationException();
-				e.printStackTrace(new PrintWriter(exp.getTrace()));
-				
-				throw exp;
+				throw new DatabaseCreationException(e);
 			}
 		}
 	}
@@ -109,14 +105,14 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 	 * .database.primitives.DBUser) */
 	@Override
 	public void addUser(DBUser user)
-		throws UsersDatabaseUserAlreadyExistsException,
-		UsersDatabaseUnkownFailureException,
-		UsersDatabaseInvalidParamsException
+		throws DatabaseAlreadyExistsException,
+		DatabaseUnkownFailureException,
+		DatabaseInvalidParamsException
 	{
 		if (user == null
 			|| user.getUsername() == null
 			|| user.getPassword() == null
-			|| user.getName() == null) { throw new UsersDatabaseInvalidParamsException(); }
+			|| user.getName() == null) { throw new DatabaseInvalidParamsException(); }
 		
 		try (
 			Connection conn = getConnection();
@@ -133,18 +129,10 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 		{
 			if (e.getErrorCode() == SQLErrorCodes.ALREADY_EXISTS.getCode())
 			{
-				UsersDatabaseUserAlreadyExistsException exp =
-					new UsersDatabaseUserAlreadyExistsException();
-				e.printStackTrace(new PrintWriter(exp.getTrace()));
-				
-				throw exp;
+				throw new DatabaseAlreadyExistsException(e);
 			}
 			
-			UsersDatabaseUnkownFailureException exp =
-				new UsersDatabaseUnkownFailureException();
-			e.printStackTrace(new PrintWriter(exp.getTrace()));
-			
-			throw exp;
+			throw new DatabaseUnkownFailureException(e);
 		}
 	}
 	
@@ -153,10 +141,10 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 	 * com.servicebook.database.UsersDatabase#getUser(java.lang.String) */
 	@Override
 	public DBUser getUser(String username)
-		throws UsersDatabaseUnkownFailureException,
-		UsersDatabaseInvalidParamsException
+		throws DatabaseUnkownFailureException,
+		DatabaseInvalidParamsException
 	{
-		if (username == null) { throw new UsersDatabaseInvalidParamsException(); }
+		if (username == null) { throw new DatabaseInvalidParamsException(); }
 		DBUser $ = null;
 		
 		try (
@@ -186,11 +174,7 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 			
 		} catch (final SQLException e)
 		{
-			UsersDatabaseUnkownFailureException exp =
-				new UsersDatabaseUnkownFailureException();
-			e.printStackTrace(new PrintWriter(exp.getTrace()));
-			
-			throw exp;
+			throw new DatabaseUnkownFailureException(e);
 		}
 		
 		return $;
@@ -201,10 +185,10 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 	 * int) */
 	@Override
 	public List<DBUser> getUsers(int start, int amount)
-		throws UsersDatabaseUnkownFailureException,
-		UsersDatabaseInvalidParamsException
+		throws DatabaseUnkownFailureException,
+		DatabaseInvalidParamsException
 	{
-		if (start < 0 || amount < 0) { throw new UsersDatabaseInvalidParamsException(); }
+		if (start < 0 || amount < 0) { throw new DatabaseInvalidParamsException(); }
 		final ArrayList<DBUser> $ = new ArrayList<>();
 		
 		try (
@@ -235,11 +219,7 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 			conn.commit();
 		} catch (final SQLException e)
 		{
-			UsersDatabaseUnkownFailureException exp =
-				new UsersDatabaseUnkownFailureException();
-			e.printStackTrace(new PrintWriter(exp.getTrace()));
-			
-			throw exp;
+			throw new DatabaseUnkownFailureException(e);
 		}
 		
 		return $;
@@ -250,10 +230,10 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 	 * com.servicebook.database.UsersDatabase#isUserExists(java.lang.String) */
 	@Override
 	public boolean isUserExists(String username)
-		throws UsersDatabaseUnkownFailureException,
-		UsersDatabaseInvalidParamsException
+		throws DatabaseUnkownFailureException,
+		DatabaseInvalidParamsException
 	{
-		if (username == null) { throw new UsersDatabaseInvalidParamsException(); }
+		if (username == null) { throw new DatabaseInvalidParamsException(); }
 		boolean $ = false;
 		
 		try (
@@ -272,11 +252,7 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 			conn.commit();
 		} catch (final SQLException e)
 		{
-			UsersDatabaseUnkownFailureException exp =
-				new UsersDatabaseUnkownFailureException();
-			e.printStackTrace(new PrintWriter(exp.getTrace()));
-			
-			throw exp;
+			throw new DatabaseUnkownFailureException(e);
 		}
 		
 		return $;
@@ -288,10 +264,10 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 	 * java.lang.String) */
 	@Override
 	public boolean validateUser(String username, String password)
-		throws UsersDatabaseInvalidParamsException,
-		UsersDatabaseUnkownFailureException
+		throws DatabaseInvalidParamsException,
+		DatabaseUnkownFailureException
 	{
-		if (username == null || password == null) { throw new UsersDatabaseInvalidParamsException(); }
+		if (username == null || password == null) { throw new DatabaseInvalidParamsException(); }
 		boolean $ = false;
 		
 		try (
@@ -313,11 +289,7 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 			conn.commit();
 		} catch (final SQLException e)
 		{
-			UsersDatabaseUnkownFailureException exp =
-				new UsersDatabaseUnkownFailureException();
-			e.printStackTrace(new PrintWriter(exp.getTrace()));
-			
-			throw exp;
+			throw new DatabaseUnkownFailureException(e);
 		}
 		
 		return $;

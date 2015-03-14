@@ -15,10 +15,10 @@ import org.apache.tomcat.dbcp.dbcp.BasicDataSource;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.servicebook.database.exceptions.UsersDatabaseExceptions.UsersDatabaseCreationException;
-import com.servicebook.database.exceptions.UsersDatabaseExceptions.UsersDatabaseInvalidParamsException;
-import com.servicebook.database.exceptions.UsersDatabaseExceptions.UsersDatabaseUnkownFailureException;
-import com.servicebook.database.exceptions.UsersDatabaseExceptions.UsersDatabaseUserAlreadyExistsException;
+import com.servicebook.database.exceptions.DatabaseUnkownFailureException;
+import com.servicebook.database.exceptions.users.DatabaseAlreadyExistsException;
+import com.servicebook.database.exceptions.users.DatabaseCreationException;
+import com.servicebook.database.exceptions.users.DatabaseInvalidParamsException;
 import com.servicebook.database.implementation.UsersDatabaseImpl;
 import com.servicebook.database.primitives.DBUser;
 
@@ -38,13 +38,13 @@ public class UsersDatabaseTest
 		try
 		{
 			userDB.addUser(badUser);
-		} catch (final UsersDatabaseUserAlreadyExistsException e)
+		} catch (final DatabaseAlreadyExistsException e)
 		{
 			fail("In case of invalid params we shouldnt get to already exists exception");
-		} catch (final UsersDatabaseUnkownFailureException e)
+		} catch (final DatabaseUnkownFailureException e)
 		{
 			fail("In case of invalid params we shouldnt get here");
-		} catch (final UsersDatabaseInvalidParamsException e)
+		} catch (final DatabaseInvalidParamsException e)
 		{}
 	}
 	
@@ -57,52 +57,52 @@ public class UsersDatabaseTest
 		try
 		{
 			userDB.addUser(badUser);
-		} catch (final UsersDatabaseUserAlreadyExistsException e)
+		} catch (final DatabaseAlreadyExistsException e)
 		{
 			fail("In case of invalid params we shouldnt get to already exists exception");
-		} catch (final UsersDatabaseUnkownFailureException e)
+		} catch (final DatabaseUnkownFailureException e)
 		{
 			fail("In case of invalid params we shouldnt get here");
-		} catch (final UsersDatabaseInvalidParamsException e)
+		} catch (final DatabaseInvalidParamsException e)
 		{}
 
 		badUser = new DBUser(null, "password", "name", -1);
 		try
 		{
 			userDB.addUser(badUser);
-		} catch (final UsersDatabaseUserAlreadyExistsException e)
+		} catch (final DatabaseAlreadyExistsException e)
 		{
 			fail("In case of invalid params we shouldnt get to already exists exception");
-		} catch (final UsersDatabaseUnkownFailureException e)
+		} catch (final DatabaseUnkownFailureException e)
 		{
 			fail("In case of invalid params we shouldnt get here");
-		} catch (final UsersDatabaseInvalidParamsException e)
+		} catch (final DatabaseInvalidParamsException e)
 		{}
 		
 		badUser = new DBUser("username", "password", null, 0);
 		try
 		{
 			userDB.addUser(badUser);
-		} catch (final UsersDatabaseUserAlreadyExistsException e)
+		} catch (final DatabaseAlreadyExistsException e)
 		{
 			fail("In case of invalid params we shouldnt get to already exists exception");
-		} catch (final UsersDatabaseUnkownFailureException e)
+		} catch (final DatabaseUnkownFailureException e)
 		{
 			fail("In case of invalid params we shouldnt get here");
-		} catch (final UsersDatabaseInvalidParamsException e)
+		} catch (final DatabaseInvalidParamsException e)
 		{}
 		
 		badUser = new DBUser("username", null, "name", 0);
 		try
 		{
 			userDB.addUser(badUser);
-		} catch (final UsersDatabaseUserAlreadyExistsException e)
+		} catch (final DatabaseAlreadyExistsException e)
 		{
 			fail("In case of invalid params we shouldnt get to already exists exception");
-		} catch (final UsersDatabaseUnkownFailureException e)
+		} catch (final DatabaseUnkownFailureException e)
 		{
 			fail("In case of invalid params we shouldnt get here");
-		} catch (final UsersDatabaseInvalidParamsException e)
+		} catch (final DatabaseInvalidParamsException e)
 		{}
 		
 	}
@@ -116,9 +116,9 @@ public class UsersDatabaseTest
 		{
 			userDB.addUser(goodUser);
 		} catch (
-			UsersDatabaseUserAlreadyExistsException
-			| UsersDatabaseUnkownFailureException
-			| UsersDatabaseInvalidParamsException e)
+			DatabaseAlreadyExistsException
+			| DatabaseUnkownFailureException
+			| DatabaseInvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -129,9 +129,9 @@ public class UsersDatabaseTest
 		{
 			userDB.addUser(goodUser);
 		} catch (
-			UsersDatabaseUserAlreadyExistsException
-			| UsersDatabaseUnkownFailureException
-			| UsersDatabaseInvalidParamsException e)
+			DatabaseAlreadyExistsException
+			| DatabaseUnkownFailureException
+			| DatabaseInvalidParamsException e)
 		{
 			fail();
 		}
@@ -144,9 +144,9 @@ public class UsersDatabaseTest
 		{
 			userDB.addUser(goodUser);
 		} catch (
-			UsersDatabaseUserAlreadyExistsException
-			| UsersDatabaseUnkownFailureException
-			| UsersDatabaseInvalidParamsException e)
+			DatabaseAlreadyExistsException
+			| DatabaseUnkownFailureException
+			| DatabaseInvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -156,13 +156,13 @@ public class UsersDatabaseTest
 		try
 		{
 			userDB.addUser(goodUser);
-		} catch (UsersDatabaseUserAlreadyExistsException e)
+		} catch (DatabaseAlreadyExistsException e)
 		{
 			// Success
-		} catch (UsersDatabaseUnkownFailureException e)
+		} catch (DatabaseUnkownFailureException e)
 		{
 			fail("Shouldnt get to UsersDatabaseUnkownFailureException exception");
-		} catch (UsersDatabaseInvalidParamsException e)
+		} catch (DatabaseInvalidParamsException e)
 		{
 			fail("Shouldnt get to UsersDatabaseInvalidParamsException");
 		}
@@ -182,7 +182,7 @@ public class UsersDatabaseTest
 		try
 		{
 			userDB = new UsersDatabaseImpl("users", "servicebook_db", ds);
-		} catch (final UsersDatabaseCreationException e)
+		} catch (final DatabaseCreationException e)
 		{
 			fail("Fuck");
 		}

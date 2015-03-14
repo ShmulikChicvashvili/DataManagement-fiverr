@@ -4,9 +4,9 @@ package com.servicebook.database;
 
 import java.util.List;
 
-import com.servicebook.database.exceptions.UsersDatabaseExceptions.UsersDatabaseInvalidParamsException;
-import com.servicebook.database.exceptions.UsersDatabaseExceptions.UsersDatabaseUnkownFailureException;
-import com.servicebook.database.exceptions.UsersDatabaseExceptions.UsersDatabaseUserAlreadyExistsException;
+import com.servicebook.database.exceptions.DatabaseUnkownFailureException;
+import com.servicebook.database.exceptions.users.DatabaseInvalidParamsException;
+import com.servicebook.database.exceptions.users.DatabaseAlreadyExistsException;
 import com.servicebook.database.primitives.DBUser;
 
 
@@ -24,17 +24,17 @@ public interface UsersDatabase
 	 *
 	 * @param user
 	 *            the user to be added
-	 * @throws UsersDatabaseUserAlreadyExistsException
+	 * @throws DatabaseAlreadyExistsException
 	 *             User already exists exception
-	 * @throws UsersDatabaseUnkownFailureException
+	 * @throws DatabaseUnkownFailureException
 	 *             Unknown failure exception
-	 * @throws UsersDatabaseInvalidParamsException
+	 * @throws DatabaseInvalidParamsException
 	 *             Invalid parameters exception
 	 */
 	public void addUser(final DBUser user)
-		throws UsersDatabaseUserAlreadyExistsException,
-		UsersDatabaseUnkownFailureException,
-		UsersDatabaseInvalidParamsException;
+		throws DatabaseAlreadyExistsException,
+		DatabaseUnkownFailureException,
+		DatabaseInvalidParamsException;
 	
 	
 	/**
@@ -43,14 +43,14 @@ public interface UsersDatabase
 	 * @param username
 	 *            the user's username
 	 * @return the user with the given username, or null if non existent
-	 * @throws UsersDatabaseUnkownFailureException
+	 * @throws DatabaseUnkownFailureException
 	 *             Unknown failure exception
-	 * @throws UsersDatabaseInvalidParamsException
+	 * @throws DatabaseInvalidParamsException
 	 *             Invalid parameters exception
 	 */
 	public DBUser getUser(String username)
-		throws UsersDatabaseUnkownFailureException,
-		UsersDatabaseInvalidParamsException;
+		throws DatabaseUnkownFailureException,
+		DatabaseInvalidParamsException;
 	
 	
 	/**
@@ -63,14 +63,14 @@ public interface UsersDatabase
 	 *            all users from 'start' to the end.
 	 * @return a list of up to 'amount' users, starting from 'start'. If no
 	 *         users match the criteria an empty list is returned.
-	 * @throws UsersDatabaseUnkownFailureException
+	 * @throws DatabaseUnkownFailureException
 	 *             Unknown failure exception
-	 * @throws UsersDatabaseInvalidParamsException
+	 * @throws DatabaseInvalidParamsException
 	 *             Invalid parameters exception
 	 */
 	public List<DBUser> getUsers(int start, int amount)
-		throws UsersDatabaseUnkownFailureException,
-		UsersDatabaseInvalidParamsException;
+		throws DatabaseUnkownFailureException,
+		DatabaseInvalidParamsException;
 	
 	
 	/**
@@ -79,14 +79,14 @@ public interface UsersDatabase
 	 * @param username
 	 *            the username to be checked.
 	 * @return {@code True} if is user exists, {@code False} otherwise.
-	 * @throws UsersDatabaseUnkownFailureException
+	 * @throws DatabaseUnkownFailureException
 	 *             Unknown failure
-	 * @throws UsersDatabaseInvalidParamsException
+	 * @throws DatabaseInvalidParamsException
 	 *             Invalid parameters exception
 	 */
 	public boolean isUserExists(String username)
-		throws UsersDatabaseUnkownFailureException,
-		UsersDatabaseInvalidParamsException;
+		throws DatabaseUnkownFailureException,
+		DatabaseInvalidParamsException;
 	
 	
 	/**
@@ -98,12 +98,12 @@ public interface UsersDatabase
 	 *            the user's password
 	 * @return {@code True} if a username-login pair is registered (able to
 	 *         login), {@code False} otherwise.
-	 * @throws UsersDatabaseUnkownFailureException
+	 * @throws DatabaseUnkownFailureException
 	 *             Unknown failure exception
-	 * @throws UsersDatabaseInvalidParamsException
+	 * @throws DatabaseInvalidParamsException
 	 *             Invalid parameters exception
 	 */
 	public boolean validateUser(String username, String password)
-		throws UsersDatabaseUnkownFailureException,
-		UsersDatabaseInvalidParamsException;
+		throws DatabaseUnkownFailureException,
+		DatabaseInvalidParamsException;
 }
