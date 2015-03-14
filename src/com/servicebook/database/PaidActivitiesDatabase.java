@@ -33,10 +33,11 @@ public interface PaidActivitiesDatabase {
 	 * @param conn
 	 *            the Sql connection to be used. Used for transactions.
 	 */
-	public void deletePaidActivity(long id, Connection conn);
+	public void deletePaidActivity(int id, Connection conn);
 
 	/**
-	 * Gets the services offered to the specified user.
+	 * Gets the services offered to the specified user. the services are ordered
+	 * by their title.
 	 *
 	 * @param username
 	 *            the user's username
@@ -54,7 +55,8 @@ public interface PaidActivitiesDatabase {
 			int start, int amount);
 
 	/**
-	 * Gets the tasks offered to the specified user.
+	 * Gets the tasks offered to the specified user. the tasks are ordered by
+	 * their title.
 	 *
 	 * @param username
 	 *            the user's username
@@ -72,7 +74,8 @@ public interface PaidActivitiesDatabase {
 			int start, int amount);
 
 	/**
-	 * Gets the services offered by the specified user.
+	 * Gets the services offered by the specified user. the services are ordered
+	 * by their title.
 	 *
 	 * @param username
 	 *            the user's username
@@ -89,7 +92,8 @@ public interface PaidActivitiesDatabase {
 			int start, int amount);
 
 	/**
-	 * Gets the tasks offered by the specified user.
+	 * Gets the tasks offered by the specified user. the tasks are ordered by
+	 * their title.
 	 *
 	 * @param username
 	 *            the user's username
@@ -113,8 +117,10 @@ public interface PaidActivitiesDatabase {
 	 *            the username of the user to be registered
 	 * @param id
 	 *            the id of the desired activity
+	 * @param conn
+	 *            TODO
 	 */
-	public void registerToActivity(String username, long id);
+	public void registerToActivity(String username, long id, Connection conn);
 
 	/**
 	 * Unregister a user from an activity. does <b><u>not</u></b> update the
@@ -124,6 +130,8 @@ public interface PaidActivitiesDatabase {
 	 *            the username of the user to be unregistered.
 	 * @param id
 	 *            the id of the desired activity.
+	 * @param conn
+	 *            TODO
 	 */
-	public void unregisterFromActivity(String username, long id);
+	public void unregisterFromActivity(String username, long id, Connection conn);
 }

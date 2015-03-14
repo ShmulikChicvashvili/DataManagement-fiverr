@@ -14,6 +14,7 @@ public class PaidActivityDatabaseTest {
 	@Test
 	public void test() throws ClassNotFoundException {
 		BasicDataSource ds = new BasicDataSource();
+		ds.setDefaultAutoCommit(false);
 		ds.setDriverClassName("com.mysql.jdbc.Driver");
 		ds.setUsername("root");
 		ds.setPassword("root");
