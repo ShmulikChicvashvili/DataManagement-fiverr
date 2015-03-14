@@ -7,6 +7,7 @@ import org.apache.tomcat.dbcp.dbcp.BasicDataSource;
 
 public abstract class AbstractMySqlDatabase {
 	protected BasicDataSource datasource;
+	protected String schema;
 
 	/**
 	 * Instantiates a new abstract my sql database.
@@ -17,6 +18,7 @@ public abstract class AbstractMySqlDatabase {
 	public AbstractMySqlDatabase(String schema, BasicDataSource datasource) {
 		super();
 		this.datasource = datasource;
+		this.schema = schema;
 	}
 
 	protected Connection getConnection() throws SQLException {
