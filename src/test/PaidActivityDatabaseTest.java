@@ -7,6 +7,7 @@ import org.apache.tomcat.dbcp.dbcp.BasicDataSource;
 import org.junit.Test;
 
 import com.servicebook.database.PaidActivitiesDatabase;
+import com.servicebook.database.exceptions.paidActivities.DatabaseCreationException;
 import com.servicebook.database.implementation.PaidActivitiesDatabaseImpl;
 
 public class PaidActivityDatabaseTest {
@@ -20,8 +21,14 @@ public class PaidActivityDatabaseTest {
 		ds.setPassword("root");
 		ds.setUrl("jdbc:mysql://localhost/");
 
-		PaidActivitiesDatabase paidDB = new PaidActivitiesDatabaseImpl(
-				"activities", "activities_registrations", "servicebook_db", ds);
+		try {
+			PaidActivitiesDatabase paidDB = new PaidActivitiesDatabaseImpl(
+					"activities", "activities_registrations", "servicebook_db",
+					ds);
+		} catch (DatabaseCreationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		System.out.println("Done test!");
 	}
