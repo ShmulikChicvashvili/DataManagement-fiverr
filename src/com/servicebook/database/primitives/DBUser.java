@@ -90,6 +90,32 @@ public class DBUser
 	}
 	
 	
+	/* (non-Javadoc) @see java.lang.Object#equals(java.lang.Object) */
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (!(obj instanceof DBUser)) { return false; }
+		DBUser other = (DBUser) obj;
+		return (this.username.equals(other.username)
+			&& this.password.equals(other.password)
+			&& this.name.equals(other.name) && this.balance == other.balance);
+	}
+	
+	
+	/* (non-Javadoc) @see java.lang.Object#toString() */
+	@Override
+	public String toString()
+	{
+		return this.username
+			+ ", "
+			+ this.password
+			+ ", "
+			+ this.name
+			+ ", "
+			+ new Integer(this.balance).toString();
+	}
+	
+	
 	
 	private String username;
 	
@@ -98,5 +124,5 @@ public class DBUser
 	private String name;
 	
 	private int balance;
-
+	
 }

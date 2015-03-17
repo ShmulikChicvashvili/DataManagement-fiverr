@@ -345,7 +345,7 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 		
 		gettingMultipleUsersQuery =
 			String.format(
-				"SELECT * FROM %s LIMIT ?, ? ORDER BY %s",
+				"SELECT * FROM %s ORDER BY `%s` LIMIT ?, ?",
 				table,
 				Columns.NAME.toString().toLowerCase());
 	}
