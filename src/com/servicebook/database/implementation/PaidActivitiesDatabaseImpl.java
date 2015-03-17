@@ -13,7 +13,6 @@ import org.apache.tomcat.dbcp.dbcp.BasicDataSource;
 import com.servicebook.database.AbstractMySqlDatabase;
 import com.servicebook.database.PaidActivitiesDatabase;
 import com.servicebook.database.exceptions.DatabaseUnkownFailureException;
-import com.servicebook.database.exceptions.paidActivities.DatabaseAlreadyExistsException;
 import com.servicebook.database.exceptions.paidActivities.DatabaseCreationException;
 import com.servicebook.database.exceptions.paidActivities.InvalidParameterException;
 import com.servicebook.database.primitives.DBPaidActivity;
@@ -39,7 +38,20 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 	}
 
 	private enum ActivityType {
-		SERVICE, TASK
+		SERVICE {
+			@Override
+			public String toDB() {
+				return "SERVICE";
+			}
+		},
+		TASK {
+			@Override
+			public String toDB() {
+				return "TASK";
+			}
+		};
+
+		public abstract String toDB();
 	}
 
 	private String activityTable;
@@ -82,6 +94,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 	 *            int
 	 */
 	private String getActivitiesOfferedByUserQuery;
+	private String queryNumRegisteredField = "numRegistered";
 
 	private void initializeQueries() {
 		addActivityQuery = String
@@ -96,10 +109,27 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 				activityTable, ActivityTableColumn.ID.columnName());
 
 		getActivitiesOfferedByUserQuery = String
-				.format("SELECT %s.*, count(*) FROM %s JOIN %s ON () GROUP BY %s WHERE `%s`=? AND `%S`=? ORDER BY `%s` LIMIT ?,?",
+				.format("SELECT %s.*, count(%s.%s) AS "
+						+ queryNumRegisteredField
+						+ " FROM "
+						+ activityTable
+						+ " LEFT OUTER JOIN "
+						+ registrationTable
+						+ " ON ("
+						+ activityTable
+						+ "."
+						+ ActivityTableColumn.ID.columnName()
+						+ "="
+						+ registrationTable
+						+ "."
+						+ RegistrationTableColumn.ID.columnName()
+						+ ") WHERE %s.`%s`=? AND `%S`=? GROUP BY %s  ORDER BY `%s` LIMIT ?,?",
+						activityTable, registrationTable,
+						RegistrationTableColumn.USERNAME.columnName(),
 						activityTable,
 						ActivityTableColumn.USERNAME.columnName(),
 						ActivityTableColumn.TYPE.columnName(),
+						ActivityTableColumn.ID.columnName(),
 						ActivityTableColumn.TITLE.columnName());
 	}
 
@@ -120,8 +150,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 
 			conn.commit();
 		} catch (SQLException e) {
-			DatabaseCreationException exp = new DatabaseCreationException(e);
-			throw exp;
+			throw new DatabaseCreationException(e);
 		}
 	}
 
@@ -158,13 +187,14 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 	}
 
 	/**
-	 * Sets the parameters for the prepared statement handling adding an
-	 * activity to the database (as initialized in initializeQueries).
-	 * 
+	 * adds the activity to the database.
+	 *
 	 * @param activity
 	 *            the activity to be added. id is ignored and set by the
 	 *            database (incrementally), and capacity and distance must be
 	 *            positive.
+	 * @param type
+	 *            the type
 	 * @throws InvalidParameterException
 	 *             In case the activity is null, or capacity or distance are non
 	 *             positive.
@@ -177,6 +207,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 				|| activity.getDistance() <= 0) {
 			throw new InvalidParameterException();
 		}
+		assert (activity.getDistance() == 1);
 		try (Connection conn = getConnection();
 				PreparedStatement stmt = conn
 						.prepareStatement(addActivityQuery)) {
@@ -184,7 +215,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 			stmt.setString(2, activity.getUsername());
 			stmt.setShort(3, activity.getCapacity());
 			stmt.setShort(4, activity.getDistance());
-			stmt.setString(5, type.toString().toUpperCase());
+			stmt.setString(5, type.toDB());
 
 			stmt.executeUpdate();
 			conn.commit();
@@ -220,7 +251,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 	}
 
 	private boolean isStartAmountInRanges(int start, int amount) {
-		return start > 0 && amount > 0;
+		return start >= 0 && amount > 0;
 	}
 
 	@Override
@@ -237,19 +268,37 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 		return null;
 	}
 
-	@Override
-	public List<DBPaidService> getServicesOfferedByUser(String username,
-			int start, int amount) throws InvalidParameterException {
+	/**
+	 * Gets the activities offered by user. The activities are ordered by their
+	 * title.
+	 *
+	 * @param username
+	 *            the user's username
+	 * @param start
+	 *            the index for the first activity.
+	 * @param amount
+	 *            the maximum amount of activities to retrieve.
+	 * @param type
+	 *            the type of the activity {@link ActivityType}
+	 * @return the activities offered by the user
+	 * @throws InvalidParameterException
+	 *             In case a null was passed, or the ranges are bad.
+	 * @throws DatabaseUnkownFailureException
+	 *             In case of an unknown SQL exception
+	 */
+	private List<DBPaidActivity> getActivitiesOfferedByUser(String username,
+			int start, int amount, ActivityType type)
+			throws InvalidParameterException, DatabaseUnkownFailureException {
 		if (username == null || !isStartAmountInRanges(start, amount)) {
 			throw new InvalidParameterException();
 		}
 
-		List<DBPaidService> services = new ArrayList<DBPaidService>();
+		List<DBPaidActivity> $ = new ArrayList<DBPaidActivity>();
 		try (Connection conn = getConnection();
 				PreparedStatement stmt = conn
 						.prepareStatement(getActivitiesOfferedByUserQuery)) {
 			stmt.setString(1, username);
-			stmt.setString(2, ActivityType.SERVICE.toString().toUpperCase());
+			stmt.setString(2, type.toDB());
 			stmt.setInt(3, start);
 			stmt.setInt(4, amount);
 
@@ -261,26 +310,77 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 						.columnName());
 				assert (username.equals(rs
 						.getString(ActivityTableColumn.USERNAME.columnName())));
-				// String username = rs.getString(ActivityTableColumn.USERNAME
-				// .columnName());
 				short capacity = rs.getShort(ActivityTableColumn.CAPACITY
 						.columnName());
 				short distance = rs.getShort(ActivityTableColumn.DISTANCE
 						.columnName());
+				short numRegistered = rs.getShort(queryNumRegisteredField);
 
+				DBPaidActivity activity = null;
+
+				switch (type) {
+				case SERVICE:
+					activity = new DBPaidService(id, title, username, capacity,
+							distance, numRegistered);
+					break;
+				case TASK:
+					activity = new DBPaidTask(id, title, username, capacity,
+							distance, numRegistered);
+					break;
+				default:
+					break;
+
+				}
+				$.add(activity);
 			}
+
+			// ResultSet rs closes automatically when `stmt` closes
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new DatabaseUnkownFailureException(e);
 		}
-		return null;
+
+		assert ($.size() <= amount);
+
+		return $;
+
+	}
+
+	@Override
+	public List<DBPaidService> getServicesOfferedByUser(String username,
+			int start, int amount) throws InvalidParameterException,
+			DatabaseUnkownFailureException {
+		List<DBPaidService> $ = new ArrayList<DBPaidService>();
+		List<DBPaidActivity> services = getActivitiesOfferedByUser(username,
+				start, amount, ActivityType.SERVICE);
+
+		for (DBPaidActivity service : services) {
+			assert (service instanceof DBPaidService);
+			if (!(service instanceof DBPaidService)) {
+				continue;
+			}
+			$.add((DBPaidService) service);
+		}
+
+		return $;
 	}
 
 	@Override
 	public List<DBPaidTask> getTasksOfferedByUser(String username, int start,
-			int amount) {
-		// TODO Auto-generated method stub
-		return null;
+			int amount) throws DatabaseUnkownFailureException,
+			InvalidParameterException {
+		List<DBPaidTask> $ = new ArrayList<DBPaidTask>();
+		List<DBPaidActivity> tasks = getActivitiesOfferedByUser(username,
+				start, amount, ActivityType.TASK);
+
+		for (DBPaidActivity task : tasks) {
+			assert (task instanceof DBPaidTask);
+			if (!(task instanceof DBPaidTask)) {
+				continue;
+			}
+			$.add((DBPaidTask) task);
+		}
+
+		return $;
 	}
 
 	@Override
