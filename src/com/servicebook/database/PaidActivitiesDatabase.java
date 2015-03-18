@@ -10,6 +10,10 @@ import com.servicebook.database.primitives.DBPaidTask;
 
 public interface PaidActivitiesDatabase {
 
+	public enum ActivityStatus {
+		NOT_EXIST, SERVICE, TASK
+	}
+
 	/**
 	 * Adds the paid service to the database.
 	 *
@@ -50,6 +54,30 @@ public interface PaidActivitiesDatabase {
 	 */
 	public void deletePaidActivity(int id, Connection conn)
 			throws DatabaseUnkownFailureException;
+
+	/**
+	 * Gets the activity status in the database.
+	 *
+	 * @param id
+	 *            the id for the activity
+	 * @return the activity status - NOT_EXIST if no such activity exists. If it
+	 *         does exist returns SERVICE or TASK according to its type
+	 * @throws DatabaseUnkownFailureException
+	 */
+	public ActivityStatus getActivityStatus(int id) throws DatabaseUnkownFailureException;
+
+	/**
+	 * Gets the activity status in the database.
+	 *
+	 * @param id
+	 *            the id for the activity
+	 * @param conn
+	 *            the conn to be used (as part of a transaction).
+	 * @return the activity status - NOT_EXIST if no such activity exists. If it
+	 *         does exist returns SERVICE or TASK according to its type
+	 * @throws DatabaseUnkownFailureException 
+	 */
+	public ActivityStatus getActivityStatus(int id, Connection conn) throws DatabaseUnkownFailureException;
 
 	/**
 	 * Gets the services offered to the specified user. the services are ordered
@@ -130,26 +158,24 @@ public interface PaidActivitiesDatabase {
 	/**
 	 * Register a user to an activity. does <b><u>not</u></b> update the balance
 	 * of the users.
-	 *
-	 * @param username
-	 *            the username of the user to be registered
 	 * @param id
 	 *            the id of the desired activity
+	 * @param username
+	 *            the username of the user to be registered
 	 * @param conn
 	 *            TODO
 	 */
-	public void registerToActivity(String username, long id, Connection conn);
+	public void registerToActivity(int id, String username, Connection conn);
 
 	/**
 	 * Unregister a user from an activity. does <b><u>not</u></b> update the
 	 * balance of the users.
-	 *
-	 * @param username
-	 *            the username of the user to be unregistered.
 	 * @param id
 	 *            the id of the desired activity.
+	 * @param username
+	 *            the username of the user to be unregistered.
 	 * @param conn
 	 *            TODO
 	 */
-	public void unregisterFromActivity(String username, long id, Connection conn);
+	public void unregisterFromActivity(int id, String username, Connection conn);
 }
