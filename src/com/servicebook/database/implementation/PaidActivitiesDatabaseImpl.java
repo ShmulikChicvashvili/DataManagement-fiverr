@@ -13,7 +13,7 @@ import org.apache.tomcat.dbcp.dbcp.BasicDataSource;
 import com.servicebook.database.AbstractMySqlDatabase;
 import com.servicebook.database.PaidActivitiesDatabase;
 import com.servicebook.database.exceptions.DatabaseUnkownFailureException;
-import com.servicebook.database.exceptions.paidActivities.DatabaseCreationException;
+import com.servicebook.database.exceptions.paidActivities.TableCreationException;
 import com.servicebook.database.exceptions.paidActivities.InvalidParameterException;
 import com.servicebook.database.primitives.DBPaidActivity;
 import com.servicebook.database.primitives.DBPaidService;
@@ -151,7 +151,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 
 	public PaidActivitiesDatabaseImpl(String activityTable,
 			String registrationTable, String schema, BasicDataSource datasource)
-			throws DatabaseCreationException {
+			throws TableCreationException {
 		super(schema, datasource);
 		this.activityTable = this.schema + ".`" + activityTable + "`";
 		this.registrationTable = this.schema + ".`" + registrationTable + "`";
@@ -166,7 +166,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 
 			conn.commit();
 		} catch (SQLException e) {
-			throw new DatabaseCreationException(e);
+			throw new TableCreationException(e);
 		}
 	}
 
@@ -449,6 +449,9 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 		try (PreparedStatement stmt = conn
 				.prepareStatement(registerToActivityQuery)) {
 
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 

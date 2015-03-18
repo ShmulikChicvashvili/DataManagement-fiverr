@@ -7,7 +7,7 @@ import org.apache.tomcat.dbcp.dbcp.BasicDataSource;
 import org.junit.Test;
 
 import com.servicebook.database.PaidActivitiesDatabase;
-import com.servicebook.database.exceptions.paidActivities.DatabaseCreationException;
+import com.servicebook.database.exceptions.paidActivities.TableCreationException;
 import com.servicebook.database.implementation.PaidActivitiesDatabaseImpl;
 
 public class PaidActivityDatabaseTest {
@@ -25,7 +25,7 @@ public class PaidActivityDatabaseTest {
 			PaidActivitiesDatabase paidDB = new PaidActivitiesDatabaseImpl(
 					"activities", "activities_registrations", "servicebook_db",
 					ds);
-		} catch (DatabaseCreationException e) {
+		} catch (TableCreationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
