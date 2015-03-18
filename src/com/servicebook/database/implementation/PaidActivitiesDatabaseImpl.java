@@ -107,7 +107,24 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 	private String getActivitiesOfferedByUserQuery;
 	private String queryNumRegisteredField = "numRegistered";
 
+	/**
+	 * The registration to an activity query
+	 * 
+	 * @param id
+	 *            int
+	 * @param username
+	 *            String
+	 */
 	private String registerToActivityQuery;
+
+	/**
+	 * The unregister from an activity query
+	 * 
+	 * @param id
+	 *            int
+	 * @param username
+	 *            String
+	 */
 	private String unregisterFromActivityQuery;
 
 	private void initializeQueries() {
@@ -142,7 +159,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 						+ registrationTable
 						+ "."
 						+ RegistrationTableColumn.ID.columnName()
-						+ ") WHERE %s.`%s`=? AND `%S`=? GROUP BY %s  ORDER BY `%s` LIMIT ?,?",
+						+ ") WHERE %s.`%s`=? AND `%s`=? GROUP BY %s  ORDER BY `%s` LIMIT ?,?",
 						activityTable, registrationTable,
 						RegistrationTableColumn.USERNAME.columnName(),
 						activityTable,
@@ -150,6 +167,16 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 						ActivityTableColumn.TYPE.columnName(),
 						ActivityTableColumn.ID.columnName(),
 						ActivityTableColumn.TITLE.columnName());
+
+		registerToActivityQuery = String.format(
+				"INSERT INTO %s (%s,%s) VALUES (?,?)", registrationTable,
+				RegistrationTableColumn.ID.columnName(),
+				RegistrationTableColumn.USERNAME.columnName());
+
+		unregisterFromActivityQuery = String.format(
+				"DELETE FROM %s WHERE `%s`=? and `%s`=?", registrationTable,
+				RegistrationTableColumn.ID.columnName(),
+				RegistrationTableColumn.USERNAME.columnName());
 	}
 
 	private boolean isValidId(int id) {
