@@ -100,10 +100,12 @@ public interface PaidActivitiesDatabase {
 	 *            the maximum amount of services to return. must be at least 1.
 	 * @return the services offered by the user, including the amount of
 	 *         registered users to the service.
-	 * @throws InvalidParameterException 
+	 * @throws InvalidParameterException
+	 * @throws DatabaseUnkownFailureException
 	 */
 	public List<DBPaidService> getServicesOfferedByUser(final String username,
-			int start, int amount) throws InvalidParameterException;
+			int start, int amount) throws InvalidParameterException,
+			DatabaseUnkownFailureException;
 
 	/**
 	 * Gets the tasks offered by the specified user. the tasks are ordered by
@@ -118,9 +120,12 @@ public interface PaidActivitiesDatabase {
 	 *            the maximum amount of tasks to return. must be at least 1.
 	 * @return the tasks offered by the user, including the amount of registered
 	 *         users to the task.
+	 * @throws InvalidParameterException
+	 * @throws DatabaseUnkownFailureException
 	 */
 	public List<DBPaidTask> getTasksOfferedByUser(final String username,
-			int start, int amount);
+			int start, int amount) throws DatabaseUnkownFailureException,
+			InvalidParameterException;
 
 	/**
 	 * Register a user to an activity. does <b><u>not</u></b> update the balance
