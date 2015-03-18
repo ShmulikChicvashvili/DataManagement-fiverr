@@ -19,9 +19,9 @@ import org.apache.tomcat.dbcp.dbcp.BasicDataSource;
 import com.servicebook.database.AbstractMySqlDatabase;
 import com.servicebook.database.UsersDatabase;
 import com.servicebook.database.exceptions.DatabaseUnkownFailureException;
-import com.servicebook.database.exceptions.users.DatabaseCreationException;
-import com.servicebook.database.exceptions.users.DatabaseInvalidParamsException;
-import com.servicebook.database.exceptions.users.DatabaseAlreadyExistsException;
+import com.servicebook.database.exceptions.users.TableCreationException;
+import com.servicebook.database.exceptions.users.InvalidParamsException;
+import com.servicebook.database.exceptions.users.ElementAlreadyExistsException;
 import com.servicebook.database.primitives.DBUser;
 
 
@@ -70,14 +70,14 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 	 *            The scheme name
 	 * @param datasource
 	 *            The connection handler
-	 * @throws DatabaseCreationException
+	 * @throws TableCreationException
 	 *             The exception in case of failure
 	 */
 	@SuppressWarnings("nls")
 	public UsersDatabaseImpl(
 		String table,
 		String schema,
-		BasicDataSource datasource) throws DatabaseCreationException
+		BasicDataSource datasource) throws TableCreationException
 	{
 		super(schema, datasource);
 		this.table = schema + "." + "`" + table + "`";
@@ -94,7 +94,7 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 		{
 			if (e.getErrorCode() != SQLErrorCodes.CREATION_ERROR.getCode())
 			{
-				throw new DatabaseCreationException(e);
+				throw new TableCreationException(e);
 			}
 		}
 	}
@@ -105,14 +105,14 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 	 * .database.primitives.DBUser) */
 	@Override
 	public void addUser(DBUser user)
-		throws DatabaseAlreadyExistsException,
+		throws ElementAlreadyExistsException,
 		DatabaseUnkownFailureException,
-		DatabaseInvalidParamsException
+		InvalidParamsException
 	{
 		if (user == null
 			|| user.getUsername() == null
 			|| user.getPassword() == null
-			|| user.getName() == null) { throw new DatabaseInvalidParamsException(); }
+			|| user.getName() == null) { throw new InvalidParamsException(); }
 		
 		try (
 			Connection conn = getConnection();
@@ -129,7 +129,7 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 		{
 			if (e.getErrorCode() == SQLErrorCodes.ALREADY_EXISTS.getCode())
 			{
-				throw new DatabaseAlreadyExistsException(e);
+				throw new ElementAlreadyExistsException(e);
 			}
 			
 			throw new DatabaseUnkownFailureException(e);
@@ -142,9 +142,9 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 	@Override
 	public DBUser getUser(String username)
 		throws DatabaseUnkownFailureException,
-		DatabaseInvalidParamsException
+		InvalidParamsException
 	{
-		if (username == null) { throw new DatabaseInvalidParamsException(); }
+		if (username == null) { throw new InvalidParamsException(); }
 		DBUser $ = null;
 		
 		try (
@@ -186,9 +186,9 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 	@Override
 	public List<DBUser> getUsers(int start, int amount)
 		throws DatabaseUnkownFailureException,
-		DatabaseInvalidParamsException
+		InvalidParamsException
 	{
-		if (start < 0 || amount < 0) { throw new DatabaseInvalidParamsException(); }
+		if (start < 0 || amount < 0) { throw new InvalidParamsException(); }
 		final ArrayList<DBUser> $ = new ArrayList<>();
 		
 		try (
@@ -231,9 +231,9 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 	@Override
 	public boolean isUserExists(String username)
 		throws DatabaseUnkownFailureException,
-		DatabaseInvalidParamsException
+		InvalidParamsException
 	{
-		if (username == null) { throw new DatabaseInvalidParamsException(); }
+		if (username == null) { throw new InvalidParamsException(); }
 		boolean $ = false;
 		
 		try (
@@ -264,10 +264,10 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 	 * java.lang.String) */
 	@Override
 	public boolean validateUser(String username, String password)
-		throws DatabaseInvalidParamsException,
+		throws InvalidParamsException,
 		DatabaseUnkownFailureException
 	{
-		if (username == null || password == null) { throw new DatabaseInvalidParamsException(); }
+		if (username == null || password == null) { throw new InvalidParamsException(); }
 		boolean $ = false;
 		
 		try (

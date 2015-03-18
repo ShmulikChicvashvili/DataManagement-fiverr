@@ -18,9 +18,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.servicebook.database.exceptions.DatabaseUnkownFailureException;
-import com.servicebook.database.exceptions.users.DatabaseAlreadyExistsException;
-import com.servicebook.database.exceptions.users.DatabaseCreationException;
-import com.servicebook.database.exceptions.users.DatabaseInvalidParamsException;
+import com.servicebook.database.exceptions.users.ElementAlreadyExistsException;
+import com.servicebook.database.exceptions.users.TableCreationException;
+import com.servicebook.database.exceptions.users.InvalidParamsException;
 import com.servicebook.database.implementation.UsersDatabaseImpl;
 import com.servicebook.database.primitives.DBUser;
 
@@ -43,9 +43,9 @@ public class UsersDatabaseTest
 			{
 				userDB.addUser(new DBUser(data, data, data, i));
 			} catch (
-				DatabaseAlreadyExistsException
+				ElementAlreadyExistsException
 				| DatabaseUnkownFailureException
-				| DatabaseInvalidParamsException e)
+				| InvalidParamsException e)
 			{
 				e.printStackTrace();
 				fail();
@@ -65,9 +65,9 @@ public class UsersDatabaseTest
 		{
 			userDB.addUser(goodUser);
 		} catch (
-			DatabaseAlreadyExistsException
+			ElementAlreadyExistsException
 			| DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException e)
+			| InvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -76,14 +76,14 @@ public class UsersDatabaseTest
 		try
 		{
 			userDB.addUser(goodUserCaseUnSensitive);
-		} catch (DatabaseAlreadyExistsException e)
+		} catch (ElementAlreadyExistsException e)
 		{
 			return;
 		} catch (DatabaseUnkownFailureException e)
 		{
 			e.printStackTrace();
 			fail();
-		} catch (DatabaseInvalidParamsException e)
+		} catch (InvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -99,13 +99,13 @@ public class UsersDatabaseTest
 		try
 		{
 			userDB.addUser(badUser);
-		} catch (final DatabaseAlreadyExistsException e)
+		} catch (final ElementAlreadyExistsException e)
 		{
 			fail("In case of invalid params we shouldnt get to already exists exception");
 		} catch (final DatabaseUnkownFailureException e)
 		{
 			fail("In case of invalid params we shouldnt get here");
-		} catch (final DatabaseInvalidParamsException e)
+		} catch (final InvalidParamsException e)
 		{}
 	}
 	
@@ -118,52 +118,52 @@ public class UsersDatabaseTest
 		try
 		{
 			userDB.addUser(badUser);
-		} catch (final DatabaseAlreadyExistsException e)
+		} catch (final ElementAlreadyExistsException e)
 		{
 			fail("In case of invalid params we shouldnt get to already exists exception");
 		} catch (final DatabaseUnkownFailureException e)
 		{
 			fail("In case of invalid params we shouldnt get here");
-		} catch (final DatabaseInvalidParamsException e)
+		} catch (final InvalidParamsException e)
 		{}
 		
 		badUser = new DBUser(null, "password", "name", -1);
 		try
 		{
 			userDB.addUser(badUser);
-		} catch (final DatabaseAlreadyExistsException e)
+		} catch (final ElementAlreadyExistsException e)
 		{
 			fail("In case of invalid params we shouldnt get to already exists exception");
 		} catch (final DatabaseUnkownFailureException e)
 		{
 			fail("In case of invalid params we shouldnt get here");
-		} catch (final DatabaseInvalidParamsException e)
+		} catch (final InvalidParamsException e)
 		{}
 		
 		badUser = new DBUser("username", "password", null, 0);
 		try
 		{
 			userDB.addUser(badUser);
-		} catch (final DatabaseAlreadyExistsException e)
+		} catch (final ElementAlreadyExistsException e)
 		{
 			fail("In case of invalid params we shouldnt get to already exists exception");
 		} catch (final DatabaseUnkownFailureException e)
 		{
 			fail("In case of invalid params we shouldnt get here");
-		} catch (final DatabaseInvalidParamsException e)
+		} catch (final InvalidParamsException e)
 		{}
 		
 		badUser = new DBUser("username", null, "name", 0);
 		try
 		{
 			userDB.addUser(badUser);
-		} catch (final DatabaseAlreadyExistsException e)
+		} catch (final ElementAlreadyExistsException e)
 		{
 			fail("In case of invalid params we shouldnt get to already exists exception");
 		} catch (final DatabaseUnkownFailureException e)
 		{
 			fail("In case of invalid params we shouldnt get here");
-		} catch (final DatabaseInvalidParamsException e)
+		} catch (final InvalidParamsException e)
 		{}
 		
 	}
@@ -177,9 +177,9 @@ public class UsersDatabaseTest
 		{
 			userDB.addUser(goodUser);
 		} catch (
-			DatabaseAlreadyExistsException
+			ElementAlreadyExistsException
 			| DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException e)
+			| InvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -190,9 +190,9 @@ public class UsersDatabaseTest
 		{
 			userDB.addUser(goodUser);
 		} catch (
-			DatabaseAlreadyExistsException
+			ElementAlreadyExistsException
 			| DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException e)
+			| InvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -208,9 +208,9 @@ public class UsersDatabaseTest
 		{
 			userDB.addUser(goodUser);
 		} catch (
-			DatabaseAlreadyExistsException
+			ElementAlreadyExistsException
 			| DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException e)
+			| InvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -220,13 +220,13 @@ public class UsersDatabaseTest
 		try
 		{
 			userDB.addUser(goodUser);
-		} catch (DatabaseAlreadyExistsException e)
+		} catch (ElementAlreadyExistsException e)
 		{
 			// Success
 		} catch (DatabaseUnkownFailureException e)
 		{
 			fail("Shouldnt get to UsersDatabaseUnkownFailureException exception");
-		} catch (DatabaseInvalidParamsException e)
+		} catch (InvalidParamsException e)
 		{
 			fail("Shouldnt get to UsersDatabaseInvalidParamsException");
 		}
@@ -245,7 +245,7 @@ public class UsersDatabaseTest
 		{
 			e.printStackTrace();
 			fail();
-		} catch (DatabaseInvalidParamsException e)
+		} catch (InvalidParamsException e)
 		{
 			return;
 		}
@@ -263,7 +263,7 @@ public class UsersDatabaseTest
 			res = userDB.getUser(getUsername);
 		} catch (
 			DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException e)
+			| InvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -276,8 +276,8 @@ public class UsersDatabaseTest
 			userDB.addUser(new DBUser(getUsername, "123", "shm", 1));
 		} catch (
 			DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException
-			| DatabaseAlreadyExistsException e)
+			| InvalidParamsException
+			| ElementAlreadyExistsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -290,7 +290,7 @@ public class UsersDatabaseTest
 			userDB.getUser(getUsername);
 		} catch (
 			DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException e)
+			| InvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -312,9 +312,9 @@ public class UsersDatabaseTest
 			userDB.addUser(goodUser1);
 			userDB.addUser(goodUser2);
 		} catch (
-			DatabaseAlreadyExistsException
+			ElementAlreadyExistsException
 			| DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException e)
+			| InvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -326,7 +326,7 @@ public class UsersDatabaseTest
 			res = userDB.getUser(username1);
 		} catch (
 			DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException e)
+			| InvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -338,7 +338,7 @@ public class UsersDatabaseTest
 			res = userDB.getUser(username2);
 		} catch (
 			DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException e)
+			| InvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -350,7 +350,7 @@ public class UsersDatabaseTest
 			res = userDB.getUser("sHmuLik");
 		} catch (
 			DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException e)
+			| InvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -371,7 +371,7 @@ public class UsersDatabaseTest
 		{
 			e.printStackTrace();
 			fail();
-		} catch (DatabaseInvalidParamsException e)
+		} catch (InvalidParamsException e)
 		{
 			// Success
 		}
@@ -385,7 +385,7 @@ public class UsersDatabaseTest
 		{
 			e.printStackTrace();
 			fail();
-		} catch (DatabaseInvalidParamsException e)
+		} catch (InvalidParamsException e)
 		{
 			// Success
 		}
@@ -405,9 +405,9 @@ public class UsersDatabaseTest
 			{
 				userDB.addUser(users.get(i));
 			} catch (
-				DatabaseAlreadyExistsException
+				ElementAlreadyExistsException
 				| DatabaseUnkownFailureException
-				| DatabaseInvalidParamsException e)
+				| InvalidParamsException e)
 			{
 				e.printStackTrace();
 				fail();
@@ -422,7 +422,7 @@ public class UsersDatabaseTest
 		{
 			e.printStackTrace();
 			fail();
-		} catch (DatabaseInvalidParamsException e)
+		} catch (InvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -460,9 +460,9 @@ public class UsersDatabaseTest
 			{
 				userDB.addUser(users.get(i));
 			} catch (
-				DatabaseAlreadyExistsException
+				ElementAlreadyExistsException
 				| DatabaseUnkownFailureException
-				| DatabaseInvalidParamsException e)
+				| InvalidParamsException e)
 			{
 				e.printStackTrace();
 				fail();
@@ -476,7 +476,7 @@ public class UsersDatabaseTest
 			res = userDB.getUsers(3, 1);
 		} catch (
 			DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException e)
+			| InvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -489,7 +489,7 @@ public class UsersDatabaseTest
 			res = userDB.getUsers(0, 5);
 		} catch (
 			DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException e)
+			| InvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -505,7 +505,7 @@ public class UsersDatabaseTest
 			res = userDB.getUsers(2, 3);
 		} catch (
 			DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException e)
+			| InvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -528,7 +528,7 @@ public class UsersDatabaseTest
 		{
 			e.printStackTrace();
 			fail();
-		} catch (DatabaseInvalidParamsException e)
+		} catch (InvalidParamsException e)
 		{
 			return;
 		}
@@ -544,9 +544,9 @@ public class UsersDatabaseTest
 		{
 			userDB.addUser(shmulik);
 		} catch (
-			DatabaseAlreadyExistsException
+			ElementAlreadyExistsException
 			| DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException e1)
+			| InvalidParamsException e1)
 		{
 			e1.printStackTrace();
 			fail();
@@ -559,8 +559,8 @@ public class UsersDatabaseTest
 			userDB.addUser(new DBUser("avi", "1", "av", 1));
 		} catch (
 			DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException
-			| DatabaseAlreadyExistsException e)
+			| InvalidParamsException
+			| ElementAlreadyExistsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -572,7 +572,7 @@ public class UsersDatabaseTest
 			res = userDB.isUserExists("shmulik2");
 		} catch (
 			DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException e)
+			| InvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -592,9 +592,9 @@ public class UsersDatabaseTest
 			userDB.addUser(shmulik);
 			userDB.addUser(eyal);
 		} catch (
-			DatabaseAlreadyExistsException
+			ElementAlreadyExistsException
 			| DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException e1)
+			| InvalidParamsException e1)
 		{
 			e1.printStackTrace();
 			fail();
@@ -606,7 +606,7 @@ public class UsersDatabaseTest
 			res = userDB.isUserExists("ShMuliK");
 		} catch (
 			DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException e)
+			| InvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -618,7 +618,7 @@ public class UsersDatabaseTest
 			res = userDB.isUserExists("Eyal");
 		} catch (
 			DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException e)
+			| InvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -640,7 +640,7 @@ public class UsersDatabaseTest
 		{
 			e.printStackTrace();
 			fail();
-		} catch (DatabaseInvalidParamsException e)
+		} catch (InvalidParamsException e)
 		{}
 		
 		username = "1";
@@ -651,7 +651,7 @@ public class UsersDatabaseTest
 		{
 			e.printStackTrace();
 			fail();
-		} catch (DatabaseInvalidParamsException e)
+		} catch (InvalidParamsException e)
 		{}
 		
 		username = null;
@@ -663,7 +663,7 @@ public class UsersDatabaseTest
 		{
 			e.printStackTrace();
 			fail();
-		} catch (DatabaseInvalidParamsException e)
+		} catch (InvalidParamsException e)
 		{}
 	}
 	
@@ -678,9 +678,9 @@ public class UsersDatabaseTest
 			res = userDB.validateUser("Shmulik2", "1");
 			userDB.addUser(badUser);
 		} catch (
-			DatabaseAlreadyExistsException
+			ElementAlreadyExistsException
 			| DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException e)
+			| InvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -692,7 +692,7 @@ public class UsersDatabaseTest
 			res = userDB.validateUser("Shmulik", "2");
 		} catch (
 			DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException e)
+			| InvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -704,7 +704,7 @@ public class UsersDatabaseTest
 			res = userDB.validateUser("Shmulik", "1");
 		} catch (
 			DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException e)
+			| InvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -716,7 +716,7 @@ public class UsersDatabaseTest
 			res = userDB.validateUser("SHmUlik", "1");
 		} catch (
 			DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException e)
+			| InvalidParamsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -740,7 +740,7 @@ public class UsersDatabaseTest
 		try
 		{
 			userDB = new UsersDatabaseImpl("users", "servicebook_db", ds);
-		} catch (final DatabaseCreationException e)
+		} catch (final TableCreationException e)
 		{
 			fail("Fuck");
 		}
