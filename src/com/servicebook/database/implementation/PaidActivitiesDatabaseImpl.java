@@ -13,7 +13,7 @@ import org.apache.tomcat.dbcp.dbcp.BasicDataSource;
 import com.servicebook.database.AbstractMySqlDatabase;
 import com.servicebook.database.PaidActivitiesDatabase;
 import com.servicebook.database.exceptions.DatabaseUnkownFailureException;
-import com.servicebook.database.exceptions.paidActivities.DatabaseCreationException;
+import com.servicebook.database.exceptions.paidActivities.TableCreationException;
 import com.servicebook.database.exceptions.paidActivities.InvalidParameterException;
 import com.servicebook.database.primitives.DBPaidActivity;
 import com.servicebook.database.primitives.DBPaidService;
@@ -82,6 +82,14 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 	private String deleteActivityQuery;
 
 	/**
+	 * the get activity status query.
+	 * 
+	 * @param id
+	 *            int
+	 */
+	private String getActivityStatusQuery;
+
+	/**
 	 * The get activities offered by user query.
 	 * 
 	 * @param username
@@ -96,6 +104,9 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 	private String getActivitiesOfferedByUserQuery;
 	private String queryNumRegisteredField = "numRegistered";
 
+	private String registerToActivityQuery;
+	private String unregisterFromActivityQuery;
+
 	private void initializeQueries() {
 		addActivityQuery = String
 				.format("INSERT INTO %s (`%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?, ?);",
@@ -107,6 +118,11 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 
 		deleteActivityQuery = String.format("DELETE FROM %s WHERE `%s`=?;",
 				activityTable, ActivityTableColumn.ID.columnName());
+
+		getActivityStatusQuery = String.format(
+				"SELECT %s.%s FROM %s WHERE `%s`=?", activityTable,
+				ActivityTableColumn.TYPE.columnName(), activityTable,
+				ActivityTableColumn.ID.columnName());
 
 		getActivitiesOfferedByUserQuery = String
 				.format("SELECT %s.*, count(%s.%s) AS "
@@ -135,7 +151,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 
 	public PaidActivitiesDatabaseImpl(String activityTable,
 			String registrationTable, String schema, BasicDataSource datasource)
-			throws DatabaseCreationException {
+			throws TableCreationException {
 		super(schema, datasource);
 		this.activityTable = this.schema + ".`" + activityTable + "`";
 		this.registrationTable = this.schema + ".`" + registrationTable + "`";
@@ -150,7 +166,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 
 			conn.commit();
 		} catch (SQLException e) {
-			throw new DatabaseCreationException(e);
+			throw new TableCreationException(e);
 		}
 	}
 
@@ -235,6 +251,50 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 	public void addPaidTask(DBPaidTask task)
 			throws DatabaseUnkownFailureException, InvalidParameterException {
 		AddPaidActivity(task, ActivityType.TASK);
+	}
+
+	@Override
+	public ActivityStatus getActivityStatus(int id)
+			throws DatabaseUnkownFailureException {
+		ActivityStatus $ = ActivityStatus.NOT_EXIST;
+
+		try (Connection conn = getConnection()) {
+			$ = getActivityStatus(id, conn);
+		} catch (SQLException e) {
+			throw new DatabaseUnkownFailureException(e);
+		}
+
+		return $;
+	}
+
+	@Override
+	public ActivityStatus getActivityStatus(int id, Connection conn)
+			throws DatabaseUnkownFailureException {
+
+		ActivityStatus $ = ActivityStatus.NOT_EXIST;
+		try (PreparedStatement stmt = conn
+				.prepareStatement(getActivityStatusQuery)) {
+			stmt.setInt(0, id);
+
+			ResultSet rs = stmt.executeQuery();
+
+			if (rs.next()) {
+				String type = rs.getString(ActivityTableColumn.TYPE
+						.columnName());
+				if (type.equals(ActivityType.SERVICE.toDB())) {
+					$ = ActivityStatus.SERVICE;
+				} else if (type.equals(ActivityType.TASK.toDB())) {
+					$ = ActivityStatus.TASK;
+				} else {
+					assert (false);
+				}
+			}
+
+		} catch (SQLException e) {
+			throw new DatabaseUnkownFailureException(e);
+		}
+
+		return $;
 	}
 
 	@Override
@@ -384,14 +444,21 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 	}
 
 	@Override
-	public void registerToActivity(String username, long id, Connection conn) {
+	public void registerToActivity(int id, String username, Connection conn) {
 		// TODO Auto-generated method stub
+		try (PreparedStatement stmt = conn
+				.prepareStatement(registerToActivityQuery)) {
 
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
-	public void unregisterFromActivity(String username, long id, Connection conn) {
+	public void unregisterFromActivity(int id, String username, Connection conn) {
 		// TODO Auto-generated method stub
 
 	}
+
 }
