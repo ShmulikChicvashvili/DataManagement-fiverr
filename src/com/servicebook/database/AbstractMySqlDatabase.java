@@ -24,20 +24,5 @@ public abstract class AbstractMySqlDatabase {
 	protected Connection getConnection() throws SQLException {
 		return datasource.getConnection();
 	}
-	
-	public enum SQLErrorCodes {
-		ALREADY_EXISTS (1062),
-		CREATION_ERROR (1061);
-		
-		SQLErrorCodes(int code)
-		{
-			this.code = code;
-		}
-		
-		public int getCode() {
-			return code;
-		}
-		
-		private final int code; 
-	}
+
 }
