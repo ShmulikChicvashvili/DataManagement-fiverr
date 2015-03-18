@@ -25,4 +25,22 @@ public abstract class AbstractMySqlDatabase {
 		return datasource.getConnection();
 	}
 
+	/**
+	 * Checks if is conn closed. surrounds the check so that an exception will
+	 * not be thrown.
+	 *
+	 * @param conn
+	 *            the conn to be checked
+	 * @return true if conn is closed or an exception occured, false otherwise
+	 */
+	protected boolean isConnClosed(Connection conn) {
+		try {
+			if (conn.isClosed()) {
+				return true;
+			}
+		} catch (SQLException e) {
+			return true;
+		}
+		return false;
+	}
 }
