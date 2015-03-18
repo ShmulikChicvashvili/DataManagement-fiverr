@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.util.List;
 
 import com.servicebook.database.exceptions.DatabaseUnkownFailureException;
+import com.servicebook.database.exceptions.paidActivities.ElementAlreadyExistException;
+import com.servicebook.database.exceptions.paidActivities.ElementNotExistException;
 import com.servicebook.database.exceptions.paidActivities.InvalidParameterException;
 import com.servicebook.database.primitives.DBPaidService;
 import com.servicebook.database.primitives.DBPaidTask;
@@ -50,10 +52,13 @@ public interface PaidActivitiesDatabase {
 	 *            the id of the activity to be deleted.
 	 * @param conn
 	 *            the Sql connection to be used. Used for transactions.
+	 * @throws InvalidParameterException
+	 *             the id is negative or conn is closed.
 	 * @throws DatabaseUnkownFailureException
+	 *             the database unkown failure exception
 	 */
 	public void deletePaidActivity(int id, Connection conn)
-			throws DatabaseUnkownFailureException;
+			throws InvalidParameterException, DatabaseUnkownFailureException;
 
 	/**
 	 * Gets the activity status in the database.
@@ -62,9 +67,13 @@ public interface PaidActivitiesDatabase {
 	 *            the id for the activity
 	 * @return the activity status - NOT_EXIST if no such activity exists. If it
 	 *         does exist returns SERVICE or TASK according to its type
+	 * @throws InvalidParameterException
+	 *             id is negative.
 	 * @throws DatabaseUnkownFailureException
+	 *             the database unkown failure exception
 	 */
-	public ActivityStatus getActivityStatus(int id) throws DatabaseUnkownFailureException;
+	public ActivityStatus getActivityStatus(int id)
+			throws InvalidParameterException, DatabaseUnkownFailureException;
 
 	/**
 	 * Gets the activity status in the database.
@@ -75,9 +84,13 @@ public interface PaidActivitiesDatabase {
 	 *            the conn to be used (as part of a transaction).
 	 * @return the activity status - NOT_EXIST if no such activity exists. If it
 	 *         does exist returns SERVICE or TASK according to its type
-	 * @throws DatabaseUnkownFailureException 
+	 * @throws InvalidParameterException
+	 *             id is negative or conn is closed.
+	 * @throws DatabaseUnkownFailureException
+	 *             the database unkown failure exception
 	 */
-	public ActivityStatus getActivityStatus(int id, Connection conn) throws DatabaseUnkownFailureException;
+	public ActivityStatus getActivityStatus(int id, Connection conn)
+			throws InvalidParameterException, DatabaseUnkownFailureException;
 
 	/**
 	 * Gets the services offered to the specified user. the services are ordered
@@ -129,7 +142,10 @@ public interface PaidActivitiesDatabase {
 	 * @return the services offered by the user, including the amount of
 	 *         registered users to the service.
 	 * @throws InvalidParameterException
+	 *             In case the username was null, start is negative or amount is
+	 *             less than 1.
 	 * @throws DatabaseUnkownFailureException
+	 *             In case an unknown SQL exception occurred.
 	 */
 	public List<DBPaidService> getServicesOfferedByUser(final String username,
 			int start, int amount) throws InvalidParameterException,
@@ -149,7 +165,10 @@ public interface PaidActivitiesDatabase {
 	 * @return the tasks offered by the user, including the amount of registered
 	 *         users to the task.
 	 * @throws InvalidParameterException
+	 *             In case the username was null, start is negative or amount is
+	 *             less than 1.
 	 * @throws DatabaseUnkownFailureException
+	 *             In case an unknown SQL exception occurred.
 	 */
 	public List<DBPaidTask> getTasksOfferedByUser(final String username,
 			int start, int amount) throws DatabaseUnkownFailureException,
@@ -158,24 +177,42 @@ public interface PaidActivitiesDatabase {
 	/**
 	 * Register a user to an activity. does <b><u>not</u></b> update the balance
 	 * of the users.
+	 *
 	 * @param id
-	 *            the id of the desired activity
+	 *            the id of the desired activity. must be non-negative.
 	 * @param username
 	 *            the username of the user to be registered
 	 * @param conn
-	 *            TODO
+	 *            The connection to be used. Must be open.
+	 * @throws InvalidParameterException
+	 *             the id is negative, username is null or conn is closed
+	 * @throws ElementAlreadyExistException
+	 *             the user is already registered to the activity
+	 * @throws DatabaseUnkownFailureException
+	 *             an unknown SQL exception was thrown
 	 */
-	public void registerToActivity(int id, String username, Connection conn);
+	public void registerToActivity(int id, String username, Connection conn)
+			throws InvalidParameterException, ElementAlreadyExistException,
+			DatabaseUnkownFailureException;
 
 	/**
 	 * Unregister a user from an activity. does <b><u>not</u></b> update the
 	 * balance of the users.
+	 *
 	 * @param id
-	 *            the id of the desired activity.
+	 *            the id of the desired activity. must be non-negative.
 	 * @param username
 	 *            the username of the user to be unregistered.
 	 * @param conn
-	 *            TODO
+	 *            The connection to be used. Must be open.
+	 * @throws InvalidParameterException
+	 *             the id is negative, username is null or conn is closed
+	 * @throws ElementNotExistException
+	 *             The user was nor registered to the activity
+	 * @throws DatabaseUnkownFailureException
+	 *             an unknown SQL exception was thrown
 	 */
-	public void unregisterFromActivity(int id, String username, Connection conn);
+	public void unregisterFromActivity(int id, String username, Connection conn)
+			throws InvalidParameterException, ElementNotExistException,
+			DatabaseUnkownFailureException;
 }

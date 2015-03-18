@@ -10,9 +10,12 @@ import java.util.List;
 
 import org.apache.tomcat.dbcp.dbcp.BasicDataSource;
 
+import com.mysql.jdbc.MysqlErrorNumbers;
 import com.servicebook.database.AbstractMySqlDatabase;
 import com.servicebook.database.PaidActivitiesDatabase;
 import com.servicebook.database.exceptions.DatabaseUnkownFailureException;
+import com.servicebook.database.exceptions.paidActivities.ElementAlreadyExistException;
+import com.servicebook.database.exceptions.paidActivities.ElementNotExistException;
 import com.servicebook.database.exceptions.paidActivities.TableCreationException;
 import com.servicebook.database.exceptions.paidActivities.InvalidParameterException;
 import com.servicebook.database.primitives.DBPaidActivity;
@@ -149,6 +152,10 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 						ActivityTableColumn.TITLE.columnName());
 	}
 
+	private boolean isValidId(int id) {
+		return id >= 0;
+	}
+
 	public PaidActivitiesDatabaseImpl(String activityTable,
 			String registrationTable, String schema, BasicDataSource datasource)
 			throws TableCreationException {
@@ -255,7 +262,10 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 
 	@Override
 	public ActivityStatus getActivityStatus(int id)
-			throws DatabaseUnkownFailureException {
+			throws DatabaseUnkownFailureException, InvalidParameterException {
+		if (!isValidId(id)) {
+			throw new InvalidParameterException();
+		}
 		ActivityStatus $ = ActivityStatus.NOT_EXIST;
 
 		try (Connection conn = getConnection()) {
@@ -269,7 +279,10 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 
 	@Override
 	public ActivityStatus getActivityStatus(int id, Connection conn)
-			throws DatabaseUnkownFailureException {
+			throws DatabaseUnkownFailureException, InvalidParameterException {
+		if (!isValidId(id) || isConnClosed(conn)) {
+			throw new InvalidParameterException();
+		}
 
 		ActivityStatus $ = ActivityStatus.NOT_EXIST;
 		try (PreparedStatement stmt = conn
@@ -299,7 +312,11 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 
 	@Override
 	public void deletePaidActivity(int id, Connection conn)
-			throws DatabaseUnkownFailureException {
+			throws DatabaseUnkownFailureException, InvalidParameterException {
+		if (!isValidId(id) || isConnClosed(conn)) {
+			throw new InvalidParameterException();
+		}
+
 		try (PreparedStatement stmt = conn
 				.prepareStatement(deleteActivityQuery)) {
 			stmt.setInt(1, id);
@@ -444,21 +461,45 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 	}
 
 	@Override
-	public void registerToActivity(int id, String username, Connection conn) {
-		// TODO Auto-generated method stub
+	public void registerToActivity(int id, String username, Connection conn)
+			throws ElementAlreadyExistException,
+			DatabaseUnkownFailureException, InvalidParameterException {
+		if (!isValidId(id) || username == null || isConnClosed(conn)) {
+			throw new InvalidParameterException();
+		}
+
 		try (PreparedStatement stmt = conn
 				.prepareStatement(registerToActivityQuery)) {
-
+			stmt.setInt(0, id);
+			stmt.setString(1, username);
+			stmt.executeUpdate();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if (e.getErrorCode() == MysqlErrorNumbers.ER_DUP_ENTRY) {
+				throw new ElementAlreadyExistException(e);
+			}
+			throw new DatabaseUnkownFailureException(e);
 		}
 	}
 
 	@Override
-	public void unregisterFromActivity(int id, String username, Connection conn) {
-		// TODO Auto-generated method stub
+	public void unregisterFromActivity(int id, String username, Connection conn)
+			throws ElementNotExistException, DatabaseUnkownFailureException,
+			InvalidParameterException {
+		if (!isValidId(id) || username == null || isConnClosed(conn)) {
+			throw new InvalidParameterException();
+		}
 
+		try (PreparedStatement stmt = conn
+				.prepareStatement(unregisterFromActivityQuery)) {
+			stmt.setInt(0, id);
+			stmt.setString(1, username);
+			int deleted = stmt.executeUpdate();
+
+			if (deleted == 0) {
+				throw new ElementNotExistException();
+			}
+		} catch (SQLException e) {
+			throw new DatabaseUnkownFailureException(e);
+		}
 	}
-
 }
