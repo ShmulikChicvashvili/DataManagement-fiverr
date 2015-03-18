@@ -9,7 +9,7 @@ import com.servicebook.database.exceptions.AbstractDatabaseException;
  * @author Shmulik
  *
  */
-public class DatabaseAlreadyExistsException
+public class ElementAlreadyExistsException
 	extends
 		AbstractDatabaseException
 {
@@ -17,7 +17,7 @@ public class DatabaseAlreadyExistsException
 	/**
 	 * @param e
 	 */
-	public DatabaseAlreadyExistsException(Exception e)
+	public ElementAlreadyExistsException(Exception e)
 	{
 		super(e);
 	}	
