@@ -516,8 +516,10 @@ public class UsersDatabaseTest
 		assertEquals(users.get(4), res.get(2));
 	}
 	
+	
 	@Test
-	public void isUserExistBadParamsTest() {
+	public void isUserExistBadParamsTest()
+	{
 		boolean res;
 		try
 		{
@@ -533,8 +535,10 @@ public class UsersDatabaseTest
 		fail();
 	}
 	
+	
 	@Test
-	public void isUserExistNonExistingTest() {
+	public void isUserExistNonExistingTest()
+	{
 		DBUser shmulik = new DBUser("Shmulik", "123", "shmulik", 1);
 		try
 		{
@@ -548,7 +552,6 @@ public class UsersDatabaseTest
 			fail();
 		}
 		
-		
 		boolean res = false;
 		try
 		{
@@ -556,7 +559,8 @@ public class UsersDatabaseTest
 			userDB.addUser(new DBUser("avi", "1", "av", 1));
 		} catch (
 			DatabaseUnkownFailureException
-			| DatabaseInvalidParamsException | DatabaseAlreadyExistsException e)
+			| DatabaseInvalidParamsException
+			| DatabaseAlreadyExistsException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -576,8 +580,10 @@ public class UsersDatabaseTest
 		assertEquals(false, res);
 	}
 	
+	
 	@Test
-	public void isUserExistExistingTest() {
+	public void isUserExistExistingTest()
+	{
 		DBUser shmulik = new DBUser("Shmulik", "123", "shmulik", 1);
 		DBUser eyal = new DBUser("Eyal", "1", "eyal", 2);
 		
@@ -593,7 +599,6 @@ public class UsersDatabaseTest
 			e1.printStackTrace();
 			fail();
 		}
-		
 		
 		boolean res = false;
 		try
@@ -621,8 +626,10 @@ public class UsersDatabaseTest
 		assertEquals(true, res);
 	}
 	
+	
 	@Test
-	public void validateUserBadParamsTest() {
+	public void validateUserBadParamsTest()
+	{
 		String username = null;
 		String password = null;
 		
@@ -647,8 +654,8 @@ public class UsersDatabaseTest
 		} catch (DatabaseInvalidParamsException e)
 		{}
 		
-		username=null;
-		password="1";
+		username = null;
+		password = "1";
 		try
 		{
 			userDB.validateUser(username, password);
@@ -660,11 +667,15 @@ public class UsersDatabaseTest
 		{}
 	}
 	
+	
 	@Test
-	public void validateUserBadUserTest() {
+	public void validateUserTest()
+	{
 		DBUser badUser = new DBUser("Shmulik", "1", "shmulik", 1);
+		boolean res = false;
 		try
 		{
+			res = userDB.validateUser("Shmulik2", "1");
 			userDB.addUser(badUser);
 		} catch (
 			DatabaseAlreadyExistsException
@@ -674,8 +685,43 @@ public class UsersDatabaseTest
 			e.printStackTrace();
 			fail();
 		}
+		assertEquals(false, res);
 		
+		try
+		{
+			res = userDB.validateUser("Shmulik", "2");
+		} catch (
+			DatabaseUnkownFailureException
+			| DatabaseInvalidParamsException e)
+		{
+			e.printStackTrace();
+			fail();
+		}
+		assertEquals(false, res);
 		
+		try
+		{
+			res = userDB.validateUser("Shmulik", "1");
+		} catch (
+			DatabaseUnkownFailureException
+			| DatabaseInvalidParamsException e)
+		{
+			e.printStackTrace();
+			fail();
+		}
+		assertEquals(true, res);
+		
+		try
+		{
+			res = userDB.validateUser("SHmUlik", "1");
+		} catch (
+			DatabaseUnkownFailureException
+			| DatabaseInvalidParamsException e)
+		{
+			e.printStackTrace();
+			fail();
+		}
+		assertEquals(true, res);
 	}
 	
 	
