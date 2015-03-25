@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.apache.tomcat.dbcp.dbcp.BasicDataSource;
 
+import com.mysql.jdbc.MysqlErrorNumbers;
 import com.servicebook.database.AbstractMySqlDatabase;
 import com.servicebook.database.UsersDatabase;
 import com.servicebook.database.exceptions.DatabaseUnkownFailureException;
@@ -92,7 +93,7 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 			conn.commit();
 		} catch (final SQLException e)
 		{
-			if (e.getErrorCode() != SQLErrorCodes.CREATION_ERROR.getCode())
+			if (e.getErrorCode() != 1063)
 			{
 				throw new TableCreationException(e);
 			}
@@ -127,7 +128,7 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 			conn.commit();
 		} catch (final SQLException e)
 		{
-			if (e.getErrorCode() == SQLErrorCodes.ALREADY_EXISTS.getCode())
+			if (e.getErrorCode() == MysqlErrorNumbers.ER_DUP_ENTRY)
 			{
 				throw new ElementAlreadyExistsException(e);
 			}

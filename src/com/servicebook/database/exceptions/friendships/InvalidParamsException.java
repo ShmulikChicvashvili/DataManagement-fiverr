@@ -9,15 +9,15 @@ import com.servicebook.database.exceptions.AbstractDatabaseException;
  * @author Shmulik
  *
  */
-public class InvalidParamsException extends AbstractDatabaseException
+public class InvalidParamsException extends Exception
 {
 
 	/**
 	 * @param e
 	 */
-	public InvalidParamsException(Exception e)
+	public InvalidParamsException()
 	{
-		super(e);
+		super();
 	}	
 	
 }

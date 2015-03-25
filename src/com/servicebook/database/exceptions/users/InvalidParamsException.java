@@ -19,6 +19,7 @@ public class InvalidParamsException
 	 */
 	public InvalidParamsException()
 	{
+		super();
 	}	
 	
 }
