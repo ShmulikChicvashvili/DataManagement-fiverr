@@ -27,7 +27,7 @@ public interface PaidActivitiesDatabase {
 	 * @throws DatabaseUnkownFailureException
 	 *             In case an unexpected SQL error occurs
 	 */
-	public void addPaidService(final DBPaidService service)
+	public int addPaidService(final DBPaidService service)
 			throws InvalidParameterException, DatabaseUnkownFailureException;
 
 	/**
@@ -41,7 +41,7 @@ public interface PaidActivitiesDatabase {
 	 * @throws DatabaseUnkownFailureException
 	 *             In case an unexpected SQL error occurs
 	 */
-	public void addPaidTask(final DBPaidTask task)
+	public int addPaidTask(final DBPaidTask task)
 			throws DatabaseUnkownFailureException, InvalidParameterException;
 
 	/**
@@ -66,7 +66,7 @@ public interface PaidActivitiesDatabase {
 	 * @param id
 	 *            the id for the activity
 	 * @return the activity status - NOT_EXIST if no such activity exists. If it
-	 *         does exist returns SERVICE or TASK according to its type
+	 *         does exist returns SERVICE or TASK according to its type.
 	 * @throws InvalidParameterException
 	 *             id is negative.
 	 * @throws DatabaseUnkownFailureException
@@ -207,12 +207,10 @@ public interface PaidActivitiesDatabase {
 	 *            The connection to be used. Must be open.
 	 * @throws InvalidParameterException
 	 *             the id is negative, username is null or conn is closed
-	 * @throws ElementNotExistException
-	 *             The user was nor registered to the activity
 	 * @throws DatabaseUnkownFailureException
 	 *             an unknown SQL exception was thrown
 	 */
 	public void unregisterFromActivity(int id, String username, Connection conn)
-			throws InvalidParameterException, ElementNotExistException,
+			throws InvalidParameterException,
 			DatabaseUnkownFailureException;
 }

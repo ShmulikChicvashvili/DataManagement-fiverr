@@ -8,6 +8,17 @@ public abstract class DBPaidActivity {
 	protected short distance;
 	protected short numRegistered;
 
+	public DBPaidActivity(String title, String username, short capacity,
+			short distance, short numRegistered) {
+		super();
+		id = -1;
+		this.title = title;
+		this.username = username;
+		this.capacity = capacity;
+		this.distance = distance;
+		this.numRegistered = numRegistered;
+	}
+
 	public DBPaidActivity(int id, String title, String username,
 			short capacity, short distance, short numRegistered) {
 		super();
