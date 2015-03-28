@@ -553,11 +553,8 @@ public class PaidActivitiesDatabaseTest
 	
 	
 	@Test
-	public void testGetActivitiesOfferedByUser()
-		throws DatabaseUnkownFailureException,
-		InvalidParameterException,
-		SQLException,
-		ElementAlreadyExistException
+	public void testGetActivitiesOfferedByUserExceptions()
+		throws DatabaseUnkownFailureException
 	{
 		try
 		{
@@ -580,6 +577,16 @@ public class PaidActivitiesDatabaseTest
 			fail();
 		} catch (final InvalidParameterException e)
 		{}
+	}
+	
+	
+	@Test
+	public void testGetActivitiesOfferedByUser()
+		throws DatabaseUnkownFailureException,
+		InvalidParameterException,
+		SQLException,
+		ElementAlreadyExistException
+	{
 		
 		assertEquals(
 			new ArrayList<DBPaidService>(),
@@ -630,6 +637,9 @@ public class PaidActivitiesDatabaseTest
 			}
 		}
 		
+		/******** END OF INITIALIZATION ***********/
+		
+		/* test all activities for users */
 		for (final Entry<String, List<DBPaidService>> e : user2services
 			.entrySet())
 		{
@@ -644,12 +654,15 @@ public class PaidActivitiesDatabaseTest
 				paidActivityDB.getTasksOfferedByUser(e.getKey(), 0, 50));
 		}
 		
+		/* test start and amount */
 		assertEquals(
 			user2services.get("u1").subList(1, 2),
 			paidActivityDB.getServicesOfferedByUser("u1", 1, 1));
 		assertEquals(
 			new ArrayList<DBPaidTask>(),
 			paidActivityDB.getServicesOfferedByUser("u2", 2, 19));
+		
+		/* test activities with registered users */
 		
 		conn = ds.getConnection();
 		DBPaidService s = user2services.get("u1").get(1);
@@ -683,6 +696,17 @@ public class PaidActivitiesDatabaseTest
 			user2tasks.get("u2").subList(1, 2),
 			paidActivityDB.getTasksOfferedByUser("u2", 1, 1));
 		
+		/* test deleting an activity */
+		s = user2services.get("u1").get(1);
+		paidActivityDB.deletePaidActivity(s.getId(), conn);
+		conn.commit();
+		user2services.get("u1").remove(s);
+		
+		assertEquals(
+			user2services.get("u1"),
+			paidActivityDB.getServicesOfferedByUser("u1", 0, 5));
+		
+		conn.close();
 	}
 	
 	
