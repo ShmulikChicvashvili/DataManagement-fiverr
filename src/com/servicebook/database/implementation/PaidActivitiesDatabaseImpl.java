@@ -554,7 +554,20 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 
 		deleteActivityQuery =
 			String.format(
-				"DELETE FROM %s WHERE `%s`=?;",
+				"DELETE %s,%s FROM %s LEFT OUTER JOIN %s ON ("
+					+ activityTable
+					+ "."
+					+ ActivityTableColumn.ID.columnName()
+					+ "="
+					+ registrationTable
+					+ "."
+					+ RegistrationTableColumn.ID
+					+ ")"
+					+ "WHERE %s.`%s`=?;",
+				activityTable,
+				registrationTable,
+				activityTable,
+				registrationTable,
 				activityTable,
 				ActivityTableColumn.ID.columnName());
 
