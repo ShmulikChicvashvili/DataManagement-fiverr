@@ -1,21 +1,31 @@
+
 package com.servicebook.database;
+
 
 import java.sql.Connection;
 import java.util.List;
 
 import com.servicebook.database.exceptions.DatabaseUnkownFailureException;
 import com.servicebook.database.exceptions.paidActivities.ElementAlreadyExistException;
-import com.servicebook.database.exceptions.paidActivities.ElementNotExistException;
 import com.servicebook.database.exceptions.paidActivities.InvalidParameterException;
 import com.servicebook.database.primitives.DBPaidService;
 import com.servicebook.database.primitives.DBPaidTask;
 
-public interface PaidActivitiesDatabase {
 
-	public enum ActivityStatus {
-		NOT_EXIST, SERVICE, TASK
+
+
+public interface PaidActivitiesDatabase
+{
+	
+	public enum ActivityStatus
+	{
+		NOT_EXIST,
+		SERVICE,
+		TASK
 	}
-
+	
+	
+	
 	/**
 	 * Adds the paid service to the database.
 	 *
@@ -27,9 +37,11 @@ public interface PaidActivitiesDatabase {
 	 * @throws DatabaseUnkownFailureException
 	 *             In case an unexpected SQL error occurs
 	 */
-	public void addPaidService(final DBPaidService service)
-			throws InvalidParameterException, DatabaseUnkownFailureException;
-
+	public int addPaidService(final DBPaidService service)
+		throws InvalidParameterException,
+		DatabaseUnkownFailureException;
+	
+	
 	/**
 	 * Adds the paid task to the database.
 	 *
@@ -41,12 +53,14 @@ public interface PaidActivitiesDatabase {
 	 * @throws DatabaseUnkownFailureException
 	 *             In case an unexpected SQL error occurs
 	 */
-	public void addPaidTask(final DBPaidTask task)
-			throws DatabaseUnkownFailureException, InvalidParameterException;
-
+	public int addPaidTask(final DBPaidTask task)
+		throws DatabaseUnkownFailureException,
+		InvalidParameterException;
+	
+	
 	/**
-	 * Deletes the paid activity. does <b><u>not</u></b> update the balance for
-	 * the participators.
+	 * Deletes the paid activity and all registrations to it. does
+	 * <b><u>not</u></b> update the balance for the participators.
 	 *
 	 * @param id
 	 *            the id of the activity to be deleted.
@@ -58,23 +72,27 @@ public interface PaidActivitiesDatabase {
 	 *             the database unkown failure exception
 	 */
 	public void deletePaidActivity(int id, Connection conn)
-			throws InvalidParameterException, DatabaseUnkownFailureException;
-
+		throws InvalidParameterException,
+		DatabaseUnkownFailureException;
+	
+	
 	/**
 	 * Gets the activity status in the database.
 	 *
 	 * @param id
 	 *            the id for the activity
 	 * @return the activity status - NOT_EXIST if no such activity exists. If it
-	 *         does exist returns SERVICE or TASK according to its type
+	 *         does exist returns SERVICE or TASK according to its type.
 	 * @throws InvalidParameterException
 	 *             id is negative.
 	 * @throws DatabaseUnkownFailureException
 	 *             the database unkown failure exception
 	 */
 	public ActivityStatus getActivityStatus(int id)
-			throws InvalidParameterException, DatabaseUnkownFailureException;
-
+		throws InvalidParameterException,
+		DatabaseUnkownFailureException;
+	
+	
 	/**
 	 * Gets the activity status in the database.
 	 *
@@ -90,8 +108,10 @@ public interface PaidActivitiesDatabase {
 	 *             the database unkown failure exception
 	 */
 	public ActivityStatus getActivityStatus(int id, Connection conn)
-			throws InvalidParameterException, DatabaseUnkownFailureException;
-
+		throws InvalidParameterException,
+		DatabaseUnkownFailureException;
+	
+	
 	/**
 	 * Gets the services offered to the specified user. the services are ordered
 	 * by their title.
@@ -107,9 +127,12 @@ public interface PaidActivitiesDatabase {
 	 *         registered users to the service. If no services are offered an
 	 *         empty set is returned.
 	 */
-	public List<DBPaidService> getServicesOfferedToUser(final String username,
-			int start, int amount);
-
+	public List<DBPaidService> getServicesOfferedToUser(
+		final String username,
+		int start,
+		int amount);
+	
+	
 	/**
 	 * Gets the tasks offered to the specified user. the tasks are ordered by
 	 * their title.
@@ -125,9 +148,12 @@ public interface PaidActivitiesDatabase {
 	 *         users to the task. If no tasks are offered an empty set is
 	 *         returned.
 	 */
-	public List<DBPaidTask> getTasksOfferedToUser(final String username,
-			int start, int amount);
-
+	public List<DBPaidTask> getTasksOfferedToUser(
+		final String username,
+		int start,
+		int amount);
+	
+	
 	/**
 	 * Gets the services offered by the specified user. the services are ordered
 	 * by their title.
@@ -147,10 +173,14 @@ public interface PaidActivitiesDatabase {
 	 * @throws DatabaseUnkownFailureException
 	 *             In case an unknown SQL exception occurred.
 	 */
-	public List<DBPaidService> getServicesOfferedByUser(final String username,
-			int start, int amount) throws InvalidParameterException,
-			DatabaseUnkownFailureException;
-
+	public List<DBPaidService> getServicesOfferedByUser(
+		final String username,
+		int start,
+		int amount)
+		throws InvalidParameterException,
+		DatabaseUnkownFailureException;
+	
+	
 	/**
 	 * Gets the tasks offered by the specified user. the tasks are ordered by
 	 * their title.
@@ -170,10 +200,14 @@ public interface PaidActivitiesDatabase {
 	 * @throws DatabaseUnkownFailureException
 	 *             In case an unknown SQL exception occurred.
 	 */
-	public List<DBPaidTask> getTasksOfferedByUser(final String username,
-			int start, int amount) throws DatabaseUnkownFailureException,
-			InvalidParameterException;
-
+	public List<DBPaidTask> getTasksOfferedByUser(
+		final String username,
+		int start,
+		int amount)
+		throws DatabaseUnkownFailureException,
+		InvalidParameterException;
+	
+	
 	/**
 	 * Register a user to an activity. does <b><u>not</u></b> update the balance
 	 * of the users.
@@ -192,9 +226,11 @@ public interface PaidActivitiesDatabase {
 	 *             an unknown SQL exception was thrown
 	 */
 	public void registerToActivity(int id, String username, Connection conn)
-			throws InvalidParameterException, ElementAlreadyExistException,
-			DatabaseUnkownFailureException;
-
+		throws InvalidParameterException,
+		ElementAlreadyExistException,
+		DatabaseUnkownFailureException;
+	
+	
 	/**
 	 * Unregister a user from an activity. does <b><u>not</u></b> update the
 	 * balance of the users.
@@ -207,12 +243,12 @@ public interface PaidActivitiesDatabase {
 	 *            The connection to be used. Must be open.
 	 * @throws InvalidParameterException
 	 *             the id is negative, username is null or conn is closed
-	 * @throws ElementNotExistException
-	 *             The user was nor registered to the activity
 	 * @throws DatabaseUnkownFailureException
 	 *             an unknown SQL exception was thrown
 	 */
-	public void unregisterFromActivity(int id, String username, Connection conn)
-			throws InvalidParameterException, ElementNotExistException,
+	public
+		void
+		unregisterFromActivity(int id, String username, Connection conn)
+			throws InvalidParameterException,
 			DatabaseUnkownFailureException;
 }
