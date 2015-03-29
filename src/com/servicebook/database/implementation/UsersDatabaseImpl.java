@@ -93,7 +93,7 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 			conn.commit();
 		} catch (final SQLException e)
 		{
-			if (e.getErrorCode() != 1063)
+			if (e.getErrorCode() != 1061)
 			{
 				throw new TableCreationException(e);
 			}

@@ -98,8 +98,7 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase
 			conn.commit();
 		} catch (final SQLException e)
 		{
-			if (e.getErrorCode() != 1063) { throw new TableCreationException(
-				e); }
+			if (e.getErrorCode() != 1061) { throw new TableCreationException(e); }
 		}
 	}
 	
@@ -116,7 +115,7 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase
 	{
 		if (username1 == null || username2 == null) { throw new InvalidParamsException(); }
 		
-		if (username1.equals(username2)) { throw new ReflexiveFriendshipException(); }
+		if (username1.equalsIgnoreCase(username2)) { throw new ReflexiveFriendshipException(); }
 		
 		insertByUsername(username1, username2);
 	}
@@ -125,11 +124,11 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase
 	/* (non-Javadoc) @see
 	 * com.servicebook.database.FriendshipsDatabase#getFriends(java.lang.String) */
 	@Override
-	public List<DBUser> getFriends(String username) throws InvalidParamsException, DatabaseUnkownFailureException
+	public List<DBUser> getFriends(String username)
+		throws InvalidParamsException,
+		DatabaseUnkownFailureException
 	{
-		if(username == null) {
-			throw new InvalidParamsException();
-		}
+		if (username == null) { throw new InvalidParamsException(); }
 		return getByUsername(username);
 	}
 	
@@ -145,9 +144,7 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase
 		InvalidParamsException,
 		ReflexiveFriendshipException
 	{
-		if(user1 == null || user2 == null) {
-			throw new InvalidParamsException();
-		}
+		if (isUserNull(user1) || isUserNull(user2)) { throw new InvalidParamsException(); }
 		addFriendship(user1.getUsername(), user2.getUsername());
 	}
 	
@@ -156,11 +153,11 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase
 	 * com.servicebook.database.FriendshipsDatabase#getFriends
 	 * (com.servicebook.database.primitives.DBUser) */
 	@Override
-	public List<DBUser> getFriends(DBUser user) throws InvalidParamsException, DatabaseUnkownFailureException
+	public List<DBUser> getFriends(DBUser user)
+		throws InvalidParamsException,
+		DatabaseUnkownFailureException
 	{
-		if(user == null) {
-			throw new InvalidParamsException();
-		}
+		if (isUserNull(user)) { throw new InvalidParamsException(); }
 		return getFriends(user.getUsername());
 	}
 	
@@ -187,27 +184,24 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase
 		gettingQuery =
 			String
 				.format(
-					"SELECT * FROM (SELECT %s, %s, %s, %s FROM (SELECT * FROM %s WHERE %s = ? OR %s = ?) O JOIN %s ON (O.%s = %s.%s OR O.%s = %s.%s)) G WHERE G.%s <> ?",
+					"SELECT %s, %s, %s, %s FROM (SELECT * FROM %s WHERE %s = ?) O JOIN %s ON (O.%s = %s.%s)",
 					UsersColumns.USERNAME.toString().toLowerCase(),
 					UsersColumns.PASSWORD.toString().toLowerCase(),
 					UsersColumns.NAME.toString().toLowerCase(),
 					UsersColumns.BALANCE.toString().toLowerCase(),
 					friendshipsTable,
 					FriendshipsColumns.FIRST_USERNAME.toString().toLowerCase(),
+					usersTable,
 					FriendshipsColumns.SECOND_USERNAME.toString().toLowerCase(),
 					usersTable,
-					FriendshipsColumns.FIRST_USERNAME.toString().toLowerCase(),
-					usersTable,
-					UsersColumns.USERNAME.toString().toLowerCase(),
-					FriendshipsColumns.SECOND_USERNAME.toString().toLowerCase(),
-					usersTable,
-					UsersColumns.USERNAME.toString().toLowerCase(),
 					UsersColumns.USERNAME.toString().toLowerCase());
 		
 	}
 	
 	
-	private void insertByUsername(String username1, String username2) throws ElementAlreadyExistsException, DatabaseUnkownFailureException
+	private void insertByUsername(String username1, String username2)
+		throws ElementAlreadyExistsException,
+		DatabaseUnkownFailureException
 	{
 		try (
 			Connection conn = getConnection();
@@ -215,6 +209,9 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase
 		{
 			prpdStmt.setString(1, username1);
 			prpdStmt.setString(2, username2);
+			prpdStmt.executeUpdate();
+			prpdStmt.setString(1, username2);
+			prpdStmt.setString(2, username1);
 			prpdStmt.executeUpdate();
 			conn.commit();
 		} catch (SQLException e)
@@ -227,7 +224,8 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase
 	}
 	
 	
-	private List<DBUser> getByUsername(String username) throws DatabaseUnkownFailureException
+	private List<DBUser> getByUsername(String username)
+		throws DatabaseUnkownFailureException
 	{
 		ArrayList<DBUser> $ = new ArrayList<>();
 		
@@ -236,8 +234,6 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase
 			PreparedStatement prpdStmt = conn.prepareStatement(gettingQuery))
 		{
 			prpdStmt.setString(1, username);
-			prpdStmt.setString(2, username);
-			prpdStmt.setString(3, username);
 			ResultSet res = prpdStmt.executeQuery();
 			
 			while (res.next())
@@ -261,6 +257,12 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase
 		}
 		
 		return $;
+	}
+	
+	private static boolean isUserNull(DBUser u)
+	{
+		return (u == null || u.getUsername() == null || u.getPassword() == null || u
+			.getName() == null);
 	}
 	
 	
