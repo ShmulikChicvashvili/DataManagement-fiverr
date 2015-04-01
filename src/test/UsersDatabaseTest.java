@@ -724,6 +724,116 @@ public class UsersDatabaseTest
 		assertEquals(true, res);
 	}
 	
+	@Test
+	public void updateBalanceInvalidParamsTest() {
+		try
+		{
+			userDB.updateBalance(null, "shmulik", 1);
+		} catch (DatabaseUnkownFailureException e)
+		{
+			e.printStackTrace();
+			fail();
+		} catch (InvalidParamsException e)
+		{
+			// success
+		}
+		
+		Connection conn = null;
+		try
+		{
+			conn = ds.getConnection();
+		} catch (SQLException e)
+		{
+			e.printStackTrace();
+			fail();
+		}
+		if(conn == null) {
+			fail();
+		}
+		try
+		{
+			userDB.updateBalance(conn, null, 0);
+		} catch (DatabaseUnkownFailureException e)
+		{
+			e.printStackTrace();
+			fail();
+		} catch (InvalidParamsException e)
+		{
+			// success
+		}
+		
+		try
+		{
+			conn.close();
+		} catch (SQLException e)
+		{
+			e.printStackTrace();
+			fail();
+		}
+		try
+		{
+			userDB.updateBalance(conn, "", 0);
+		} catch (DatabaseUnkownFailureException e)
+		{
+			e.printStackTrace();
+			fail();
+		} catch (InvalidParamsException e)
+		{
+			return;
+		}
+		fail();
+	}
+	
+	@Test
+	public void updateBalanceTest() throws SQLException {
+		try
+		{
+			userDB.addUser(new DBUser("Shmulik", "1", "shmulik", 13));
+			userDB.addUser(new DBUser("Eyal", "1", "eyal", -3));
+		} catch (
+			ElementAlreadyExistsException
+			| DatabaseUnkownFailureException
+			| InvalidParamsException e)
+		{
+			e.printStackTrace();
+			fail();
+		}
+		
+		Connection conn = null;
+		Connection conn2 = null;
+		try
+		{
+			conn = ds.getConnection();
+			conn2 = ds.getConnection();
+		} catch (SQLException e)
+		{
+			e.printStackTrace();
+			fail();
+		}
+		if(conn == null || conn2 == null) {
+			fail();
+		}
+		
+		try
+		{
+			userDB.updateBalance(conn, "shmulik", 5);
+			assertEquals(18, userDB.getUser("shmulik").getBalance());
+			userDB.updateBalance(conn2, "shmulik", -5);
+			conn.commit();
+			conn2.commit();
+			assertEquals(13, userDB.getUser("shmulik").getBalance());
+		} catch (DatabaseUnkownFailureException | InvalidParamsException e)
+		{
+			e.printStackTrace();
+			fail();
+		} catch (SQLException e)
+		{
+			e.printStackTrace();
+			fail();
+		}
+		conn.close();
+		conn2.close();
+	}
 	
 	@Before
 	public void Before()

@@ -1,6 +1,3 @@
-/**
- *
- */
 
 package com.servicebook.database.implementation;
 
@@ -93,10 +90,7 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 			conn.commit();
 		} catch (final SQLException e)
 		{
-			if (e.getErrorCode() != 1061)
-			{
-				throw new TableCreationException(e);
-			}
+			if (e.getErrorCode() != 1061) { throw new TableCreationException(e); }
 		}
 	}
 	
@@ -128,10 +122,8 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 			conn.commit();
 		} catch (final SQLException e)
 		{
-			if (e.getErrorCode() == MysqlErrorNumbers.ER_DUP_ENTRY)
-			{
-				throw new ElementAlreadyExistsException(e);
-			}
+			if (e.getErrorCode() == MysqlErrorNumbers.ER_DUP_ENTRY) { throw new ElementAlreadyExistsException(
+				e); }
 			
 			throw new DatabaseUnkownFailureException(e);
 		}
@@ -297,6 +289,30 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 	}
 	
 	
+	/* (non-Javadoc) @see
+	 * com.servicebook.database.UsersDatabase#updateBalance(java.sql.Connection,
+	 * java.lang.String, int) */
+	@Override
+	public void updateBalance(Connection conn, String username, int balance)
+		throws InvalidParamsException,
+		DatabaseUnkownFailureException
+	{
+		if (conn == null || username == null) { throw new InvalidParamsException(); }
+		if (isConnClosed(conn)) { throw new InvalidParamsException(); }
+		try (
+			PreparedStatement prpdStmt =
+				conn.prepareStatement(updateBalanceQuery))
+		{
+			prpdStmt.setInt(1, balance);
+			prpdStmt.setString(2, username);
+			prpdStmt.executeUpdate();
+		} catch (SQLException e)
+		{
+			throw new DatabaseUnkownFailureException(e);
+		}
+	}
+	
+	
 	/**
 	 * After setting the table scheme and name the method will be called for
 	 * initialising the query string
@@ -349,6 +365,14 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 				"SELECT * FROM %s ORDER BY `%s` LIMIT ?, ?",
 				table,
 				Columns.NAME.toString().toLowerCase());
+		
+		updateBalanceQuery =
+			String.format(
+				"UPDATE %s SET %s = %s+? WHERE %s = ?;",
+				table,
+				Columns.BALANCE.toString().toLowerCase(),
+				Columns.BALANCE.toString().toLowerCase(),
+				Columns.USERNAME.toString().toLowerCase());
 	}
 	
 	
@@ -388,4 +412,5 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 	 */
 	private String gettingMultipleUsersQuery;
 	
+	private String updateBalanceQuery;
 }

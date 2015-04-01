@@ -2,6 +2,7 @@
 package com.servicebook.database;
 
 
+import java.sql.Connection;
 import java.util.List;
 
 import com.servicebook.database.exceptions.DatabaseUnkownFailureException;
@@ -106,4 +107,25 @@ public interface UsersDatabase
 	public boolean validateUser(String username, String password)
 		throws DatabaseUnkownFailureException,
 		InvalidParamsException;
+	
+	
+	/**
+	 * Updates the balance for a specific user, the balance parameter is the
+	 * difference to be set. The query will be a part of a transction, therefore
+	 * the function will get the connection.
+	 * 
+	 * @param conn
+	 *            The connection in this specific transaction
+	 * @param username
+	 *            The username of the user to be updated
+	 * @param balance
+	 *            The balance to be added or subtracted
+	 * @throws InvalidParamsException
+	 *             Invalid parameters exception
+	 * @throws DatabaseUnkownFailureException
+	 *             Unknown failure exception
+	 */
+	public void updateBalance(Connection conn, String username, int balance)
+		throws InvalidParamsException,
+		DatabaseUnkownFailureException;
 }
