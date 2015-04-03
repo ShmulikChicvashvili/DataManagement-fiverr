@@ -17,16 +17,16 @@ import com.servicebook.database.primitives.DBPaidTask;
 
 public interface PaidActivitiesDatabase
 {
-
+	
 	public enum ActivityStatus
 	{
 		NOT_EXIST,
 		SERVICE,
 		TASK
 	}
-
-
-
+	
+	
+	
 	/**
 	 * Adds the paid service to the database.
 	 *
@@ -41,8 +41,8 @@ public interface PaidActivitiesDatabase
 	public int addPaidService(final DBPaidService service)
 		throws InvalidParameterException,
 		DatabaseUnkownFailureException;
-
-
+	
+	
 	/**
 	 * Adds the paid task to the database.
 	 *
@@ -57,8 +57,8 @@ public interface PaidActivitiesDatabase
 	public int addPaidTask(final DBPaidTask task)
 		throws DatabaseUnkownFailureException,
 		InvalidParameterException;
-
-
+	
+	
 	/**
 	 * Deletes the paid activity and all registrations to it. does
 	 * <b><u>not</u></b> update the balance for the participators.
@@ -75,8 +75,26 @@ public interface PaidActivitiesDatabase
 	public void deletePaidActivity(int id, Connection conn)
 		throws InvalidParameterException,
 		DatabaseUnkownFailureException;
-
-
+	
+	
+	/**
+	 * Deletes all of the user's paid activities and all registrations to them.
+	 * does <b><u>not</u></b> update the balance for the participators.
+	 *
+	 * @param username
+	 *            the username whose activities should be deleted.
+	 * @param conn
+	 *            the Sql connection to be used. Used for transactions.
+	 * @throws InvalidParameterException
+	 *             the username is null or conn is closed.
+	 * @throws DatabaseUnkownFailureException
+	 *             the database unkown failure exception
+	 */
+	public void deleteUserPaidActivities(String username, Connection conn)
+		throws InvalidParameterException,
+		DatabaseUnkownFailureException;
+	
+	
 	/**
 	 * Gets the activity status in the database.
 	 *
@@ -92,8 +110,8 @@ public interface PaidActivitiesDatabase
 	public ActivityStatus getActivityStatus(int id)
 		throws InvalidParameterException,
 		DatabaseUnkownFailureException;
-
-
+	
+	
 	/**
 	 * Gets the activity status in the database.
 	 *
@@ -111,8 +129,8 @@ public interface PaidActivitiesDatabase
 	public ActivityStatus getActivityStatus(int id, Connection conn)
 		throws InvalidParameterException,
 		DatabaseUnkownFailureException;
-
-
+	
+	
 	/**
 	 * Gets the services offered to the specified user. the services are ordered
 	 * by their title.
@@ -142,8 +160,8 @@ public interface PaidActivitiesDatabase
 		throws InvalidParameterException,
 		DatabaseUnkownFailureException,
 		FriendshipsTableNotExist;
-
-
+	
+	
 	/**
 	 * Gets the tasks offered to the specified user. the tasks are ordered by
 	 * their title.
@@ -173,8 +191,8 @@ public interface PaidActivitiesDatabase
 		throws InvalidParameterException,
 		DatabaseUnkownFailureException,
 		FriendshipsTableNotExist;
-
-
+	
+	
 	/**
 	 * Gets the services offered by the specified user. the services are ordered
 	 * by their title.
@@ -200,8 +218,8 @@ public interface PaidActivitiesDatabase
 		int amount)
 		throws InvalidParameterException,
 		DatabaseUnkownFailureException;
-
-
+	
+	
 	/**
 	 * Gets the tasks offered by the specified user. the tasks are ordered by
 	 * their title.
@@ -227,8 +245,8 @@ public interface PaidActivitiesDatabase
 		int amount)
 		throws DatabaseUnkownFailureException,
 		InvalidParameterException;
-
-
+	
+	
 	/**
 	 * Register a user to an activity. does <b><u>not</u></b> update the balance
 	 * of the users.
@@ -250,8 +268,8 @@ public interface PaidActivitiesDatabase
 		throws InvalidParameterException,
 		ElementAlreadyExistException,
 		DatabaseUnkownFailureException;
-
-
+	
+	
 	/**
 	 * Unregister a user from an activity. does <b><u>not</u></b> update the
 	 * balance of the users.

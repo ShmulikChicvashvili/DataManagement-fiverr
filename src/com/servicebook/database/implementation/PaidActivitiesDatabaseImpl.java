@@ -190,6 +190,27 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 
 
 	@Override
+	public void deleteUserPaidActivities(String username, Connection conn)
+		throws InvalidParameterException,
+		DatabaseUnkownFailureException
+	{
+		if (username == null || isConnClosed(conn)) { throw new InvalidParameterException(); }
+		try (
+			PreparedStatement stmt =
+				conn.prepareStatement(deleteAllUserActivitiesQuery))
+		{
+			stmt.setString(1, username);
+
+			stmt.executeUpdate();
+		} catch (final SQLException e)
+		{
+			throw new DatabaseUnkownFailureException(e);
+		}
+
+	}
+
+
+	@Override
 	public ActivityStatus getActivityStatus(int id)
 		throws DatabaseUnkownFailureException,
 		InvalidParameterException
@@ -731,7 +752,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 				ActivityTableColumn.DISTANCE.columnName(),
 				ActivityTableColumn.TYPE.columnName());
 
-		deleteActivityQuery =
+		final String deleteQueryPrefix =
 			String.format(
 				"DELETE %s,%s FROM %s LEFT OUTER JOIN %s ON ("
 					+ activityTable
@@ -741,14 +762,25 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 					+ registrationTable
 					+ "."
 					+ RegistrationTableColumn.ID
-					+ ")"
-					+ "WHERE %s.`%s`=?;",
+					+ ")",
 				activityTable,
 				registrationTable,
 				activityTable,
-				registrationTable,
-				activityTable,
-				ActivityTableColumn.ID.columnName());
+				registrationTable);
+
+		deleteActivityQuery =
+			deleteQueryPrefix
+				+ String.format(
+					"WHERE %s.`%s`=?;",
+					activityTable,
+					ActivityTableColumn.ID.columnName());
+
+		deleteAllUserActivitiesQuery =
+			deleteQueryPrefix
+				+ String.format(
+					"WHERE %s.`%s`=?;",
+					activityTable,
+					ActivityTableColumn.USERNAME.columnName());
 
 		getActivityStatusQuery =
 			String.format(
@@ -880,6 +912,14 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	private String deleteActivityQuery;
 
 	/**
+	 * The delete all user activities query.
+	 *
+	 * @param username
+	 *            String
+	 */
+	private String deleteAllUserActivitiesQuery;
+
+	/**
 	 * the get activity status query.
 	 *
 	 * @param id
@@ -890,14 +930,6 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	/**
 	 * The get activities offered by user query.
 	 *
-	 * @param username
-	 *            String
-	 * @param type
-	 *            Enum
-	 * @param offset
-	 *            int
-	 * @param amount
-	 *            int
 	 */
 	private String getActivitiesOfferedByUserQuery;
 
@@ -936,4 +968,5 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	 *            String
 	 */
 	private String unregisterFromActivityQuery;
+
 }
