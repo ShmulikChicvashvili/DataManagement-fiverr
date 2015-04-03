@@ -22,6 +22,7 @@ import org.junit.Test;
 import com.servicebook.database.PaidActivitiesDatabase.ActivityStatus;
 import com.servicebook.database.exceptions.DatabaseUnkownFailureException;
 import com.servicebook.database.exceptions.paidActivities.ElementAlreadyExistException;
+import com.servicebook.database.exceptions.paidActivities.FriendshipsTableNotExist;
 import com.servicebook.database.exceptions.paidActivities.InvalidParameterException;
 import com.servicebook.database.exceptions.paidActivities.TableCreationException;
 import com.servicebook.database.implementation.PaidActivitiesDatabaseImpl;
@@ -34,6 +35,63 @@ import com.servicebook.database.primitives.DBPaidTask;
 @SuppressWarnings("javadoc")
 public class PaidActivitiesDatabaseTest
 {
+	
+	private class FriendsTableInfo
+	{
+		/**
+		 * @param tableName
+		 * @param userColumn
+		 * @param friendColumn
+		 */
+		public FriendsTableInfo(
+			String tableName,
+			String userColumn,
+			String friendColumn)
+		{
+			super();
+			this.tableName = tableName;
+			this.userColumn = userColumn;
+			this.friendColumn = friendColumn;
+			creationQuery =
+				String
+					.format(
+						"CREATE TABLE IF NOT EXISTS %s (`%s` VARCHAR(255) NOT NULL, `%s` VARCHAR(255) NOT NULL, PRIMARY KEY(`%s`, `%s`))",
+						tableName,
+						userColumn,
+						friendColumn,
+						userColumn,
+						friendColumn);
+		}
+		
+		
+		
+		public String creationQuery;
+		
+		public String tableName;
+		
+		public String userColumn;
+		
+		public String friendColumn;
+	}
+	
+	
+	
+	private final FriendsTableInfo friendsTableInfo;
+	
+	
+	
+	/**
+	 *
+	 */
+	public PaidActivitiesDatabaseTest()
+	{
+		friendsTableInfo =
+			new FriendsTableInfo(
+				"`servicebook_db`.`friendships`",
+				"first_username",
+				"second_userame");
+	}
+	
 	
 	@Before
 	public void setUp() throws Exception
@@ -52,14 +110,22 @@ public class PaidActivitiesDatabaseTest
 			String dropQuery =
 				"DROP TABLE IF EXISTS `servicebook_db`.`activities`;";
 			stmt.execute(dropQuery);
+			
 			dropQuery =
 				"DROP TABLE IF EXISTS `servicebook_db`.`activities_registrations`;";
 			stmt.execute(dropQuery);
+			
+			dropQuery =
+				"DROP TABLE IF EXISTS " + friendsTableInfo.tableName + ";";
+			stmt.execute(dropQuery);
+			
+			stmt.execute(friendsTableInfo.creationQuery);
 			
 			conn.commit();
 		} catch (final SQLException e)
 		{
 			e.printStackTrace();
+			fail();
 		}
 		
 		try
@@ -69,7 +135,10 @@ public class PaidActivitiesDatabaseTest
 					"activities",
 					"activities_registrations",
 					"servicebook_db",
-					ds);
+					ds,
+					"friendships",
+					friendsTableInfo.userColumn,
+					friendsTableInfo.friendColumn);
 		} catch (final TableCreationException e)
 		{
 			fail("Unable to create paidActivityDB");
@@ -588,12 +657,15 @@ public class PaidActivitiesDatabaseTest
 		ElementAlreadyExistException
 	{
 		
+		final String u1 = "u1";
+		final String u2 = "u2";
+		
 		assertEquals(
 			new ArrayList<DBPaidService>(),
-			paidActivityDB.getServicesOfferedByUser("u1", 0, 10));
+			paidActivityDB.getServicesOfferedByUser(u1, 0, 10));
 		assertEquals(
 			new ArrayList<DBPaidTask>(),
-			paidActivityDB.getTasksOfferedByUser("u1", 0, 10));
+			paidActivityDB.getTasksOfferedByUser(u1, 0, 10));
 		
 		final Map<String, List<DBPaidService>> user2services =
 			new HashMap<String, List<DBPaidService>>();
@@ -602,25 +674,25 @@ public class PaidActivitiesDatabaseTest
 		List<DBPaidService> services = new ArrayList<DBPaidService>();
 		List<DBPaidTask> tasks = new ArrayList<DBPaidTask>();
 		
-		services.add(new DBPaidService("s1", "u1", 5, 1, 0));
-		services.add(new DBPaidService("s2", "u1", 2, 2, 0));
-		services.add(new DBPaidService("s3", "u1", 3, 1, 0));
-		tasks.add(new DBPaidTask("t1", "u1", 1, 1, 0));
-		tasks.add(new DBPaidTask("t2", "u1", 1, 1, 0));
+		services.add(new DBPaidService("s1", u1, 5, 1, 0));
+		services.add(new DBPaidService("s2", u1, 2, 2, 0));
+		services.add(new DBPaidService("s3", u1, 3, 1, 0));
+		tasks.add(new DBPaidTask("t1", u1, 1, 1, 0));
+		tasks.add(new DBPaidTask("t2", u1, 1, 1, 0));
 		
-		user2services.put("u1", services);
-		user2tasks.put("u1", tasks);
+		user2services.put(u1, services);
+		user2tasks.put(u1, tasks);
 		
 		services = new ArrayList<DBPaidService>();
 		tasks = new ArrayList<DBPaidTask>();
 		
-		services.add(new DBPaidService("s1", "u2", 1, 3, 0));
-		services.add(new DBPaidService("s5", "u2", 10, 4, 0));
-		tasks.add(new DBPaidTask("t10", "u2", 2, 1, 0));
-		tasks.add(new DBPaidTask("t12", "u2", 3, 5, 0));
+		services.add(new DBPaidService("s1", u2, 1, 3, 0));
+		services.add(new DBPaidService("s5", u2, 10, 4, 0));
+		tasks.add(new DBPaidTask("t10", u2, 2, 1, 0));
+		tasks.add(new DBPaidTask("t12", u2, 3, 5, 0));
 		
-		user2services.put("u2", services);
-		user2tasks.put("u2", tasks);
+		user2services.put(u2, services);
+		user2tasks.put(u2, tasks);
 		
 		for (final List<DBPaidService> l : user2services.values())
 		{
@@ -656,64 +728,354 @@ public class PaidActivitiesDatabaseTest
 		
 		/* test start and amount */
 		assertEquals(
-			user2services.get("u1").subList(1, 2),
-			paidActivityDB.getServicesOfferedByUser("u1", 1, 1));
+			user2services.get(u1).subList(1, 2),
+			paidActivityDB.getServicesOfferedByUser(u1, 1, 1));
 		assertEquals(
 			new ArrayList<DBPaidTask>(),
-			paidActivityDB.getServicesOfferedByUser("u2", 2, 19));
+			paidActivityDB.getServicesOfferedByUser(u2, 2, 19));
 		
 		/* test activities with registered users */
 		
 		conn = ds.getConnection();
-		DBPaidService s = user2services.get("u1").get(1);
-		paidActivityDB.registerToActivity(s.getId(), "u2", conn);
+		DBPaidService s = user2services.get(u1).get(1);
+		paidActivityDB.registerToActivity(s.getId(), u2, conn);
 		paidActivityDB.registerToActivity(s.getId(), "u3", conn);
 		conn.commit();
 		s.setNumRegistered((short) 2);
 		
 		assertEquals(
-			user2services.get("u1"),
-			paidActivityDB.getServicesOfferedByUser("u1", 0, 10));
+			user2services.get(u1),
+			paidActivityDB.getServicesOfferedByUser(u1, 0, 10));
 		
-		s = user2services.get("u1").get(0);
+		s = user2services.get(u1).get(0);
 		paidActivityDB.registerToActivity(s.getId(), "u5", conn);
 		conn.commit();
 		s.setNumRegistered((short) 1);
 		
 		assertEquals(
-			user2services.get("u1"),
-			paidActivityDB.getServicesOfferedByUser("u1", 0, 10));
+			user2services.get(u1),
+			paidActivityDB.getServicesOfferedByUser(u1, 0, 10));
 		
-		final DBPaidTask t = user2tasks.get("u2").get(1);
-		paidActivityDB.registerToActivity(t.getId(), "u1", conn);
+		final DBPaidTask t = user2tasks.get(u2).get(1);
+		paidActivityDB.registerToActivity(t.getId(), u1, conn);
 		conn.commit();
 		t.setNumRegistered((short) 1);
 		
 		assertEquals(
-			user2tasks.get("u2").subList(0, 1),
-			paidActivityDB.getTasksOfferedByUser("u2", 0, 1));
+			user2tasks.get(u2).subList(0, 1),
+			paidActivityDB.getTasksOfferedByUser(u2, 0, 1));
 		assertEquals(
-			user2tasks.get("u2").subList(1, 2),
-			paidActivityDB.getTasksOfferedByUser("u2", 1, 1));
+			user2tasks.get(u2).subList(1, 2),
+			paidActivityDB.getTasksOfferedByUser(u2, 1, 1));
 		
 		/* test deleting an activity */
-		s = user2services.get("u1").get(1);
+		s = user2services.get(u1).get(1);
 		paidActivityDB.deletePaidActivity(s.getId(), conn);
 		conn.commit();
-		user2services.get("u1").remove(s);
+		user2services.get(u1).remove(s);
 		
 		assertEquals(
-			user2services.get("u1"),
-			paidActivityDB.getServicesOfferedByUser("u1", 0, 5));
+			user2services.get(u1),
+			paidActivityDB.getServicesOfferedByUser(u1, 0, 5));
 		
 		conn.close();
 	}
 	
 	
 	@Test
-	public void testGetActivitiesOfferedToUser()
+	public void testGetActivitiesOfferedToUserExceptions()
+		throws DatabaseUnkownFailureException,
+		FriendshipsTableNotExist,
+		SQLException,
+		InvalidParameterException
 	{
-		fail("Not yet implemented");
+		try
+		{
+			paidActivityDB.getServicesOfferedToUser(null, 0, 1);
+			paidActivityDB.getTasksOfferedToUser(null, 0, 1);
+			fail();
+		} catch (final InvalidParameterException e)
+		{}
+		try
+		{
+			paidActivityDB.getServicesOfferedToUser("u1", -1, 1);
+			paidActivityDB.getTasksOfferedToUser("u1", -1, 1);
+			fail();
+		} catch (final InvalidParameterException e)
+		{}
+		try
+		{
+			paidActivityDB.getServicesOfferedToUser("u1", 0, 0);
+			paidActivityDB.getTasksOfferedToUser("u1", 0, 0);
+			fail();
+		} catch (final InvalidParameterException e)
+		{}
+		
+		try (
+			Connection conn = ds.getConnection();
+			Statement stmt = conn.createStatement())
+		{
+			stmt.execute("DROP TABLE IF EXISTS " + friendsTableInfo.tableName);
+			conn.commit();
+			
+			paidActivityDB.getServicesOfferedToUser("u1", 0, 1);
+			paidActivityDB.getTasksOfferedToUser("u1", 0, 1);
+			fail();
+		} catch (final FriendshipsTableNotExist e)
+		{}
+	}
+	
+	
+	private final <T> List<T> joinLists(List<T> l1, List<T> l2)
+	{
+		final List<T> l = new ArrayList<T>(l1);
+		l.addAll(l2);
+		return l;
+	}
+	
+	
+	@Test
+	public void testGetActivitiesOfferedToUser()
+		throws DatabaseUnkownFailureException,
+		InvalidParameterException,
+		SQLException,
+		ElementAlreadyExistException,
+		FriendshipsTableNotExist
+	{
+		
+		conn = ds.getConnection();
+		
+		final String u1 = "u1";
+		final String u2 = "u2";
+		final String u3 = "u3";
+		final String u4 = "u4";
+		
+		assertEquals(
+			new ArrayList<DBPaidService>(),
+			paidActivityDB.getServicesOfferedToUser(u1, 0, 10));
+		assertEquals(
+			new ArrayList<DBPaidTask>(),
+			paidActivityDB.getTasksOfferedToUser(u1, 0, 10));
+		
+		final Map<String, List<DBPaidService>> user2services =
+			new HashMap<String, List<DBPaidService>>();
+		final HashMap<String, List<DBPaidTask>> user2tasks =
+			new HashMap<String, List<DBPaidTask>>();
+		List<DBPaidService> services = new ArrayList<DBPaidService>();
+		List<DBPaidTask> tasks = new ArrayList<DBPaidTask>();
+		
+		services.add(new DBPaidService("s1", u1, 5, 1, 0));
+		services.add(new DBPaidService("s2", u1, 2, 2, 0));
+		services.add(new DBPaidService("s3", u1, 3, 1, 0));
+		tasks.add(new DBPaidTask("t1", u1, 1, 1, 0));
+		tasks.add(new DBPaidTask("t2", u1, 1, 1, 0));
+		user2services.put(u1, services);
+		user2tasks.put(u1, tasks);
+		
+		services = new ArrayList<DBPaidService>();
+		tasks = new ArrayList<DBPaidTask>();
+		services.add(new DBPaidService("s1", u2, 1, 3, 0));
+		services.add(new DBPaidService("s5", u2, 10, 4, 0));
+		services.add(new DBPaidService("s6", u2, 8, 3, 0));
+		tasks.add(new DBPaidTask("t12", u2, 3, 5, 0));
+		user2services.put(u2, services);
+		user2tasks.put(u2, tasks);
+		
+		services = new ArrayList<DBPaidService>();
+		tasks = new ArrayList<DBPaidTask>();
+		services.add(new DBPaidService("s20", u3, 12, 3, 0));
+		services.add(new DBPaidService("s25", u3, 7, 4, 0));
+		services.add(new DBPaidService("s26", u3, 16, 5, 0));
+		services.add(new DBPaidService("s27", u3, 12, 8, 0));
+		tasks.add(new DBPaidTask("t20", u3, 5, 6, 0));
+		tasks.add(new DBPaidTask("t22", u3, 3, 5, 0));
+		user2services.put(u3, services);
+		user2tasks.put(u3, tasks);
+		
+		services = new ArrayList<DBPaidService>();
+		tasks = new ArrayList<DBPaidTask>();
+		services.add(new DBPaidService("s90", u4, 1, 3, 0));
+		services.add(new DBPaidService("s93", u4, 10, 4, 0));
+		tasks.add(new DBPaidTask("t91", u4, 7, 9, 0));
+		tasks.add(new DBPaidTask("t97", u4, 12, 35, 0));
+		user2services.put(u4, services);
+		user2tasks.put(u4, tasks);
+		
+		for (final List<DBPaidService> l : user2services.values())
+		{
+			for (final DBPaidService s : l)
+			{
+				paidActivityDB.addPaidService(s);
+			}
+		}
+		for (final List<DBPaidTask> l : user2tasks.values())
+		{
+			for (final DBPaidTask t : l)
+			{
+				paidActivityDB.addPaidTask(t);
+			}
+		}
+		
+		/******** END OF INITIALIZATION ***********/
+		
+		// test everyones offered activites are empty
+		for (final String u : user2services.keySet())
+		{
+			assertEquals(
+				new ArrayList<DBPaidService>(),
+				paidActivityDB.getServicesOfferedToUser(u, 0, 10));
+			assertEquals(
+				new ArrayList<DBPaidService>(),
+				paidActivityDB.getTasksOfferedToUser(u, 0, 10));
+		}
+		
+		// add u2 and u3 as friends
+		try (
+			Connection conn = ds.getConnection();
+			Statement stmt = conn.createStatement())
+		{
+			stmt.execute(String.format(
+				"INSERT INTO %s (%s,%s) VALUES ('%s','%s')",
+				friendsTableInfo.tableName,
+				friendsTableInfo.userColumn,
+				friendsTableInfo.friendColumn,
+				u2,
+				u3));
+			stmt.execute(String.format(
+				"INSERT INTO %s (%s,%s) VALUES ('%s','%s')",
+				friendsTableInfo.tableName,
+				friendsTableInfo.userColumn,
+				friendsTableInfo.friendColumn,
+				u3,
+				u2));
+			
+			conn.commit();
+		}
+		
+		assertEquals(
+			user2services.get(u3),
+			paidActivityDB.getServicesOfferedToUser(u2, 0, 10));
+		assertEquals(
+			user2tasks.get(u3),
+			paidActivityDB.getTasksOfferedToUser(u2, 0, 10));
+		assertEquals(
+			user2services.get(u2),
+			paidActivityDB.getServicesOfferedToUser(u3, 0, 10));
+		assertEquals(
+			user2tasks.get(u2),
+			paidActivityDB.getTasksOfferedToUser(u3, 0, 10));
+		
+		assertEquals(
+			user2services.get(u3).subList(1, 3),
+			paidActivityDB.getServicesOfferedToUser(u2, 1, 2));
+		assertEquals(
+			new ArrayList<DBPaidTask>(),
+			paidActivityDB.getTasksOfferedToUser(u2, 5, 2));
+		
+		// add u3 and u4 as friends
+		try (
+			Connection conn = ds.getConnection();
+			Statement stmt = conn.createStatement())
+		{
+			stmt.execute(String.format(
+				"INSERT INTO %s (%s,%s) VALUES ('%s','%s')",
+				friendsTableInfo.tableName,
+				friendsTableInfo.userColumn,
+				friendsTableInfo.friendColumn,
+				u4,
+				u3));
+			stmt.execute(String.format(
+				"INSERT INTO %s (%s,%s) VALUES ('%s','%s')",
+				friendsTableInfo.tableName,
+				friendsTableInfo.userColumn,
+				friendsTableInfo.friendColumn,
+				u3,
+				u4));
+			
+			conn.commit();
+		}
+		
+		// test u2 and u4 have only u3 services and tasks
+		assertEquals(
+			user2services.get(u3),
+			paidActivityDB.getServicesOfferedToUser(u2, 0, 10));
+		assertEquals(
+			user2tasks.get(u3),
+			paidActivityDB.getTasksOfferedToUser(u2, 0, 10));
+		assertEquals(
+			user2services.get(u3),
+			paidActivityDB.getServicesOfferedToUser(u4, 0, 10));
+		assertEquals(
+			user2tasks.get(u3),
+			paidActivityDB.getTasksOfferedToUser(u4, 0, 10));
+		
+		// test u3 now has both u2 and u4 services and tasks
+		assertEquals(
+			joinLists(user2services.get(u2), user2services.get(u4)),
+			paidActivityDB.getServicesOfferedToUser(u3, 0, 10));
+		assertEquals(
+			joinLists(user2tasks.get(u2), user2tasks.get(u4)),
+			paidActivityDB.getTasksOfferedToUser(u3, 0, 10));
+		
+		DBPaidService s = user2services.get(u2).get(1);
+		paidActivityDB.registerToActivity(s.getId(), "u5", conn);
+		paidActivityDB.registerToActivity(s.getId(), "u6", conn);
+		s.setNumRegistered((short) 2);
+		
+		s = user2services.get(u4).get(0);
+		paidActivityDB.registerToActivity(s.getId(), "u5", conn);
+		paidActivityDB.registerToActivity(s.getId(), "u7", conn);
+		paidActivityDB.registerToActivity(s.getId(), "u13", conn);
+		s.setNumRegistered((short) 3);
+		
+		DBPaidTask t = user2tasks.get(u2).get(0);
+		paidActivityDB.registerToActivity(t.getId(), "u5", conn);
+		t.setNumRegistered((short) 1);
+		
+		t = user2tasks.get(u3).get(1);
+		paidActivityDB.registerToActivity(t.getId(), "u12", conn);
+		paidActivityDB.registerToActivity(t.getId(), "u15", conn);
+		paidActivityDB.registerToActivity(t.getId(), "u123", conn);
+		t.setNumRegistered((short) 3);
+		
+		conn.commit();
+		
+		// test u2 and u4 have updated u3 services and tasks
+		assertEquals(
+			user2services.get(u3),
+			paidActivityDB.getServicesOfferedToUser(u2, 0, 10));
+		assertEquals(
+			user2tasks.get(u3),
+			paidActivityDB.getTasksOfferedToUser(u2, 0, 10));
+		assertEquals(
+			user2services.get(u3),
+			paidActivityDB.getServicesOfferedToUser(u4, 0, 10));
+		assertEquals(
+			user2tasks.get(u3),
+			paidActivityDB.getTasksOfferedToUser(u4, 0, 10));
+		
+		// test u3 now has both u2 and u4 updated services and tasks
+		assertEquals(
+			joinLists(user2services.get(u2), user2services.get(u4)),
+			paidActivityDB.getServicesOfferedToUser(u3, 0, 10));
+		assertEquals(
+			joinLists(user2tasks.get(u2), user2tasks.get(u4)),
+			paidActivityDB.getTasksOfferedToUser(u3, 0, 10));
+		
+		s = user2services.get(u4).get(0);
+		paidActivityDB.deletePaidActivity(s.getId(), conn);
+		conn.commit();
+		user2services.get(u4).remove(s);
+		
+		// test u3 now has both u2 and u4 updated services and tasks
+		assertEquals(
+			joinLists(user2services.get(u2), user2services.get(u4)),
+			paidActivityDB.getServicesOfferedToUser(u3, 0, 10));
+		assertEquals(
+			joinLists(user2tasks.get(u2), user2tasks.get(u4)),
+			paidActivityDB.getTasksOfferedToUser(u3, 0, 10));
+		
+		conn.close();
 	}
 	
 	

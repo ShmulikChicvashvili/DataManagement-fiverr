@@ -18,6 +18,26 @@ public abstract class DBPaidActivity
 
 
 
+	/* (non-Javadoc) @see java.lang.Object#toString() */
+	@Override
+	public String toString()
+	{
+		return "DBPaidActivity [id="
+			+ id
+			+ ", title="
+			+ title
+			+ ", username="
+			+ username
+			+ ", capacity="
+			+ capacity
+			+ ", distance="
+			+ distance
+			+ ", numRegistered="
+			+ numRegistered
+			+ "]";
+	}
+
+
 	public DBPaidActivity(
 		String title,
 		String username,

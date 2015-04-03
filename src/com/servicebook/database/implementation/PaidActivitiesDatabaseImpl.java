@@ -17,6 +17,7 @@ import com.servicebook.database.AbstractMySqlDatabase;
 import com.servicebook.database.PaidActivitiesDatabase;
 import com.servicebook.database.exceptions.DatabaseUnkownFailureException;
 import com.servicebook.database.exceptions.paidActivities.ElementAlreadyExistException;
+import com.servicebook.database.exceptions.paidActivities.FriendshipsTableNotExist;
 import com.servicebook.database.exceptions.paidActivities.InvalidParameterException;
 import com.servicebook.database.exceptions.paidActivities.TableCreationException;
 import com.servicebook.database.primitives.DBPaidActivity;
@@ -30,6 +31,35 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	implements
 		PaidActivitiesDatabase
 {
+	private class FriendsTableInfo
+	{
+		/**
+		 * @param tableName
+		 * @param userColumn
+		 * @param friendColumn
+		 */
+		public FriendsTableInfo(
+			String tableName,
+			String userColumn,
+			String friendColumn)
+		{
+			super();
+			this.tableName = tableName;
+			this.userColumn = userColumn;
+			this.friendColumn = friendColumn;
+		}
+
+
+
+		public String tableName;
+
+		public String userColumn;
+
+		public String friendColumn;
+	}
+
+
+
 	private enum ActivityTableColumn
 	{
 		ID,
@@ -88,11 +118,20 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		String activityTable,
 		String registrationTable,
 		String schema,
-		BasicDataSource datasource) throws TableCreationException
+		BasicDataSource datasource,
+		String friendsTableName,
+		String friendsTableUsernameColumn,
+		String friendsTableFriendColumn) throws TableCreationException
 	{
 		super(schema, datasource);
 		this.activityTable = this.schema + ".`" + activityTable + "`";
 		this.registrationTable = this.schema + ".`" + registrationTable + "`";
+
+		friendsTableInfo =
+			new FriendsTableInfo(
+				this.schema + ".`" + friendsTableName + "`",
+				friendsTableUsernameColumn,
+				friendsTableFriendColumn);
 
 		initializeQueries();
 
@@ -246,9 +285,29 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		String username,
 		int start,
 		int amount)
+		throws InvalidParameterException,
+		DatabaseUnkownFailureException,
+		FriendshipsTableNotExist
 	{
-		// TODO Auto-generated method stub
-		return null;
+		final List<DBPaidService> $ = new ArrayList<DBPaidService>();
+		final List<DBPaidActivity> services =
+			getActivitiesOfferedToUser(
+				username,
+				start,
+				amount,
+				ActivityType.SERVICE);
+
+		for (final DBPaidActivity service : services)
+		{
+			assert service instanceof DBPaidService;
+			if (!(service instanceof DBPaidService))
+			{
+				continue;
+			}
+			$.add((DBPaidService) service);
+		}
+
+		return $;
 	}
 
 
@@ -287,9 +346,29 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		String username,
 		int start,
 		int amount)
+		throws InvalidParameterException,
+		DatabaseUnkownFailureException,
+		FriendshipsTableNotExist
 	{
-		// TODO Auto-generated method stub
-		return null;
+		final List<DBPaidTask> $ = new ArrayList<DBPaidTask>();
+		final List<DBPaidActivity> tasks =
+			getActivitiesOfferedToUser(
+				username,
+				start,
+				amount,
+				ActivityType.TASK);
+
+		for (final DBPaidActivity task : tasks)
+		{
+			assert task instanceof DBPaidTask;
+			if (!(task instanceof DBPaidTask))
+			{
+				continue;
+			}
+			$.add((DBPaidTask) task);
+		}
+
+		return $;
 	}
 
 
@@ -539,6 +618,106 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	}
 
 
+	/**
+	 * Gets the activities offered by user. The activities are ordered by their
+	 * title.
+	 *
+	 * @param username
+	 *            the user's username
+	 * @param start
+	 *            the index for the first activity.
+	 * @param amount
+	 *            the maximum amount of activities to retrieve.
+	 * @param type
+	 *            the type of the activity {@link ActivityType}
+	 * @return the activities offered by the user
+	 * @throws InvalidParameterException
+	 *             In case a null was passed, or the ranges are bad.
+	 * @throws DatabaseUnkownFailureException
+	 *             In case of an unknown SQL exception
+	 * @throws FriendshipsTableNotExist
+	 *             the friendships table does not exist
+	 */
+	private List<DBPaidActivity> getActivitiesOfferedToUser(
+		String username,
+		int start,
+		int amount,
+		ActivityType type)
+		throws InvalidParameterException,
+		DatabaseUnkownFailureException,
+		FriendshipsTableNotExist
+	{
+		if (username == null || !isStartAmountInRanges(start, amount)) { throw new InvalidParameterException(); }
+
+		final List<DBPaidActivity> $ = new ArrayList<DBPaidActivity>();
+		try (
+			Connection conn = getConnection();
+			PreparedStatement stmt =
+				conn.prepareStatement(getActivitiesOfferedToUserQuery))
+		{
+			stmt.setString(1, username);
+			stmt.setString(2, type.toDB());
+			stmt.setInt(3, start);
+			stmt.setInt(4, amount);
+
+			final ResultSet rs = stmt.executeQuery();
+
+			while (rs.next())
+			{
+				final int id = rs.getInt(ActivityTableColumn.ID.columnName());
+				final String title =
+					rs.getString(ActivityTableColumn.TITLE.columnName());
+				final String user =
+					rs.getString(ActivityTableColumn.USERNAME.columnName());
+				final short capacity =
+					rs.getShort(ActivityTableColumn.CAPACITY.columnName());
+				final short distance =
+					rs.getShort(ActivityTableColumn.DISTANCE.columnName());
+				final short numRegistered =
+					rs.getShort(queryNumRegisteredField);
+
+				DBPaidActivity activity = null;
+
+				switch (type)
+				{
+					case SERVICE:
+						activity =
+							new DBPaidService(
+								id,
+								title,
+								user,
+								capacity,
+								distance,
+								numRegistered);
+						break;
+					case TASK:
+						activity =
+							new DBPaidTask(
+								id,
+								title,
+								user,
+								capacity,
+								distance,
+								numRegistered);
+						break;
+				}
+				$.add(activity);
+			}
+
+			// ResultSet rs closes automatically when `stmt` closes
+		} catch (final SQLException e)
+		{
+			if (e.getErrorCode() == MysqlErrorNumbers.ER_NO_SUCH_TABLE) { throw new FriendshipsTableNotExist(
+				e); }
+			throw new DatabaseUnkownFailureException(e);
+		}
+
+		assert $.size() <= amount;
+
+		return $;
+	}
+
+
 	private void initializeQueries()
 	{
 		addActivityQuery =
@@ -605,6 +784,42 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 					activityTable + "." + ActivityTableColumn.ID.columnName(),
 					ActivityTableColumn.TITLE.columnName());
 
+		getActivitiesOfferedToUserQuery =
+			String
+				.format(
+					"SELECT %s.*, count(%s.%s) AS "
+						+ queryNumRegisteredField
+						+ " FROM "
+						+ activityTable
+						+ " JOIN "
+						+ friendsTableInfo.tableName
+						+ " ON ("
+						+ String.format(
+							"%s.%s=%s.%s",
+							activityTable,
+							ActivityTableColumn.USERNAME.columnName(),
+							friendsTableInfo.tableName,
+							friendsTableInfo.friendColumn)
+						+ ") LEFT OUTER JOIN "
+						+ registrationTable
+						+ " ON ("
+						+ activityTable
+						+ "."
+						+ ActivityTableColumn.ID.columnName()
+						+ "="
+						+ registrationTable
+						+ "."
+						+ RegistrationTableColumn.ID.columnName()
+						+ ") WHERE %s.`%s`=? AND `%s`=? GROUP BY %s  ORDER BY `%s` LIMIT ?,?",
+					activityTable,
+					registrationTable,
+					RegistrationTableColumn.USERNAME.columnName(),
+					friendsTableInfo.tableName,
+					friendsTableInfo.userColumn,
+					ActivityTableColumn.TYPE.columnName(),
+					activityTable + "." + ActivityTableColumn.ID.columnName(),
+					ActivityTableColumn.TITLE.columnName());
+
 		registerToActivityQuery =
 			String.format(
 				"INSERT INTO %s (%s,%s) VALUES (?,?)",
@@ -637,6 +852,8 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	private final String activityTable;
 
 	private final String registrationTable;
+
+	private final FriendsTableInfo friendsTableInfo;
 
 	/**
 	 * The add activity query.
@@ -683,6 +900,20 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	 *            int
 	 */
 	private String getActivitiesOfferedByUserQuery;
+
+	/**
+	 * The get activities offered to user query.
+	 *
+	 * @param username
+	 *            String
+	 * @param type
+	 *            Enum
+	 * @param offset
+	 *            int
+	 * @param amount
+	 *            int
+	 */
+	private String getActivitiesOfferedToUserQuery;
 
 	private final String queryNumRegisteredField = "numRegistered";
 

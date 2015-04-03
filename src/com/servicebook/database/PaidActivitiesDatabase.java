@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.servicebook.database.exceptions.DatabaseUnkownFailureException;
 import com.servicebook.database.exceptions.paidActivities.ElementAlreadyExistException;
+import com.servicebook.database.exceptions.paidActivities.FriendshipsTableNotExist;
 import com.servicebook.database.exceptions.paidActivities.InvalidParameterException;
 import com.servicebook.database.primitives.DBPaidService;
 import com.servicebook.database.primitives.DBPaidTask;
@@ -16,16 +17,16 @@ import com.servicebook.database.primitives.DBPaidTask;
 
 public interface PaidActivitiesDatabase
 {
-	
+
 	public enum ActivityStatus
 	{
 		NOT_EXIST,
 		SERVICE,
 		TASK
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Adds the paid service to the database.
 	 *
@@ -40,8 +41,8 @@ public interface PaidActivitiesDatabase
 	public int addPaidService(final DBPaidService service)
 		throws InvalidParameterException,
 		DatabaseUnkownFailureException;
-	
-	
+
+
 	/**
 	 * Adds the paid task to the database.
 	 *
@@ -56,8 +57,8 @@ public interface PaidActivitiesDatabase
 	public int addPaidTask(final DBPaidTask task)
 		throws DatabaseUnkownFailureException,
 		InvalidParameterException;
-	
-	
+
+
 	/**
 	 * Deletes the paid activity and all registrations to it. does
 	 * <b><u>not</u></b> update the balance for the participators.
@@ -74,8 +75,8 @@ public interface PaidActivitiesDatabase
 	public void deletePaidActivity(int id, Connection conn)
 		throws InvalidParameterException,
 		DatabaseUnkownFailureException;
-	
-	
+
+
 	/**
 	 * Gets the activity status in the database.
 	 *
@@ -91,8 +92,8 @@ public interface PaidActivitiesDatabase
 	public ActivityStatus getActivityStatus(int id)
 		throws InvalidParameterException,
 		DatabaseUnkownFailureException;
-	
-	
+
+
 	/**
 	 * Gets the activity status in the database.
 	 *
@@ -110,8 +111,8 @@ public interface PaidActivitiesDatabase
 	public ActivityStatus getActivityStatus(int id, Connection conn)
 		throws InvalidParameterException,
 		DatabaseUnkownFailureException;
-	
-	
+
+
 	/**
 	 * Gets the services offered to the specified user. the services are ordered
 	 * by their title.
@@ -126,13 +127,23 @@ public interface PaidActivitiesDatabase
 	 * @return the services offered to the user, including the amount of
 	 *         registered users to the service. If no services are offered an
 	 *         empty set is returned.
+	 * @throws InvalidParameterException
+	 *             In case the username was null, start is negative or amount is
+	 *             less than 1.
+	 * @throws DatabaseUnkownFailureException
+	 *             In case an unknown SQL exception occurred.
+	 * @throws FriendshipsTableNotExist
+	 *             the friendships table does not exist
 	 */
 	public List<DBPaidService> getServicesOfferedToUser(
 		final String username,
 		int start,
-		int amount);
-	
-	
+		int amount)
+		throws InvalidParameterException,
+		DatabaseUnkownFailureException,
+		FriendshipsTableNotExist;
+
+
 	/**
 	 * Gets the tasks offered to the specified user. the tasks are ordered by
 	 * their title.
@@ -147,13 +158,23 @@ public interface PaidActivitiesDatabase
 	 * @return the tasks offered to the user, including the amount of registered
 	 *         users to the task. If no tasks are offered an empty set is
 	 *         returned.
+	 * @throws InvalidParameterException
+	 *             In case the username was null, start is negative or amount is
+	 *             less than 1.
+	 * @throws DatabaseUnkownFailureException
+	 *             In case an unknown SQL exception occurred.
+	 * @throws FriendshipsTableNotExist
+	 *             the friendships table does not exist
 	 */
 	public List<DBPaidTask> getTasksOfferedToUser(
 		final String username,
 		int start,
-		int amount);
-	
-	
+		int amount)
+		throws InvalidParameterException,
+		DatabaseUnkownFailureException,
+		FriendshipsTableNotExist;
+
+
 	/**
 	 * Gets the services offered by the specified user. the services are ordered
 	 * by their title.
@@ -179,8 +200,8 @@ public interface PaidActivitiesDatabase
 		int amount)
 		throws InvalidParameterException,
 		DatabaseUnkownFailureException;
-	
-	
+
+
 	/**
 	 * Gets the tasks offered by the specified user. the tasks are ordered by
 	 * their title.
@@ -206,8 +227,8 @@ public interface PaidActivitiesDatabase
 		int amount)
 		throws DatabaseUnkownFailureException,
 		InvalidParameterException;
-	
-	
+
+
 	/**
 	 * Register a user to an activity. does <b><u>not</u></b> update the balance
 	 * of the users.
@@ -229,8 +250,8 @@ public interface PaidActivitiesDatabase
 		throws InvalidParameterException,
 		ElementAlreadyExistException,
 		DatabaseUnkownFailureException;
-	
-	
+
+
 	/**
 	 * Unregister a user from an activity. does <b><u>not</u></b> update the
 	 * balance of the users.
