@@ -252,4 +252,12 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
 	private String insertionQuery;
 
 	private String gettingQuery;
+
+	/* (non-Javadoc) @see com.servicebook.database.FriendshipsDatabase#areFriends(java.lang.String, java.lang.String) */
+	@Override
+	public boolean areFriends(String user1, String user2)
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
 }
