@@ -2,7 +2,6 @@
 package com.servicebook.database.implementation;
 
 
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -56,7 +55,19 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 		/**
 		 * Balance column representation
 		 */
-		BALANCE
+		BALANCE,
+		/**
+		 * The user's status in the database, either he exists or deleted
+		 */
+		USER_STATUS
+	}
+	
+	
+	
+	private enum UserStatus
+	{
+		EXISTS,
+		DELETED
 	}
 	
 	
@@ -232,7 +243,7 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 		try (
 			Connection conn = getConnection();
 			PreparedStatement prpdStmt =
-				conn.prepareStatement(gettingUserQuery))
+				conn.prepareStatement(isUserExistsQuery))
 		{
 			prpdStmt.setString(1, username);
 			final ResultSet res = prpdStmt.executeQuery();
@@ -313,6 +324,60 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 	}
 	
 	
+	@Override
+	public boolean isUsernameTaken(String username)
+		throws InvalidParamsException,
+		DatabaseUnkownFailureException
+	{
+		if (username == null) { throw new InvalidParamsException(); }
+		boolean $ = false;
+		
+		try (
+			Connection conn = getConnection();
+			PreparedStatement prpdStmt =
+				conn.prepareStatement(gettingUserQuery))
+		{
+			prpdStmt.setString(1, username);
+			final ResultSet res = prpdStmt.executeQuery();
+			if (res.next())
+			{
+				$ = true;
+			}
+			res.close();
+			
+			conn.commit();
+		} catch (final SQLException e)
+		{
+			throw new DatabaseUnkownFailureException(e);
+		}
+		
+		return $;
+	}
+	
+	
+	/* (non-Javadoc) @see
+	 * com.servicebook.database.UsersDatabase#deleteUser(java.sql.Connection,
+	 * java.lang.String) */
+	@Override
+	public void deleteUser(Connection conn, String username)
+		throws InvalidParamsException,
+		DatabaseUnkownFailureException
+	{
+		if (conn == null || username == null) { throw new InvalidParamsException(); }
+		if (isConnClosed(conn)) { throw new InvalidParamsException(); }
+		try (
+			PreparedStatement prpdStmt =
+				conn.prepareStatement(updateBalanceQuery))
+		{
+			prpdStmt.setString(1, username);
+			prpdStmt.executeUpdate();
+		} catch (SQLException e)
+		{
+			throw new DatabaseUnkownFailureException(e);
+		}
+	}
+	
+	
 	/**
 	 * After setting the table scheme and name the method will be called for
 	 * initialising the query string
@@ -323,13 +388,16 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 		creationQuery =
 			String
 				.format(
-					"CREATE TABLE IF NOT EXISTS %s (`%s` VARCHAR(255) NOT NULL, `%s` VARCHAR(255) NOT NULL, `%s` VARCHAR(255) NOT NULL, `%s` INT NOT NULL, PRIMARY KEY (`%s`))"
+					"CREATE TABLE IF NOT EXISTS %s (`%s` VARCHAR(255) NOT NULL, `%s` VARCHAR(255) NOT NULL, `%s` VARCHAR(255) NOT NULL, `%s` INT NOT NULL, `%s` ENUM('%s','%s') NOT NULL, PRIMARY KEY (`%s`))"
 						+ "ENGINE = MyISAM",
 					table,
 					Columns.USERNAME.toString().toLowerCase(),
 					Columns.PASSWORD.toString().toLowerCase(),
 					Columns.NAME.toString().toLowerCase(),
 					Columns.BALANCE.toString().toLowerCase(),
+					Columns.USER_STATUS.toString().toLowerCase(),
+					UserStatus.EXISTS.toString(),
+					UserStatus.DELETED.toString(),
 					Columns.USERNAME.toString().toLowerCase());
 		
 		indexingQuery =
@@ -340,18 +408,28 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 		
 		insertionQuery =
 			String.format(
-				"INSERT INTO %s (%s, %s, %s, %s) VALUES(?, ?, ?, ?)",
+				"INSERT INTO %s (%s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, '%s')",
 				table,
 				Columns.USERNAME.toString().toLowerCase(),
 				Columns.PASSWORD.toString().toLowerCase(),
 				Columns.NAME.toString().toLowerCase(),
-				Columns.BALANCE.toString().toLowerCase());
+				Columns.BALANCE.toString().toLowerCase(),
+				Columns.USER_STATUS.toString().toLowerCase(),
+				UserStatus.EXISTS.toString());
 		
 		gettingUserQuery =
 			String.format(
 				"SELECT * FROM %s WHERE %s = ?",
 				table,
 				Columns.USERNAME.toString().toLowerCase());
+		
+		isUserExistsQuery =
+			String.format(
+				"SELECT * FROM %s WHERE %s = ? AND %s = '%s'",
+				table,
+				Columns.USERNAME.toString().toLowerCase(),
+				Columns.USER_STATUS.toString().toLowerCase(),
+				UserStatus.EXISTS.toString());
 		
 		validationQuery =
 			String.format(
@@ -372,6 +450,14 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 				table,
 				Columns.BALANCE.toString().toLowerCase(),
 				Columns.BALANCE.toString().toLowerCase(),
+				Columns.USERNAME.toString().toLowerCase());
+		
+		userDeletionQuery =
+			String.format(
+				"UPDATE %s SET %s = %s WHERE %s = ?",
+				table,
+				Columns.USER_STATUS.toString().toLowerCase(),
+				UserStatus.DELETED.toString(),
 				Columns.USERNAME.toString().toLowerCase());
 	}
 	
@@ -413,4 +499,8 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 	private String gettingMultipleUsersQuery;
 	
 	private String updateBalanceQuery;
+	
+	private String isUserExistsQuery;
+	
+	private String userDeletionQuery;
 }

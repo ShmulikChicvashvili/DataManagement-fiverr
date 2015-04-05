@@ -128,4 +128,33 @@ public interface UsersDatabase
 	public void updateBalance(Connection conn, String username, int balance)
 		throws InvalidParamsException,
 		DatabaseUnkownFailureException;
+	
+	
+	/**
+	 * @param username
+	 *            the username
+	 * @return boolean
+	 * @throws InvalidParamsException
+	 *             exception
+	 * @throws DatabaseUnkownFailureException
+	 *             exception
+	 */
+	public boolean isUsernameTaken(String username)
+		throws InvalidParamsException,
+		DatabaseUnkownFailureException;
+	
+	
+	/**
+	 * @param conn
+	 *            connection
+	 * @param username
+	 *            username
+	 * @throws InvalidParamsException
+	 *             exception
+	 * @throws DatabaseUnkownFailureException
+	 *             exception
+	 */
+	public void deleteUser(Connection conn, String username)
+		throws InvalidParamsException,
+		DatabaseUnkownFailureException;
 }

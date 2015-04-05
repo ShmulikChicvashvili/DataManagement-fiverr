@@ -23,6 +23,15 @@ public abstract class AbstractDatabaseException extends Exception
 	{
 		System.err.println(trace.toString());
 	}
+	
+	/* (non-Javadoc) @see java.lang.Throwable#printStackTrace(java.io.PrintWriter) */
+	@Override
+	public void printStackTrace(PrintWriter s)
+	{
+		s.write(trace.toString());
+	}
 
 	StringWriter trace;
+
+
 }

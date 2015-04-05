@@ -9,4 +9,43 @@
     <welcome-file>default.htm</welcome-file>
     <welcome-file>default.jsp</welcome-file>
   </welcome-file-list>
+  <listener>
+    <listener-class>servlets.ServletListener</listener-class>
+  </listener>
+  <context-param>
+    <param-name>url</param-name>
+    <param-value>jdbc:mysql://localhost/</param-value>
+  </context-param>
+  <context-param>
+    <param-name>driverClassName</param-name>
+    <param-value>com.mysql.jdbc.Driver</param-value>
+  </context-param>
+  <context-param>
+    <param-name>username</param-name>
+    <param-value>root</param-value>
+  </context-param>
+  <context-param>
+    <param-name>password</param-name>
+    <param-value>root</param-value>
+  </context-param>
+  <context-param>
+    <param-name>usersTable</param-name>
+    <param-value>users</param-value>
+  </context-param>
+  <context-param>
+    <param-name>friendshipsTable</param-name>
+    <param-value>friendships</param-value>
+  </context-param>
+  <context-param>
+    <param-name>activitiesTable1</param-name>
+    <param-value>activities</param-value>
+  </context-param>
+  <context-param>
+    <param-name>activitiesTable2</param-name>
+    <param-value>activities_registrations</param-value>
+  </context-param>
+  <context-param>
+    <param-name>schema</param-name>
+    <param-value>servicebook_db</param-value>
+  </context-param>
 </web-app>
