@@ -66,6 +66,8 @@ public class RegisterServlet extends HttpServlet
 		String name = req.getParameter("name");
 		String password = req.getParameter("password");
 		
+		System.out.println(username + "\n" + name + "\n" + password);
+		
 		ServletContext sc = getServletContext();
 		UsersDatabase userDB = (UsersDatabase) sc.getAttribute("userDB");
 		PrintWriter output = resp.getWriter();
@@ -90,11 +92,8 @@ public class RegisterServlet extends HttpServlet
 		HttpSession session = req.getSession(true);
 		if (session.isNew())
 		{
-			output.write("session created" + "\n");
 			session.setAttribute("username", username);
 		}
-		output.write(session.getId() + "\n");
-		output.write((String)session.getAttribute("username"));
 		Cookie usernameCookie = new Cookie("username", username);
 		Cookie passwordCookie = new Cookie("password", password);
 		usernameCookie.setMaxAge(60 * 60 * 24 * 7);
@@ -102,6 +101,7 @@ public class RegisterServlet extends HttpServlet
 		resp.addCookie(usernameCookie);
 		resp.addCookie(passwordCookie);
 		// Finished handling session and cookies
+		resp.addHeader("NEED_REDIRECT", "true");
 	}
 	
 }

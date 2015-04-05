@@ -184,7 +184,7 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase
 		gettingQuery =
 			String
 				.format(
-					"SELECT %s, %s, %s, %s FROM (SELECT * FROM %s WHERE %s = ?) O LEFT OUTER JOIN %s ON (O.%s = %s.%s)",
+					"SELECT %s, %s, %s, %s FROM (SELECT * FROM %s WHERE %s = ?) O JOIN %s ON (O.%s = %s.%s)",
 					UsersColumns.USERNAME.toString().toLowerCase(),
 					UsersColumns.PASSWORD.toString().toLowerCase(),
 					UsersColumns.NAME.toString().toLowerCase(),

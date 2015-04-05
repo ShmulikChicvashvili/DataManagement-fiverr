@@ -1,32 +1,48 @@
 <!DOCTYPE html>
 <html>
-<script>
-function loadXMLDoc()
-{
-var xmlhttp;
-xmlhttp=new XMLHttpRequest();
-xmlhttp.onreadystatechange=function()
-  {
-  if (xmlhttp.readyState==4 && xmlhttp.status==200)
-    {
-    document.getElementById("errorDiv").innerHTML=xmlhttp.responseText;
-    }
-  }
-xmlhttp.open("POST","ajax_info.txt",true);
-xmlhttp.send();
-}
-</script>
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+
+</head>
 <body>
-	<form action="servlet/Register" method="post">
+	<form action="servlet/Register" method="post" id="registrationForm">
 
 		Username:<input type="text" name="username" /><br />
 		<br /> Name:<input type="text" name="name" /><br />
 		<br /> password:<input type="password" name="password" /><br />
 		<br />
-		<div id="errorDiv"><h1>registration</h1></div>
 		<br />
-		<br /> <input type="submit" value="submit" onclick="loadXMLDoc()" />
-
+		<br /> 
+		<input type="submit" value="submit">
+		
 	</form>
+	<div id="resultDiv"></div>
+	<script>
+			$(document).bind('ajaxSuccess',function(event,request,settings){
+				if (request.getResponseHeader('NEED_REDIRECT') == 'true'){
+					window.location.replace = '/HW5/index.jsp';
+				};
+			});
+            /* attach a submit handler to the form */
+            $("#registrationForm").submit(function(event) {
+                /* stop form from submitting normally */
+                event.preventDefault();
+
+                /* get some values from elements on the page: */
+                var $form = $(this),
+                    username = $form.find('input[name="username"]').val(),
+					name = $form.find('input[name="name"]').val(),
+					password = $form.find('input[name="password"]').val(),
+                    url = $form.attr('action');
+                /* Send the data using post */
+                var posting = $.post(url,{username:username, name:name, password:password});
+
+                /* Put the results in a div */
+                posting.done(function(data) {
+					
+                    $("#resultDiv").empty().append(data);
+                });
+            });
+	</script>
 </body>
 </html>

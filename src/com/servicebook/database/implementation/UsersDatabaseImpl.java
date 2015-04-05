@@ -56,18 +56,6 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 		 * Balance column representation
 		 */
 		BALANCE,
-		/**
-		 * The user's status in the database, either he exists or deleted
-		 */
-		USER_STATUS
-	}
-	
-	
-	
-	private enum UserStatus
-	{
-		EXISTS,
-		DELETED
 	}
 	
 	
@@ -388,16 +376,13 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 		creationQuery =
 			String
 				.format(
-					"CREATE TABLE IF NOT EXISTS %s (`%s` VARCHAR(255) NOT NULL, `%s` VARCHAR(255) NOT NULL, `%s` VARCHAR(255) NOT NULL, `%s` INT NOT NULL, `%s` ENUM('%s','%s') NOT NULL, PRIMARY KEY (`%s`))"
+					"CREATE TABLE IF NOT EXISTS %s (`%s` VARCHAR(255) NOT NULL, `%s` VARCHAR(255) NOT NULL, `%s` VARCHAR(255) NOT NULL, `%s` INT NOT NULL, PRIMARY KEY (`%s`))"
 						+ "ENGINE = MyISAM",
 					table,
 					Columns.USERNAME.toString().toLowerCase(),
 					Columns.PASSWORD.toString().toLowerCase(),
 					Columns.NAME.toString().toLowerCase(),
 					Columns.BALANCE.toString().toLowerCase(),
-					Columns.USER_STATUS.toString().toLowerCase(),
-					UserStatus.EXISTS.toString(),
-					UserStatus.DELETED.toString(),
 					Columns.USERNAME.toString().toLowerCase());
 		
 		indexingQuery =
@@ -408,14 +393,12 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 		
 		insertionQuery =
 			String.format(
-				"INSERT INTO %s (%s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, '%s')",
+				"INSERT INTO %s (%s, %s, %s, %s) VALUES (?, ?, ?, ?)",
 				table,
 				Columns.USERNAME.toString().toLowerCase(),
 				Columns.PASSWORD.toString().toLowerCase(),
 				Columns.NAME.toString().toLowerCase(),
-				Columns.BALANCE.toString().toLowerCase(),
-				Columns.USER_STATUS.toString().toLowerCase(),
-				UserStatus.EXISTS.toString());
+				Columns.BALANCE.toString().toLowerCase());
 		
 		gettingUserQuery =
 			String.format(
@@ -425,11 +408,9 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 		
 		isUserExistsQuery =
 			String.format(
-				"SELECT * FROM %s WHERE %s = ? AND %s = '%s'",
+				"SELECT * FROM %s WHERE %s = ?",
 				table,
-				Columns.USERNAME.toString().toLowerCase(),
-				Columns.USER_STATUS.toString().toLowerCase(),
-				UserStatus.EXISTS.toString());
+				Columns.USERNAME.toString().toLowerCase());
 		
 		validationQuery =
 			String.format(
@@ -454,10 +435,8 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase
 		
 		userDeletionQuery =
 			String.format(
-				"UPDATE %s SET %s = %s WHERE %s = ?",
+				"DELETE FROM %s WHERE %s = ?",
 				table,
-				Columns.USER_STATUS.toString().toLowerCase(),
-				UserStatus.DELETED.toString(),
 				Columns.USERNAME.toString().toLowerCase());
 	}
 	
