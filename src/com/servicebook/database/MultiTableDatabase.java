@@ -1,5 +1,8 @@
 package com.servicebook.database;
 
+import com.servicebook.database.exceptions.DatabaseUnkownFailureException;
+import com.servicebook.database.exceptions.multiTable.InvalidParameterException;
+
 // TODO: Auto-generated Javadoc
 /**
  * The Interface MultiTableDatabase.
@@ -13,8 +16,13 @@ public interface MultiTableDatabase {
 	 *            the id for the activity
 	 * @param username
 	 *            the username to be registered into
+	 * @return true, if successful, false otherwise
+	 * @throws InvalidParameterException
+	 *             The id is negative or username is null
+	 * @throws DatabaseUnkownFailureException
 	 */
-	public void registerToActivity(int id, String username);
+	public boolean registerToActivity(int id, String username)
+			throws InvalidParameterException, DatabaseUnkownFailureException;
 
 	/**
 	 * Unregister from activity.
@@ -23,8 +31,13 @@ public interface MultiTableDatabase {
 	 *            the id for the activity
 	 * @param username
 	 *            the username to be unregistered from the activity
+	 * @return true, if successful, false otherwise
+	 * @throws InvalidParameterException
+	 *             The id is negative or username is null
+	 * @throws DatabaseUnkownFailureException
 	 */
-	public void unregisterFromActivity(int id, String username);
+	public boolean unregisterFromActivity(int id, String username)
+			throws InvalidParameterException, DatabaseUnkownFailureException;
 
 	/**
 	 * Delete a user.

@@ -1,5 +1,6 @@
 package com.servicebook.database;
 
+import java.sql.Connection;
 import java.util.List;
 
 import com.servicebook.database.exceptions.DatabaseUnkownFailureException;
@@ -72,5 +73,5 @@ public interface FriendshipsDatabase {
 	public List<DBUser> getFriends(DBUser user) throws InvalidParamsException,
 			DatabaseUnkownFailureException;
 
-	public boolean areFriends(String user1, String user2);
+	public boolean areFriends(String user1, String user2, Connection conn);
 }
