@@ -9,12 +9,19 @@
 </head>
 <body>
 	<%
-		java.util.Date d = new java.util.Date();
+		String username = null;
+		if (session == null || session.getAttribute("username") == null)
+		{
+			if(session.getAttribute("username") == null) {
+				System.out.println(":(((()))");
+			}
+			response.sendRedirect("/HW5/registration.html");
+		} else
+		{
+			username = (String)session.getAttribute("username");
+		}
 	%>
-	<h1>
-		Today's date is
-		<%=d.toString()%>
-		and this jsp page worked!
-	</h1>
+	<h1>Welcome: ${username } </h1>
+
 </body>
 </html>

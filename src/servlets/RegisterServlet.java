@@ -93,10 +93,7 @@ public class RegisterServlet extends HttpServlet
 		
 		// Setting session and cookies for feature reference
 		HttpSession session = req.getSession(true);
-		if (session.isNew())
-		{
-			session.setAttribute("username", username);
-		}
+		session.setAttribute("username", username);
 		Cookie usernameCookie = new Cookie("username", username);
 		Cookie passwordCookie = new Cookie("password", password);
 		usernameCookie.setMaxAge(60 * 60 * 24 * 7);
