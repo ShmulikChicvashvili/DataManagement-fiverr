@@ -1,4 +1,7 @@
+
 package servlets;
+
+
 import java.sql.Connection;
 
 import javax.servlet.ServletContext;
@@ -57,6 +60,10 @@ public class ServletListener implements ServletContextListener
 		String friendshipsTable = sc.getInitParameter("friendshipsTable");
 		String activitiesTable1 = sc.getInitParameter("activitiesTable1");
 		String activitiesTable2 = sc.getInitParameter("activitiesTable2");
+		String friendshipUserColumn =
+			sc.getInitParameter("friendshipUserColumn");
+		String friendshipsFriendColumn =
+			sc.getInitParameter("friendshipsFriendColumn");
 		
 		BasicDataSource ds = new BasicDataSource();
 		ds.setDefaultAutoCommit(false);
@@ -101,7 +108,10 @@ public class ServletListener implements ServletContextListener
 					activitiesTable1,
 					activitiesTable2,
 					schema,
-					ds);
+					ds,
+					friendshipsTable,
+					friendshipUserColumn,
+					friendshipsFriendColumn);
 		} catch (com.servicebook.database.exceptions.paidActivities.TableCreationException e1)
 		{
 			e1.printStackTrace();
@@ -109,5 +119,4 @@ public class ServletListener implements ServletContextListener
 		}
 		sc.setAttribute("activitiesDB", activitiesDB);
 	}
-	
 }
