@@ -20,7 +20,7 @@
 	<script>
 			$(document).bind('ajaxSuccess',function(event,request,settings){
 				if (request.getResponseHeader('NEED_REDIRECT') == 'true'){
-					window.location.replace = '/HW5/index.jsp';
+					window.location.replace = 'http://localhost:8080/HW5/index.jsp';
 				};
 			});
             /* attach a submit handler to the form */

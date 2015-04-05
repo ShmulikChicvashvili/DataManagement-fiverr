@@ -402,9 +402,6 @@ public class FriendshipsDatabaseTest
 		{
 			fail();
 		}
-		for(DBUser r : res) {
-			System.out.println(r.toString());
-		}
 		assertEquals(1, res.size());
 		assertEquals(true, res.contains(userYarden));
 		assertEquals(false, res.contains(userEyal));

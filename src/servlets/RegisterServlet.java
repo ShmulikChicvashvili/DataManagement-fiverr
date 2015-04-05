@@ -77,14 +77,17 @@ public class RegisterServlet extends HttpServlet
 		} catch (ElementAlreadyExistsException e)
 		{
 			output.write("Username already exists!");
+			resp.addHeader("NEED_REDIRECT", "false");
 			return;
 		} catch (DatabaseUnkownFailureException e)
 		{
 			output.write("Unknown error occured");
+			resp.addHeader("NEED_REDIRECT", "false");
 			return;
 		} catch (InvalidParamsException e)
 		{
 			output.write("Invalid parameters");
+			resp.addHeader("NEED_REDIRECT", "false");
 			return;
 		}
 		
