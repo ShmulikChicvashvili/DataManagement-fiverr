@@ -91,6 +91,22 @@ public interface FriendshipsDatabase {
 	 *            the first username
 	 * @param username2
 	 *            the second username
+	 * @return true, if successful
+	 * @throws InvalidParamsException
+	 *             If the strings are null.
+	 * @throws DatabaseUnkownFailureException
+	 *             the database unknown failure exception
+	 */
+	public boolean areFriends(String username1, String username2)
+			throws InvalidParamsException, DatabaseUnkownFailureException;
+
+	/**
+	 * Checks if the users are friends.
+	 *
+	 * @param username1
+	 *            the first username
+	 * @param username2
+	 *            the second username
 	 * @param conn
 	 *            the connection to be used
 	 * @return true, if successful

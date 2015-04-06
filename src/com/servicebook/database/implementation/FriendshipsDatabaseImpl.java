@@ -34,6 +34,22 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
 		FriendshipsDatabase {
 
 	@Override
+	public boolean areFriends(String username1, String username2)
+			throws InvalidParamsException, DatabaseUnkownFailureException {
+		boolean $ = false;
+
+		try (Connection conn = getConnection()) {
+			conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+
+			$ = areFriends(username1, username2, conn);
+		} catch (SQLException e) {
+			throw new DatabaseUnkownFailureException(e);
+		}
+
+		return $;
+	}
+
+	@Override
 	public boolean areFriends(String username1, String username2,
 			Connection conn) {
 		// TODO Auto-generated method stub
