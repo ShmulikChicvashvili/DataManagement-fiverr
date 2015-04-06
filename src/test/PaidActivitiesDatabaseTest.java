@@ -134,8 +134,9 @@ public class PaidActivitiesDatabaseTest {
 	@Test
 	public void testAddPaidService() throws DatabaseUnkownFailureException,
 			InvalidParameterException, SQLException {
+		conn = ds.getConnection();
 		try {
-			paidActivityDB.addPaidService(null);
+			paidActivityDB.addPaidService(null, conn);
 			fail();
 		} catch (final InvalidParameterException e) {
 		}
@@ -144,13 +145,13 @@ public class PaidActivitiesDatabaseTest {
 		final DBPaidService sBad2 = new DBPaidService("s1", "u1", 1, 0, 0);
 
 		try {
-			paidActivityDB.addPaidService(sBad1);
+			paidActivityDB.addPaidService(sBad1, conn);
 			fail();
 		} catch (final InvalidParameterException e) {
 		}
 
 		try {
-			paidActivityDB.addPaidService(sBad2);
+			paidActivityDB.addPaidService(sBad2, conn);
 			fail();
 		} catch (final InvalidParameterException e) {
 		}
@@ -164,7 +165,8 @@ public class PaidActivitiesDatabaseTest {
 
 				assertEquals(ActivityStatus.NOT_EXIST,
 						paidActivityDB.getActivityStatus(i));
-				assertEquals(++count, paidActivityDB.addPaidService(s));
+				assertEquals(++count, paidActivityDB.addPaidService(s, conn));
+				conn.commit();
 				assertEquals(ActivityStatus.SERVICE,
 						paidActivityDB.getActivityStatus(count));
 				s.setNumRegistered((short) 0);
@@ -172,13 +174,15 @@ public class PaidActivitiesDatabaseTest {
 			}
 			conn.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
 		}
+		conn.close();
 	}
 
 	@Test
 	public void testAddPaidTask() throws DatabaseUnkownFailureException,
 			InvalidParameterException, SQLException {
+		conn = ds.getConnection();
 		try {
-			paidActivityDB.addPaidTask(null);
+			paidActivityDB.addPaidTask(null, conn);
 			fail();
 		} catch (final InvalidParameterException e) {
 		}
@@ -187,13 +191,13 @@ public class PaidActivitiesDatabaseTest {
 		final DBPaidTask tBad2 = new DBPaidTask("t1", "u1", 1, 0, 0);
 
 		try {
-			paidActivityDB.addPaidTask(tBad1);
+			paidActivityDB.addPaidTask(tBad1, conn);
 			fail();
 		} catch (final InvalidParameterException e) {
 		}
 
 		try {
-			paidActivityDB.addPaidTask(tBad2);
+			paidActivityDB.addPaidTask(tBad2, conn);
 			fail();
 		} catch (final InvalidParameterException e) {
 		}
@@ -208,7 +212,8 @@ public class PaidActivitiesDatabaseTest {
 
 				assertEquals(ActivityStatus.NOT_EXIST,
 						paidActivityDB.getActivityStatus(i));
-				assertEquals(++count, paidActivityDB.addPaidTask(t));
+				assertEquals(++count, paidActivityDB.addPaidTask(t, conn));
+				conn.commit();
 				assertEquals(ActivityStatus.TASK,
 						paidActivityDB.getActivityStatus(count));
 				t.setNumRegistered((short) 0);
@@ -217,6 +222,7 @@ public class PaidActivitiesDatabaseTest {
 			conn.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
 
 		}
+		conn.close();
 	}
 
 	@Test
@@ -238,28 +244,30 @@ public class PaidActivitiesDatabaseTest {
 		final DBPaidTask t1 = new DBPaidTask("t1", "u2", 2, 3, 1);
 
 		// Adding and deleting with commit and with roll back
-		id = paidActivityDB.addPaidService(s1);
+		id = paidActivityDB.addPaidService(s1, conn);
 		assertEquals(ActivityStatus.SERVICE,
-				paidActivityDB.getActivityStatus(id));
+				paidActivityDB.getActivityStatus(id, conn));
 		paidActivityDB.deletePaidActivity(id, conn);
 		conn.commit();
 		assertEquals(ActivityStatus.NOT_EXIST,
-				paidActivityDB.getActivityStatus(id));
+				paidActivityDB.getActivityStatus(id, conn));
 
-		id = paidActivityDB.addPaidTask(t1);
-		assertEquals(ActivityStatus.TASK, paidActivityDB.getActivityStatus(id));
+		id = paidActivityDB.addPaidTask(t1, conn);
+		assertEquals(ActivityStatus.TASK,
+				paidActivityDB.getActivityStatus(id, conn));
 		paidActivityDB.deletePaidActivity(id, conn);
 		conn.commit();
 		assertEquals(ActivityStatus.NOT_EXIST,
-				paidActivityDB.getActivityStatus(id));
+				paidActivityDB.getActivityStatus(id, conn));
 
-		id = paidActivityDB.addPaidService(s1);
+		id = paidActivityDB.addPaidService(s1, conn);
 		assertEquals(ActivityStatus.SERVICE,
-				paidActivityDB.getActivityStatus(id));
+				paidActivityDB.getActivityStatus(id, conn));
+		conn.commit();
 		paidActivityDB.deletePaidActivity(id, conn);
 		conn.rollback();
 		assertEquals(ActivityStatus.SERVICE,
-				paidActivityDB.getActivityStatus(id));
+				paidActivityDB.getActivityStatus(id, conn));
 
 		paidActivityDB.deletePaidActivity(id, conn);
 		conn.commit();
@@ -282,9 +290,10 @@ public class PaidActivitiesDatabaseTest {
 		// adding services and tasks
 		final int firstBatchId = 1;
 		for (int i = 1; i <= 100; i++) {
-			id = paidActivityDB.addPaidService(s1);
-			id = paidActivityDB.addPaidTask(t1);
+			id = paidActivityDB.addPaidService(s1, conn);
+			id = paidActivityDB.addPaidTask(t1, conn);
 		}
+		conn.commit();
 
 		// deleting with commit after each command
 		for (int i = id - 100 * 2 + 1; i <= id; i += 3) {
@@ -345,7 +354,8 @@ public class PaidActivitiesDatabaseTest {
 			final DBPaidService s = new DBPaidService("s" + i, u1, i * 2 + 3,
 					i * 4 + 1, 0);
 			services.add(s);
-			paidActivityDB.addPaidService(s);
+			paidActivityDB.addPaidService(s, conn);
+			conn.commit();
 			assertEquals(ActivityStatus.SERVICE,
 					paidActivityDB.getActivityStatus(s.getId()));
 		}
@@ -355,7 +365,8 @@ public class PaidActivitiesDatabaseTest {
 			final DBPaidTask t = new DBPaidTask("t" + i, u1, i * 7 + 5,
 					i * 3 + 9, 0);
 			tasks.add(t);
-			paidActivityDB.addPaidTask(t);
+			paidActivityDB.addPaidTask(t, conn);
+			conn.commit();
 			assertEquals(ActivityStatus.TASK,
 					paidActivityDB.getActivityStatus(t.getId()));
 		}
@@ -410,7 +421,7 @@ public class PaidActivitiesDatabaseTest {
 				paidActivityDB.getActivityStatus(1, conn));
 
 		final DBPaidService s1 = new DBPaidService("s1", "u1", 4, 4, 2);
-		final int id = paidActivityDB.addPaidService(s1);
+		final int id = paidActivityDB.addPaidService(s1, conn);
 
 		// w/o this commit the add is not seen, thus using this connection fails
 		// to see the service was added
@@ -464,9 +475,9 @@ public class PaidActivitiesDatabaseTest {
 		final DBPaidService s2 = new DBPaidService("S2", "u2", 2, 3, 0);
 		final DBPaidTask t1 = new DBPaidTask("t1", "u1", 10, 5, 5);
 
-		paidActivityDB.addPaidService(s1);
-		paidActivityDB.addPaidService(s2);
-		paidActivityDB.addPaidTask(t1);
+		paidActivityDB.addPaidService(s1, conn);
+		paidActivityDB.addPaidService(s2, conn);
+		paidActivityDB.addPaidTask(t1, conn);
 
 		paidActivityDB.registerToActivity(s1.getId(), "u2", conn);
 		paidActivityDB.registerToActivity(s1.getId(), "u3", conn);
@@ -528,9 +539,9 @@ public class PaidActivitiesDatabaseTest {
 		final DBPaidService s2 = new DBPaidService("S2", "u2", 2, 3, 0);
 		final DBPaidTask t1 = new DBPaidTask("t1", "u1", 10, 5, 5);
 
-		paidActivityDB.addPaidService(s1);
-		paidActivityDB.addPaidService(s2);
-		paidActivityDB.addPaidTask(t1);
+		paidActivityDB.addPaidService(s1, conn);
+		paidActivityDB.addPaidService(s2, conn);
+		paidActivityDB.addPaidTask(t1, conn);
 
 		// register and unregister
 		paidActivityDB.registerToActivity(s1.getId(), "u2", conn);
@@ -601,6 +612,8 @@ public class PaidActivitiesDatabaseTest {
 			throws DatabaseUnkownFailureException, InvalidParameterException,
 			SQLException, ElementAlreadyExistException {
 
+		conn = ds.getConnection();
+
 		final String u1 = "u1";
 		final String u2 = "u2";
 
@@ -636,12 +649,12 @@ public class PaidActivitiesDatabaseTest {
 
 		for (final List<DBPaidService> l : user2services.values()) {
 			for (final DBPaidService s : l) {
-				paidActivityDB.addPaidService(s);
+				paidActivityDB.addPaidService(s, conn);
 			}
 		}
 		for (final List<DBPaidTask> l : user2tasks.values()) {
 			for (final DBPaidTask t : l) {
-				paidActivityDB.addPaidTask(t);
+				paidActivityDB.addPaidTask(t, conn);
 			}
 		}
 
@@ -666,7 +679,6 @@ public class PaidActivitiesDatabaseTest {
 
 		/* test activities with registered users */
 
-		conn = ds.getConnection();
 		DBPaidService s = user2services.get(u1).get(1);
 		paidActivityDB.registerToActivity(s.getId(), u2, conn);
 		paidActivityDB.registerToActivity(s.getId(), "u3", conn);
@@ -809,12 +821,12 @@ public class PaidActivitiesDatabaseTest {
 
 		for (final List<DBPaidService> l : user2services.values()) {
 			for (final DBPaidService s : l) {
-				paidActivityDB.addPaidService(s);
+				paidActivityDB.addPaidService(s, conn);
 			}
 		}
 		for (final List<DBPaidTask> l : user2tasks.values()) {
 			for (final DBPaidTask t : l) {
-				paidActivityDB.addPaidTask(t);
+				paidActivityDB.addPaidTask(t, conn);
 			}
 		}
 

@@ -34,7 +34,8 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
 		FriendshipsDatabase {
 
 	@Override
-	public boolean areFriends(String user1, String user2, Connection conn) {
+	public boolean areFriends(String username1, String username2,
+			Connection conn) {
 		// TODO Auto-generated method stub
 		throw new NotImplementedException();
 	}
@@ -105,9 +106,10 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
 	 * (java.lang.String, java.lang.String)
 	 */
 	@Override
-	public void addFriendship(String username1, String username2)
-			throws InvalidParamsException, ReflexiveFriendshipException,
-			ElementAlreadyExistsException, DatabaseUnkownFailureException {
+	public void addFriendship(String username1, String username2,
+			Connection conn) throws InvalidParamsException,
+			ReflexiveFriendshipException, ElementAlreadyExistsException,
+			DatabaseUnkownFailureException {
 		if (username1 == null || username2 == null) {
 			throw new InvalidParamsException();
 		}
@@ -116,7 +118,24 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
 			throw new ReflexiveFriendshipException();
 		}
 
-		insertByUsername(username1, username2);
+		insertByUsername(username1, username2, conn);
+	}
+
+	/*
+	 * (non-Javadoc) @see
+	 * com.servicebook.database.FriendshipsDatabase#addFriendship
+	 * (com.servicebook.database.primitives.DBUser,
+	 * com.servicebook.database.primitives.DBUser)
+	 */
+	@Override
+	public void addFriendship(DBUser user1, DBUser user2, Connection conn)
+			throws ElementAlreadyExistsException,
+			DatabaseUnkownFailureException, InvalidParamsException,
+			ReflexiveFriendshipException {
+		if (isUserNull(user1) || isUserNull(user2)) {
+			throw new InvalidParamsException();
+		}
+		addFriendship(user1.getUsername(), user2.getUsername(), conn);
 	}
 
 	/*
@@ -130,23 +149,6 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
 			throw new InvalidParamsException();
 		}
 		return getByUsername(username);
-	}
-
-	/*
-	 * (non-Javadoc) @see
-	 * com.servicebook.database.FriendshipsDatabase#addFriendship
-	 * (com.servicebook.database.primitives.DBUser,
-	 * com.servicebook.database.primitives.DBUser)
-	 */
-	@Override
-	public void addFriendship(DBUser user1, DBUser user2)
-			throws ElementAlreadyExistsException,
-			DatabaseUnkownFailureException, InvalidParamsException,
-			ReflexiveFriendshipException {
-		if (isUserNull(user1) || isUserNull(user2)) {
-			throw new InvalidParamsException();
-		}
-		addFriendship(user1.getUsername(), user2.getUsername());
 	}
 
 	/*
@@ -194,21 +196,20 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
 
 	}
 
-	private void insertByUsername(String username1, String username2)
-			throws ElementAlreadyExistsException,
-			DatabaseUnkownFailureException {
-		try (Connection conn = getConnection();
-				PreparedStatement prpdStmt = conn
-						.prepareStatement(insertionQuery)) {
-			conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+	private void insertByUsername(String username1, String username2,
+			Connection conn) throws ElementAlreadyExistsException,
+			DatabaseUnkownFailureException, InvalidParamsException {
+		if (isConnClosed(conn)) {
+			throw new InvalidParamsException();
+		}
 
+		try (PreparedStatement prpdStmt = conn.prepareStatement(insertionQuery)) {
 			prpdStmt.setString(1, username1);
 			prpdStmt.setString(2, username2);
 			prpdStmt.executeUpdate();
 			prpdStmt.setString(1, username2);
 			prpdStmt.setString(2, username1);
 			prpdStmt.executeUpdate();
-			conn.commit();
 		} catch (SQLException e) {
 			if (e.getErrorCode() == MysqlErrorNumbers.ER_DUP_ENTRY) {
 				throw new ElementAlreadyExistsException(e);

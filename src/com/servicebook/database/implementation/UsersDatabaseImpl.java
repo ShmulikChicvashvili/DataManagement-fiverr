@@ -143,7 +143,6 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase implements
 			res.close();
 
 			conn.commit();
-
 		} catch (final SQLException e) {
 			throw new DatabaseUnkownFailureException(e);
 		}
@@ -195,26 +194,21 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase implements
 	 * com.servicebook.database.UsersDatabase#isUserExists(java.lang.String)
 	 */
 	@Override
-	public boolean isUserExists(String username)
+	public boolean isUserExists(String username, Connection conn)
 			throws DatabaseUnkownFailureException, InvalidParamsException {
-		if (username == null) {
+		if (username == null || isConnClosed(conn)) {
 			throw new InvalidParamsException();
 		}
 		boolean $ = false;
 
-		try (Connection conn = getConnection();
-				PreparedStatement prpdStmt = conn
-						.prepareStatement(isUserExistsQuery)) {
-			conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-
+		try (PreparedStatement prpdStmt = conn
+				.prepareStatement(isUserExistsQuery)) {
 			prpdStmt.setString(1, username);
 			final ResultSet res = prpdStmt.executeQuery();
 			if (res.next()) {
 				$ = true;
 			}
 			res.close();
-
-			conn.commit();
 		} catch (final SQLException e) {
 			throw new DatabaseUnkownFailureException(e);
 		}

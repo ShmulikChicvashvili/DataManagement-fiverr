@@ -1,6 +1,4 @@
-
 package com.servicebook.database;
-
 
 import java.sql.Connection;
 import java.util.List;
@@ -10,16 +8,12 @@ import com.servicebook.database.exceptions.users.InvalidParamsException;
 import com.servicebook.database.exceptions.users.ElementAlreadyExistsException;
 import com.servicebook.database.primitives.DBUser;
 
-
-
-
 /**
  * @author Shmulik
  *
  */
-public interface UsersDatabase
-{
-	
+public interface UsersDatabase {
+
 	/**
 	 * Adds the user to the database.
 	 *
@@ -33,11 +27,9 @@ public interface UsersDatabase
 	 *             Invalid parameters exception
 	 */
 	public void addUser(final DBUser user)
-		throws ElementAlreadyExistsException,
-		DatabaseUnkownFailureException,
-		InvalidParamsException;
-	
-	
+			throws ElementAlreadyExistsException,
+			DatabaseUnkownFailureException, InvalidParamsException;
+
 	/**
 	 * Gets the user from the database.
 	 *
@@ -50,10 +42,8 @@ public interface UsersDatabase
 	 *             Invalid parameters exception
 	 */
 	public DBUser getUser(String username)
-		throws DatabaseUnkownFailureException,
-		InvalidParamsException;
-	
-	
+			throws DatabaseUnkownFailureException, InvalidParamsException;
+
 	/**
 	 * Gets the users.
 	 *
@@ -70,26 +60,24 @@ public interface UsersDatabase
 	 *             Invalid parameters exception
 	 */
 	public List<DBUser> getUsers(int start, int amount)
-		throws DatabaseUnkownFailureException,
-		InvalidParamsException;
-	
-	
+			throws DatabaseUnkownFailureException, InvalidParamsException;
+
 	/**
 	 * Checks if the user exists.
 	 *
 	 * @param username
 	 *            the username to be checked.
+	 * @param conn
+	 *            the connection to be used
 	 * @return {@code True} if is user exists, {@code False} otherwise.
 	 * @throws DatabaseUnkownFailureException
 	 *             Unknown failure
 	 * @throws InvalidParamsException
 	 *             Invalid parameters exception
 	 */
-	public boolean isUserExists(String username)
-		throws DatabaseUnkownFailureException,
-		InvalidParamsException;
-	
-	
+	public boolean isUserExists(String username, Connection conn)
+			throws DatabaseUnkownFailureException, InvalidParamsException;
+
 	/**
 	 * Validates such a user exists with the given password.
 	 *
@@ -105,10 +93,8 @@ public interface UsersDatabase
 	 *             Invalid parameters exception
 	 */
 	public boolean validateUser(String username, String password)
-		throws DatabaseUnkownFailureException,
-		InvalidParamsException;
-	
-	
+			throws DatabaseUnkownFailureException, InvalidParamsException;
+
 	/**
 	 * Updates the balance for a specific user, the balance parameter is the
 	 * difference to be set. The query will be a part of a transction, therefore
@@ -126,10 +112,8 @@ public interface UsersDatabase
 	 *             Unknown failure exception
 	 */
 	public void updateBalance(Connection conn, String username, int balance)
-		throws InvalidParamsException,
-		DatabaseUnkownFailureException;
-	
-	
+			throws InvalidParamsException, DatabaseUnkownFailureException;
+
 	/**
 	 * @param username
 	 *            the username
@@ -140,10 +124,8 @@ public interface UsersDatabase
 	 *             exception
 	 */
 	public boolean isUsernameTaken(String username)
-		throws InvalidParamsException,
-		DatabaseUnkownFailureException;
-	
-	
+			throws InvalidParamsException, DatabaseUnkownFailureException;
+
 	/**
 	 * @param conn
 	 *            connection
@@ -155,6 +137,5 @@ public interface UsersDatabase
 	 *             exception
 	 */
 	public void deleteUser(Connection conn, String username)
-		throws InvalidParamsException,
-		DatabaseUnkownFailureException;
+			throws InvalidParamsException, DatabaseUnkownFailureException;
 }

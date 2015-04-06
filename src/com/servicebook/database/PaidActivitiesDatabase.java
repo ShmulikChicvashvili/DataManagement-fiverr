@@ -23,13 +23,16 @@ public interface PaidActivitiesDatabase {
 	 *
 	 * @param service
 	 *            the service to be added.
+	 * @param conn
+	 *            the conn to be used
+	 * @return the int
 	 * @throws InvalidParameterException
 	 *             In case the activity is null, or capacity or distance are non
-	 *             positive.
+	 *             positive, or connection is closed.
 	 * @throws DatabaseUnkownFailureException
 	 *             In case an unexpected SQL error occurs
 	 */
-	public int addPaidService(final DBPaidService service)
+	public int addPaidService(final DBPaidService service, Connection conn)
 			throws InvalidParameterException, DatabaseUnkownFailureException;
 
 	/**
@@ -37,13 +40,16 @@ public interface PaidActivitiesDatabase {
 	 *
 	 * @param task
 	 *            the task to be added.
-	 * @throws InvalidParameterException
-	 *             In case the activity is null, or capacity or distance are non
-	 *             positive.
+	 * @param conn
+	 *            the conn to be used
+	 * @return the int
 	 * @throws DatabaseUnkownFailureException
 	 *             In case an unexpected SQL error occurs
+	 * @throws InvalidParameterException
+	 *             In case the activity is null, or capacity or distance are non
+	 *             positive, or connection is closed.
 	 */
-	public int addPaidTask(final DBPaidTask task)
+	public int addPaidTask(final DBPaidTask task, Connection conn)
 			throws DatabaseUnkownFailureException, InvalidParameterException;
 
 	/**
