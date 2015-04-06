@@ -113,6 +113,7 @@ public class PaidActivitiesDatabaseTest {
 		if (conn != null && !conn.isClosed()) {
 			conn.close();
 		}
+		ds.close();
 		// try (
 		// Connection conn = ds.getConnection();
 		// Statement stmt = conn.createStatement())

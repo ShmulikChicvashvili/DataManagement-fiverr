@@ -78,6 +78,9 @@ public interface PaidActivitiesDatabase {
 	public void deleteUserPaidActivities(String username, Connection conn)
 			throws InvalidParameterException, DatabaseUnkownFailureException;
 
+	public void deleteUserRegistrations(String username, Connection conn)
+			throws InvalidParameterException, DatabaseUnkownFailureException;
+
 	/**
 	 * Gets the activity.
 	 *

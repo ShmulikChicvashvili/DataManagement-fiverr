@@ -153,6 +153,23 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 	}
 
 	@Override
+	public void deleteUserRegistrations(String username, Connection conn)
+			throws InvalidParameterException, DatabaseUnkownFailureException {
+		if (username == null || isConnClosed(conn)) {
+			throw new InvalidParameterException();
+		}
+
+		try (PreparedStatement stmt = conn
+				.prepareStatement(deleteUserRegistrationsQuery)) {
+			stmt.setString(1, username);
+
+			stmt.executeUpdate();
+		} catch (SQLException e) {
+			throw new DatabaseUnkownFailureException(e);
+		}
+	}
+
+	@Override
 	public ActivityStatus getActivityStatus(int id)
 			throws DatabaseUnkownFailureException, InvalidParameterException {
 		if (!isValidId(id)) {
@@ -161,6 +178,8 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 		ActivityStatus $ = ActivityStatus.NOT_EXIST;
 
 		try (Connection conn = getConnection()) {
+			conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+			
 			$ = getActivityStatus(id, conn);
 		} catch (final SQLException e) {
 			throw new DatabaseUnkownFailureException(e);
@@ -374,6 +393,8 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 		try (Connection conn = getConnection();
 				PreparedStatement stmt = conn.prepareStatement(
 						addActivityQuery, Statement.RETURN_GENERATED_KEYS)) {
+			conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+			
 			stmt.setString(1, activity.getTitle());
 			stmt.setString(2, activity.getUsername());
 			stmt.setShort(3, activity.getCapacity());
@@ -456,6 +477,8 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 		try (Connection conn = getConnection();
 				PreparedStatement stmt = conn
 						.prepareStatement(getActivitiesOfferedByUserQuery)) {
+			conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+			
 			stmt.setString(1, username);
 			stmt.setString(2, type.toDB());
 			stmt.setInt(3, start);
@@ -565,6 +588,8 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 		try (Connection conn = getConnection();
 				PreparedStatement stmt = conn
 						.prepareStatement(getActivitiesOfferedToUserQuery)) {
+			conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+			
 			stmt.setString(1, username);
 			stmt.setString(2, type.toDB());
 			stmt.setInt(3, start);
@@ -616,6 +641,11 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 		deleteAllUserActivitiesQuery = deleteQueryPrefix
 				+ String.format("WHERE %s.`%s`=?;", activityTable,
 						ActivityTableColumn.USERNAME.columnName());
+
+		deleteUserRegistrationsQuery = String.format(
+				"DELETE FROM %s WHERE %s.`%s`=?;", registrationTable,
+				registrationTable,
+				RegistrationTableColumn.USERNAME.columnName());
 
 		getActivityStatusQuery = String.format(
 				"SELECT %s FROM %s WHERE `%s`=?",
@@ -740,6 +770,14 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 	 *            String
 	 */
 	private String deleteAllUserActivitiesQuery;
+
+	/**
+	 * The delete user registrations query.
+	 * 
+	 * @param username
+	 *            String
+	 */
+	private String deleteUserRegistrationsQuery;
 
 	/**
 	 * the get activity status query.

@@ -35,6 +35,13 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
 
 	@Override
 	public boolean areFriends(String user1, String user2, Connection conn) {
+		// TODO Auto-generated method stub
+		throw new NotImplementedException();
+	}
+
+	@Override
+	public void deleteFriendships(String username, Connection conn) {
+		// TODO Auto-generated method stub
 		throw new NotImplementedException();
 	}
 
@@ -193,6 +200,8 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
 		try (Connection conn = getConnection();
 				PreparedStatement prpdStmt = conn
 						.prepareStatement(insertionQuery)) {
+			conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+
 			prpdStmt.setString(1, username1);
 			prpdStmt.setString(2, username2);
 			prpdStmt.executeUpdate();
@@ -216,6 +225,8 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
 		try (Connection conn = getConnection();
 				PreparedStatement prpdStmt = conn
 						.prepareStatement(gettingQuery)) {
+			conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+
 			prpdStmt.setString(1, username);
 			ResultSet res = prpdStmt.executeQuery();
 
@@ -253,11 +264,4 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
 
 	private String gettingQuery;
 
-	/* (non-Javadoc) @see com.servicebook.database.FriendshipsDatabase#areFriends(java.lang.String, java.lang.String) */
-	@Override
-	public boolean areFriends(String user1, String user2)
-	{
-		// TODO Auto-generated method stub
-		return false;
-	}
 }

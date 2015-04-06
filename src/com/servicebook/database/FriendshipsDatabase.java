@@ -74,4 +74,6 @@ public interface FriendshipsDatabase {
 			DatabaseUnkownFailureException;
 
 	public boolean areFriends(String user1, String user2, Connection conn);
+
+	public void deleteFriendships(String username, Connection conn);
 }

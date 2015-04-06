@@ -10,7 +10,7 @@ import com.servicebook.database.exceptions.multiTable.InvalidParameterException;
 public interface MultiTableDatabase {
 
 	/**
-	 * Register a user to an activity.
+	 * Register a user to an activity. Updates the balance for the users.
 	 *
 	 * @param id
 	 *            the id for the activity
@@ -25,7 +25,7 @@ public interface MultiTableDatabase {
 			throws InvalidParameterException, DatabaseUnkownFailureException;
 
 	/**
-	 * Unregister from activity.
+	 * Unregister from activity. Updates the balance for the users.
 	 *
 	 * @param id
 	 *            the id for the activity
@@ -44,14 +44,18 @@ public interface MultiTableDatabase {
 	 *
 	 * @param username
 	 *            the username to be deleted.
+	 * @throws InvalidParameterException 
+	 * @throws DatabaseUnkownFailureException 
 	 */
-	public void deleteUser(String username);
+	public void deleteUser(String username) throws InvalidParameterException, DatabaseUnkownFailureException;
 
 	/**
 	 * Delete an activity.
 	 *
 	 * @param id
 	 *            the id for the activity to be deleted.
+	 * @throws com.servicebook.database.exceptions.paidActivities.InvalidParameterException 
+	 * @throws DatabaseUnkownFailureException 
 	 */
-	public void deleteActivity(int id);
+	public void deleteActivity(int id) throws DatabaseUnkownFailureException, com.servicebook.database.exceptions.paidActivities.InvalidParameterException;
 }

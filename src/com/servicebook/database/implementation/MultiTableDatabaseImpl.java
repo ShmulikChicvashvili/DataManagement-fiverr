@@ -11,8 +11,9 @@ import com.servicebook.database.MultiTableDatabase;
 import com.servicebook.database.PaidActivitiesDatabase;
 import com.servicebook.database.UsersDatabase;
 import com.servicebook.database.exceptions.DatabaseUnkownFailureException;
-import com.servicebook.database.exceptions.friendships.InvalidParamsException;
 import com.servicebook.database.exceptions.multiTable.InvalidParameterException;
+import com.servicebook.database.exceptions.paidActivities.ElementNotExistException;
+import com.servicebook.database.exceptions.users.InvalidParamsException;
 import com.servicebook.database.primitives.DBPaidActivity;
 import com.servicebook.database.primitives.DBPaidService;
 import com.servicebook.database.primitives.DBPaidTask;
@@ -33,6 +34,8 @@ public class MultiTableDatabaseImpl extends AbstractMySqlDatabase implements
 	public boolean registerToActivity(int id, String username)
 			throws InvalidParameterException, DatabaseUnkownFailureException {
 		try (Connection conn = getConnection()) {
+			conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+			
 			DBPaidActivity activity = activitiesDB.getActivity(id, conn);
 			if (activity == null) {
 				// activity doesn't exist
@@ -54,7 +57,7 @@ public class MultiTableDatabaseImpl extends AbstractMySqlDatabase implements
 			} catch (
 					DatabaseUnkownFailureException
 					| com.servicebook.database.exceptions.users.InvalidParamsException e) {
-				// TODO Auto-generated catch block
+				// TODO Assert auto generated catch block.
 				e.printStackTrace();
 			}
 
@@ -70,6 +73,8 @@ public class MultiTableDatabaseImpl extends AbstractMySqlDatabase implements
 			} else {
 				assert false;
 			}
+
+			conn.commit();
 		} catch (com.servicebook.database.exceptions.paidActivities.ElementAlreadyExistException e) {
 			// User is already registered to this activity
 			return false;
@@ -80,9 +85,6 @@ public class MultiTableDatabaseImpl extends AbstractMySqlDatabase implements
 		} catch (SQLException e) {
 			// Could not open connection
 			throw new DatabaseUnkownFailureException(e);
-		} catch (DatabaseUnkownFailureException e) {
-			// Who knows why... it's unknown
-			throw e;
 		}
 
 		return true;
@@ -91,21 +93,84 @@ public class MultiTableDatabaseImpl extends AbstractMySqlDatabase implements
 	@Override
 	public boolean unregisterFromActivity(int id, String username)
 			throws InvalidParameterException, DatabaseUnkownFailureException {
-		// TODO Auto-generated method stub
+		try (Connection conn = getConnection()) {
+			conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+			
+			DBPaidActivity activity = activitiesDB.getActivity(id, conn);
+			if (activity == null) {
+				// no such activity
+				return false;
+			}
+
+			activitiesDB.unregisterFromActivity(id, username, conn);
+
+			int toAdd = 1;
+			if (activity instanceof DBPaidService) {
+				usersDB.updateBalance(conn, username, toAdd);
+				usersDB.updateBalance(conn, activity.getUsername(), -toAdd);
+			} else if (activity instanceof DBPaidTask) {
+				usersDB.updateBalance(conn, username, -toAdd);
+				usersDB.updateBalance(conn, activity.getUsername(), toAdd);
+			} else {
+				assert false;
+			}
+
+			conn.commit();
+		} catch (ElementNotExistException e) {
+			// User was not registered to the activity
+			return false;
+		} catch (
+				com.servicebook.database.exceptions.users.InvalidParamsException
+				| com.servicebook.database.exceptions.paidActivities.InvalidParameterException e) {
+			throw new InvalidParameterException();
+		} catch (SQLException e) {
+			// Could not open connection
+			throw new DatabaseUnkownFailureException(e);
+		}
 
 		return true;
 	}
 
 	@Override
-	public void deleteUser(String username) {
-		// TODO Auto-generated method stub
+	public void deleteUser(String username) throws InvalidParameterException,
+			DatabaseUnkownFailureException {
+		try (Connection conn = getConnection()) {
+			conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+			
+			// Delete all his activities and registrations
+			activitiesDB.deleteUserPaidActivities(username, conn);
+			activitiesDB.deleteUserRegistrations(username, conn);
 
+			// Delete all his friendships
+			friendsDB.deleteFriendships(username, conn);
+
+			// Fatality! Delete the user! Muhahaha
+			usersDB.deleteUser(conn, username);
+
+			conn.commit();
+		} catch (
+				InvalidParamsException
+				| com.servicebook.database.exceptions.paidActivities.InvalidParameterException e) {
+			throw new InvalidParameterException();
+		} catch (SQLException e) {
+			// Could not open connection
+			throw new DatabaseUnkownFailureException(e);
+		}
 	}
 
 	@Override
-	public void deleteActivity(int id) {
-		// TODO Auto-generated method stub
-
+	public void deleteActivity(int id)
+			throws DatabaseUnkownFailureException,
+			com.servicebook.database.exceptions.paidActivities.InvalidParameterException {
+		try (Connection conn = getConnection()) {
+			conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+			
+			activitiesDB.deletePaidActivity(id, conn);
+			conn.commit();
+		} catch (SQLException e) {
+			// Could not open connection
+			throw new DatabaseUnkownFailureException(e);
+		}
 	}
 
 	private FriendshipsDatabase friendsDB;
