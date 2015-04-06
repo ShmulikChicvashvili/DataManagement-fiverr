@@ -62,11 +62,10 @@ public class RegisterServlet extends HttpServlet
 		throws ServletException,
 		IOException
 	{
+		System.out.println("in register");
 		String username = req.getParameter("username");
 		String name = req.getParameter("name");
 		String password = req.getParameter("password");
-		
-		System.out.println(username + "\n" + name + "\n" + password);
 		
 		ServletContext sc = getServletContext();
 		UsersDatabase userDB = (UsersDatabase) sc.getAttribute("userDB");
