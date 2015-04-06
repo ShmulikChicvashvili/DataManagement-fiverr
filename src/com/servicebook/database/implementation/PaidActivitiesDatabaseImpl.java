@@ -107,15 +107,15 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 	}
 
 	@Override
-	public int addPaidService(DBPaidService service)
+	public int addPaidService(DBPaidService service, Connection conn)
 			throws InvalidParameterException, DatabaseUnkownFailureException {
-		return AddPaidActivity(service, ActivityType.SERVICE);
+		return AddPaidActivity(service, ActivityType.SERVICE, conn);
 	}
 
 	@Override
-	public int addPaidTask(DBPaidTask task)
+	public int addPaidTask(DBPaidTask task, Connection conn)
 			throws DatabaseUnkownFailureException, InvalidParameterException {
-		return AddPaidActivity(task, ActivityType.TASK);
+		return AddPaidActivity(task, ActivityType.TASK, conn);
 	}
 
 	@Override
@@ -153,6 +153,23 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 	}
 
 	@Override
+	public void deleteUserRegistrations(String username, Connection conn)
+			throws InvalidParameterException, DatabaseUnkownFailureException {
+		if (username == null || isConnClosed(conn)) {
+			throw new InvalidParameterException();
+		}
+
+		try (PreparedStatement stmt = conn
+				.prepareStatement(deleteUserRegistrationsQuery)) {
+			stmt.setString(1, username);
+
+			stmt.executeUpdate();
+		} catch (SQLException e) {
+			throw new DatabaseUnkownFailureException(e);
+		}
+	}
+
+	@Override
 	public ActivityStatus getActivityStatus(int id)
 			throws DatabaseUnkownFailureException, InvalidParameterException {
 		if (!isValidId(id)) {
@@ -161,6 +178,8 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 		ActivityStatus $ = ActivityStatus.NOT_EXIST;
 
 		try (Connection conn = getConnection()) {
+			conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+
 			$ = getActivityStatus(id, conn);
 		} catch (final SQLException e) {
 			throw new DatabaseUnkownFailureException(e);
@@ -361,19 +380,19 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 	 * @throws DatabaseUnkownFailureException
 	 *             In case an unexpected SQL error occurs
 	 */
-	private int AddPaidActivity(DBPaidActivity activity, ActivityType type)
-			throws InvalidParameterException, DatabaseUnkownFailureException {
+	private int AddPaidActivity(DBPaidActivity activity, ActivityType type,
+			Connection conn) throws InvalidParameterException,
+			DatabaseUnkownFailureException {
 		if (activity == null || activity.getCapacity() <= 0
-				|| activity.getDistance() <= 0) {
+				|| activity.getDistance() <= 0 || isConnClosed(conn)) {
 			throw new InvalidParameterException();
 		}
 
 		int $ = -1;
 
 		assert activity.getDistance() == 1;
-		try (Connection conn = getConnection();
-				PreparedStatement stmt = conn.prepareStatement(
-						addActivityQuery, Statement.RETURN_GENERATED_KEYS)) {
+		try (PreparedStatement stmt = conn.prepareStatement(addActivityQuery,
+				Statement.RETURN_GENERATED_KEYS)) {
 			stmt.setString(1, activity.getTitle());
 			stmt.setString(2, activity.getUsername());
 			stmt.setShort(3, activity.getCapacity());
@@ -381,7 +400,6 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 			stmt.setString(5, type.toDB());
 
 			stmt.executeUpdate();
-			conn.commit();
 			final ResultSet rs = stmt.getGeneratedKeys();
 
 			if (rs.next()) {
@@ -425,63 +443,6 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 				RegistrationTableColumn.USERNAME.columnName());
 
 		return $;
-	}
-
-	/**
-	 * Gets the activities offered by user. The activities are ordered by their
-	 * title.
-	 *
-	 * @param username
-	 *            the user's username
-	 * @param start
-	 *            the index for the first activity.
-	 * @param amount
-	 *            the maximum amount of activities to retrieve.
-	 * @param type
-	 *            the type of the activity {@link ActivityType}
-	 * @return the activities offered by the user
-	 * @throws InvalidParameterException
-	 *             In case a null was passed, or the ranges are bad.
-	 * @throws DatabaseUnkownFailureException
-	 *             In case of an unknown SQL exception
-	 */
-	private List<DBPaidActivity> getActivitiesOfferedByUser(String username,
-			int start, int amount, ActivityType type)
-			throws InvalidParameterException, DatabaseUnkownFailureException {
-		if (username == null || !isStartAmountInRanges(start, amount)) {
-			throw new InvalidParameterException();
-		}
-
-		final List<DBPaidActivity> $ = new ArrayList<DBPaidActivity>();
-		try (Connection conn = getConnection();
-				PreparedStatement stmt = conn
-						.prepareStatement(getActivitiesOfferedByUserQuery)) {
-			stmt.setString(1, username);
-			stmt.setString(2, type.toDB());
-			stmt.setInt(3, start);
-			stmt.setInt(4, amount);
-
-			final ResultSet rs = stmt.executeQuery();
-
-			while (rs.next()) {
-				assert username.equals(rs
-						.getString(ActivityTableColumn.USERNAME.columnName()));
-				assert (type.toDB().equals(rs
-						.getString(ActivityTableColumn.TYPE.columnName())));
-
-				DBPaidActivity activity = rsRowToActivity(rs);
-				$.add(activity);
-			}
-
-			// ResultSet rs closes automatically when `stmt` closes
-		} catch (final SQLException e) {
-			throw new DatabaseUnkownFailureException(e);
-		}
-
-		assert $.size() <= amount;
-
-		return $;
-
 	}
 
 	/**
@@ -550,6 +511,65 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 	 *             In case a null was passed, or the ranges are bad.
 	 * @throws DatabaseUnkownFailureException
 	 *             In case of an unknown SQL exception
+	 */
+	private List<DBPaidActivity> getActivitiesOfferedByUser(String username,
+			int start, int amount, ActivityType type)
+			throws InvalidParameterException, DatabaseUnkownFailureException {
+		if (username == null || !isStartAmountInRanges(start, amount)) {
+			throw new InvalidParameterException();
+		}
+
+		final List<DBPaidActivity> $ = new ArrayList<DBPaidActivity>();
+		try (Connection conn = getConnection();
+				PreparedStatement stmt = conn
+						.prepareStatement(getActivitiesOfferedByUserQuery)) {
+			conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+
+			stmt.setString(1, username);
+			stmt.setString(2, type.toDB());
+			stmt.setInt(3, start);
+			stmt.setInt(4, amount);
+
+			final ResultSet rs = stmt.executeQuery();
+
+			while (rs.next()) {
+				assert username.equals(rs
+						.getString(ActivityTableColumn.USERNAME.columnName()));
+				assert (type.toDB().equals(rs
+						.getString(ActivityTableColumn.TYPE.columnName())));
+
+				DBPaidActivity activity = rsRowToActivity(rs);
+				$.add(activity);
+			}
+
+			// ResultSet rs closes automatically when `stmt` closes
+		} catch (final SQLException e) {
+			throw new DatabaseUnkownFailureException(e);
+		}
+
+		assert $.size() <= amount;
+
+		return $;
+
+	}
+
+	/**
+	 * Gets the activities offered by user. The activities are ordered by their
+	 * title.
+	 *
+	 * @param username
+	 *            the user's username
+	 * @param start
+	 *            the index for the first activity.
+	 * @param amount
+	 *            the maximum amount of activities to retrieve.
+	 * @param type
+	 *            the type of the activity {@link ActivityType}
+	 * @return the activities offered by the user
+	 * @throws InvalidParameterException
+	 *             In case a null was passed, or the ranges are bad.
+	 * @throws DatabaseUnkownFailureException
+	 *             In case of an unknown SQL exception
 	 * @throws FriendshipsTableNotExist
 	 *             the friendships table does not exist
 	 */
@@ -565,6 +585,8 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 		try (Connection conn = getConnection();
 				PreparedStatement stmt = conn
 						.prepareStatement(getActivitiesOfferedToUserQuery)) {
+			conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+
 			stmt.setString(1, username);
 			stmt.setString(2, type.toDB());
 			stmt.setInt(3, start);
@@ -616,6 +638,11 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 		deleteAllUserActivitiesQuery = deleteQueryPrefix
 				+ String.format("WHERE %s.`%s`=?;", activityTable,
 						ActivityTableColumn.USERNAME.columnName());
+
+		deleteUserRegistrationsQuery = String.format(
+				"DELETE FROM %s WHERE %s.`%s`=?;", registrationTable,
+				registrationTable,
+				RegistrationTableColumn.USERNAME.columnName());
 
 		getActivityStatusQuery = String.format(
 				"SELECT %s FROM %s WHERE `%s`=?",
@@ -740,6 +767,14 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 	 *            String
 	 */
 	private String deleteAllUserActivitiesQuery;
+
+	/**
+	 * The delete user registrations query.
+	 * 
+	 * @param username
+	 *            String
+	 */
+	private String deleteUserRegistrationsQuery;
 
 	/**
 	 * the get activity status query.
