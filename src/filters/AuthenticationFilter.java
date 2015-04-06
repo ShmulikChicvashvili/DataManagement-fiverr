@@ -62,6 +62,10 @@ public class AuthenticationFilter implements Filter
 	{
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse res = (HttpServletResponse) response;
+		for(Cookie c : req.getCookies())
+		{
+			System.out.println(c.getName() + " " + c.getValue());
+		}
 		String uri = req.getRequestURI();
 		if (uri.endsWith("login.html")
 			|| uri.endsWith("registration.html")
