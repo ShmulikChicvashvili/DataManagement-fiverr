@@ -5,8 +5,8 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ FriendshipsDatabaseTest.class,
-		PaidActivitiesDatabaseTest.class, UsersDatabaseTest.class })
+@SuiteClasses({ UsersDatabaseTest.class, FriendshipsDatabaseTest.class,
+		PaidActivitiesDatabaseTest.class, MultiTableTDatabaseTest.class })
 public class AllTests {
 
 }

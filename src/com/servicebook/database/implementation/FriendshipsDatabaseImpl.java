@@ -74,8 +74,16 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
 	@Override
 	public void deleteFriendships(String username, Connection conn)
 			throws InvalidParamsException, DatabaseUnkownFailureException {
-		// TODO Auto-generated method stub
-		throw new NotImplementedException();
+		if (username == null || isConnClosed(conn)) {
+			throw new InvalidParamsException();
+		}
+		try (PreparedStatement stmt = conn
+				.prepareStatement(deleteUserFriendsQuery)) {
+			stmt.setString(1, username);
+			stmt.executeUpdate();
+		} catch (SQLException e) {
+			throw new DatabaseUnkownFailureException(e);
+		}
 	}
 
 	private enum FriendshipsColumns {
@@ -233,6 +241,12 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
 						FriendshipsColumns.SECOND_USERNAME.toString()
 								.toLowerCase());
 
+		deleteUserFriendsQuery = String.format(
+				"DELETE FROM %s WHERE ? IN (%s.%s,%s.%s);", friendshipsTable,
+				friendshipsTable, FriendshipsColumns.FIRST_USERNAME.toString()
+						.toLowerCase(), friendshipsTable,
+				FriendshipsColumns.SECOND_USERNAME.toString().toLowerCase());
+
 	}
 
 	private void insertByUsername(String username1, String username2,
@@ -305,5 +319,7 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
 	private String gettingQuery;
 
 	private String areFriendsQuery;
+
+	private String deleteUserFriendsQuery;
 
 }

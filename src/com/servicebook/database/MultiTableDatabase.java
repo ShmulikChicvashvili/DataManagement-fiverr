@@ -15,13 +15,15 @@ public interface MultiTableDatabase {
 	/**
 	 * Register a user to an activity. Updates the balance for the users. The
 	 * activity and the user must exist, and the user and the creator for the
-	 * activity must be friends.
+	 * activity must be friends. Also the user must not have been registered to
+	 * this activity before.
 	 *
 	 * @param id
 	 *            the id for the activity
 	 * @param username
 	 *            the username to be registered into
-	 * @return true, if successful, false otherwise.
+	 * @return <code>true</code>, if successful, <code>false</code> In any of
+	 *         the forbidden cases described above.
 	 * @throws InvalidParameterException
 	 *             The id is negative or username is null
 	 * @throws DatabaseUnkownFailureException

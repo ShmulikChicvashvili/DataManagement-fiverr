@@ -753,7 +753,7 @@ public class PaidActivitiesDatabaseTest {
 		}
 	}
 
-	private final <T> List<T> joinLists(List<T> l1, List<T> l2) {
+	private final <T> List<T> concatLists(List<T> l1, List<T> l2) {
 		final List<T> l = new ArrayList<T>(l1);
 		l.addAll(l2);
 		return l;
@@ -895,9 +895,9 @@ public class PaidActivitiesDatabaseTest {
 				paidActivityDB.getTasksOfferedToUser(u4, 0, 10));
 
 		// test u3 now has both u2 and u4 services and tasks
-		assertEquals(joinLists(user2services.get(u2), user2services.get(u4)),
+		assertEquals(concatLists(user2services.get(u2), user2services.get(u4)),
 				paidActivityDB.getServicesOfferedToUser(u3, 0, 10));
-		assertEquals(joinLists(user2tasks.get(u2), user2tasks.get(u4)),
+		assertEquals(concatLists(user2tasks.get(u2), user2tasks.get(u4)),
 				paidActivityDB.getTasksOfferedToUser(u3, 0, 10));
 
 		DBPaidService s = user2services.get(u2).get(1);
@@ -934,9 +934,9 @@ public class PaidActivitiesDatabaseTest {
 				paidActivityDB.getTasksOfferedToUser(u4, 0, 10));
 
 		// test u3 now has both u2 and u4 updated services and tasks
-		assertEquals(joinLists(user2services.get(u2), user2services.get(u4)),
+		assertEquals(concatLists(user2services.get(u2), user2services.get(u4)),
 				paidActivityDB.getServicesOfferedToUser(u3, 0, 10));
-		assertEquals(joinLists(user2tasks.get(u2), user2tasks.get(u4)),
+		assertEquals(concatLists(user2tasks.get(u2), user2tasks.get(u4)),
 				paidActivityDB.getTasksOfferedToUser(u3, 0, 10));
 
 		s = user2services.get(u4).get(0);
@@ -945,9 +945,9 @@ public class PaidActivitiesDatabaseTest {
 		user2services.get(u4).remove(s);
 
 		// test u3 now has both u2 and u4 updated services and tasks
-		assertEquals(joinLists(user2services.get(u2), user2services.get(u4)),
+		assertEquals(concatLists(user2services.get(u2), user2services.get(u4)),
 				paidActivityDB.getServicesOfferedToUser(u3, 0, 10));
-		assertEquals(joinLists(user2tasks.get(u2), user2tasks.get(u4)),
+		assertEquals(concatLists(user2tasks.get(u2), user2tasks.get(u4)),
 				paidActivityDB.getTasksOfferedToUser(u3, 0, 10));
 
 		conn.close();
