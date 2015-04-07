@@ -11,10 +11,12 @@ import javax.servlet.ServletContextListener;
 import org.apache.tomcat.dbcp.dbcp.BasicDataSource;
 
 import com.servicebook.database.FriendshipsDatabase;
+import com.servicebook.database.MultiTableDatabase;
 import com.servicebook.database.PaidActivitiesDatabase;
 import com.servicebook.database.UsersDatabase;
 import com.servicebook.database.exceptions.users.TableCreationException;
 import com.servicebook.database.implementation.FriendshipsDatabaseImpl;
+import com.servicebook.database.implementation.MultiTableDatabaseImpl;
 import com.servicebook.database.implementation.PaidActivitiesDatabaseImpl;
 import com.servicebook.database.implementation.UsersDatabaseImpl;
 
@@ -117,5 +119,14 @@ public class ServletListener implements ServletContextListener
 			return;
 		}
 		sc.setAttribute("activitiesDB", activitiesDB);
+		
+		MultiTableDatabase multiTableDB =
+			new MultiTableDatabaseImpl(
+				schema,
+				ds,
+				friendshipsDB,
+				activitiesDB,
+				userDB);
+		sc.setAttribute("multiTableDB", multiTableDB);
 	}
 }
