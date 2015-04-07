@@ -227,6 +227,7 @@ public class MultiTableTDatabaseTest {
 			multiDB.addPaidTask(tasks.get(i));
 
 			multiDB.registerToActivity(services.get(i).getId(), username2);
+			services.get(i).setNumRegistered((short) 1);
 		}
 
 		for (int i = num - 1; i >= 0; i -= 2) {
@@ -335,14 +336,11 @@ public class MultiTableTDatabaseTest {
 		assertFalse(multiDB.registerToActivity(s.getId() + 1, users.get(0)
 				.getUsername()));
 
-		// TODO delete the next rows
-		multiDB.addFriendship(users.get(0).getUsername(), users.get(1)
-				.getUsername());
-		multiDB.registerToActivity(s.getId(), users.get(1).getUsername());
-
 		multiDB.deleteActivity(s.getId());
 		assertEquals(ActivityStatus.NOT_EXIST,
 				activitiesDB.getActivityStatus(s.getId()));
+
+		// TODO Not finished.
 
 	}
 
