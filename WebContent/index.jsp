@@ -9,6 +9,16 @@
 </head>
 <body>
 	<%
+		Cookie[] cookies = request.getCookies();
+		for (Cookie c : cookies)
+		{
+			System.out.println("cookies in jsp : "
+				+ c.getName()
+				+ " "
+				+ c.getValue());
+		}
+	%>
+	<%
 		String username = (String) session.getAttribute("username");
 	%>
 	<h1>Welcome: ${username }</h1>

@@ -31,7 +31,7 @@ import com.servicebook.database.primitives.DBUser;
  * @author Shmulik
  *
  */
-@WebServlet("/servlet/Register")
+@WebServlet("/Register")
 public class RegisterServlet extends HttpServlet
 {
 	
