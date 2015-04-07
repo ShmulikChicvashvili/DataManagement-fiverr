@@ -16,8 +16,8 @@
 						<td height="20%"><%@include file='header.html'%></td>
 					</tr>
 					<tr>
-						<td style="background: #FFFFFF" height="80%"><%@include
-								file='welcome_page.jsp'%></td>
+						<td height="80%"><%@include
+								file='profile.jsp'%></td>
 					</tr>
 				</table></td>
 		</tr>

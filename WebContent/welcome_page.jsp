@@ -7,9 +7,6 @@
 <title>JSP Page.</title>
 </head>
 <body>
-	<%
-		String username = (String) session.getAttribute("username");
-	%>
 	<h1>Welcome: ${username }</h1>
 
 </body>
