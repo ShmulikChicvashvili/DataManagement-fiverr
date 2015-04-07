@@ -660,8 +660,9 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 				RegistrationTableColumn.USERNAME.columnName());
 
 		getActivityQuery = getActivityPrefix
-				+ String.format(" WHERE %s.`%s`=?", activityTable,
-						ActivityTableColumn.ID.columnName());
+				+ String.format(" WHERE %s.`%s`=? HAVING %s.`%s` IS NOT NULL",
+						activityTable, ActivityTableColumn.ID.columnName(),
+						activityTable, ActivityTableColumn.ID);
 
 		getActivitiesOfferedByUserQuery = getActivityPrefix
 				+ String.format(

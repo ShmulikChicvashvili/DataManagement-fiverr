@@ -13,13 +13,15 @@ import com.servicebook.database.primitives.DBPaidTask;
 public interface MultiTableDatabase {
 
 	/**
-	 * Register a user to an activity. Updates the balance for the users.
+	 * Register a user to an activity. Updates the balance for the users. The
+	 * activity and the user must exist, and the user and the creator for the
+	 * activity must be friends.
 	 *
 	 * @param id
 	 *            the id for the activity
 	 * @param username
 	 *            the username to be registered into
-	 * @return true, if successful, false otherwise
+	 * @return true, if successful, false otherwise.
 	 * @throws InvalidParameterException
 	 *             The id is negative or username is null
 	 * @throws DatabaseUnkownFailureException
@@ -28,8 +30,9 @@ public interface MultiTableDatabase {
 			throws InvalidParameterException, DatabaseUnkownFailureException;
 
 	/**
-	 * Unregister from activity. Updates the balance for the users.
-	 *
+	 * Unregister from activity. Updates the balance for the users. The user
+	 * must have been registered to this activity.
+	 * 
 	 * @param id
 	 *            the id for the activity
 	 * @param username
@@ -48,7 +51,9 @@ public interface MultiTableDatabase {
 	 * @param username
 	 *            the username to be deleted.
 	 * @throws InvalidParameterException
+	 *             if the user is null
 	 * @throws DatabaseUnkownFailureException
+	 *             In case of an unexpected SQL error.
 	 */
 	public void deleteUser(String username) throws InvalidParameterException,
 			DatabaseUnkownFailureException;
@@ -109,7 +114,7 @@ public interface MultiTableDatabase {
 	 * @throws InvalidParameterException
 	 *             the users are null, or one of them does not exist.
 	 * @throws ReflexiveFriendshipException
-	 *             the reflexive friendship exception
+	 *             in case the usernames are equal
 	 */
 	public void addFriendship(String username1, String username2)
 			throws ElementAlreadyExistsException,

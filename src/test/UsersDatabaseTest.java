@@ -606,10 +606,12 @@ public class UsersDatabaseTest {
 		}
 
 		try {
+			// TODO Shmulik tried to make concurrent writes. but with
+			// REPEATEABLE READS it's impossible so I removed it.
 			userDB.updateBalance(conn, "shmulik", 5);
+			conn.commit();
 			assertEquals(18, userDB.getUser("shmulik").getBalance());
 			userDB.updateBalance(conn2, "shmulik", -5);
-			conn.commit();
 			conn2.commit();
 			assertEquals(13, userDB.getUser("shmulik").getBalance());
 		} catch (DatabaseUnkownFailureException | InvalidParamsException e) {
@@ -618,9 +620,10 @@ public class UsersDatabaseTest {
 		} catch (SQLException e) {
 			e.printStackTrace();
 			fail();
+		} finally {
+			conn.close();
+			conn2.close();
 		}
-		conn.close();
-		conn2.close();
 	}
 
 	@Before
@@ -632,6 +635,14 @@ public class UsersDatabaseTest {
 		ds.setUsername("root");
 		ds.setPassword("root");
 		ds.setUrl("jdbc:mysql://localhost/");
+
+		String dropQuery = "DROP TABLE IF EXISTS `servicebook_db`.`users`;";
+		try (Connection conn = ds.getConnection();
+				Statement stmt = conn.createStatement()) {
+			stmt.execute(dropQuery);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 
 		try {
 			userDB = new UsersDatabaseImpl("users", "servicebook_db", ds);

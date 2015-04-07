@@ -51,13 +51,29 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
 
 	@Override
 	public boolean areFriends(String username1, String username2,
-			Connection conn) {
-		// TODO Auto-generated method stub
-		throw new NotImplementedException();
+			Connection conn) throws InvalidParamsException,
+			DatabaseUnkownFailureException {
+		if (username1 == null || username2 == null || isConnClosed(conn)) {
+			throw new InvalidParamsException();
+		}
+		boolean $ = false;
+		try (PreparedStatement stmt = conn.prepareStatement(areFriendsQuery)) {
+			stmt.setString(1, username1);
+			stmt.setString(2, username2);
+			ResultSet rs = stmt.executeQuery();
+
+			if (rs.next()) {
+				$ = rs.getBoolean(1);
+			}
+		} catch (SQLException e) {
+			throw new DatabaseUnkownFailureException(e);
+		}
+		return $;
 	}
 
 	@Override
-	public void deleteFriendships(String username, Connection conn) {
+	public void deleteFriendships(String username, Connection conn)
+			throws InvalidParamsException, DatabaseUnkownFailureException {
 		// TODO Auto-generated method stub
 		throw new NotImplementedException();
 	}
@@ -210,6 +226,13 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
 								.toLowerCase(), usersTable,
 						UsersColumns.USERNAME.toString().toLowerCase());
 
+		areFriendsQuery = String
+				.format("SELECT CASE WHEN EXISTS (SELECT * FROM %s WHERE %s=? AND %s=?) THEN 'TRUE' ELSE 'FALSE' END;",
+						friendshipsTable, FriendshipsColumns.FIRST_USERNAME
+								.toString().toLowerCase(),
+						FriendshipsColumns.SECOND_USERNAME.toString()
+								.toLowerCase());
+
 	}
 
 	private void insertByUsername(String username1, String username2,
@@ -280,5 +303,7 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
 	private String insertionQuery;
 
 	private String gettingQuery;
+
+	private String areFriendsQuery;
 
 }

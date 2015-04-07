@@ -335,7 +335,7 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase implements
 	private void initQueries() {
 		creationQuery = String
 				.format("CREATE TABLE IF NOT EXISTS %s (`%s` VARCHAR(255) NOT NULL, `%s` VARCHAR(255) NOT NULL, `%s` VARCHAR(255) NOT NULL, `%s` INT NOT NULL, PRIMARY KEY (`%s`))"
-						+ "ENGINE = MyISAM", table, Columns.USERNAME.toString()
+				/* + "ENGINE = MyISAM" */, table, Columns.USERNAME.toString()
 						.toLowerCase(), Columns.PASSWORD.toString()
 						.toLowerCase(), Columns.NAME.toString().toLowerCase(),
 						Columns.BALANCE.toString().toLowerCase(),
