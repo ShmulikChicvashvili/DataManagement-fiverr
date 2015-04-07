@@ -62,17 +62,12 @@ public class AuthenticationFilter implements Filter
 	{
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse res = (HttpServletResponse) response;
-		for(Cookie c : req.getCookies())
-		{
-			System.out.println(c.getName() + " " + c.getValue());
-		}
 		String uri = req.getRequestURI();
 		if (uri.endsWith("login.html")
 			|| uri.endsWith("registration.html")
-			|| uri.endsWith("servlet/Register")
-			|| uri.endsWith("servlet/Login"))
+			|| uri.endsWith("Register")
+			|| uri.endsWith("Login"))
 		{
-			System.out.println(uri);
 			chain.doFilter(req, res);
 		} else if (authenticateSession(req))
 		{
@@ -83,7 +78,6 @@ public class AuthenticationFilter implements Filter
 			chain.doFilter(req, res);
 		} else
 		{
-			System.out.println("redirecting");
 			res.sendRedirect("/HW5/login.html");
 		}
 	}
@@ -117,6 +111,7 @@ public class AuthenticationFilter implements Filter
 		String username = null;
 		String password = null;
 		Cookie[] cookies = request.getCookies();
+		if (cookies == null) { return $; }
 		for (Cookie cookie : cookies)
 		{
 			if (cookie.getName().equals("username"))
@@ -151,7 +146,7 @@ public class AuthenticationFilter implements Filter
 		Cookie[] cookies = request.getCookies();
 		for (Cookie cookie : cookies)
 		{
-			if (cookie.getName().equals("usernameCookie"))
+			if (cookie.getName().equals("username"))
 			{
 				$ = cookie.getValue();
 			}
