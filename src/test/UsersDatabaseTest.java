@@ -606,7 +606,8 @@ public class UsersDatabaseTest {
 		}
 
 		try {
-			//TODO Shmulik tried to make concurrent writes. but with REPEATEABLE READS it's impossible so I removed it.
+			// TODO Shmulik tried to make concurrent writes. but with
+			// REPEATEABLE READS it's impossible so I removed it.
 			userDB.updateBalance(conn, "shmulik", 5);
 			conn.commit();
 			assertEquals(18, userDB.getUser("shmulik").getBalance());
