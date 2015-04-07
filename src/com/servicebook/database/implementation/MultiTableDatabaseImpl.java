@@ -35,6 +35,10 @@ public class MultiTableDatabaseImpl extends AbstractMySqlDatabase implements
 	@Override
 	public boolean registerToActivity(int id, String username)
 			throws InvalidParameterException, DatabaseUnkownFailureException {
+		if (!isValidId(id) || username == null) {
+			throw new InvalidParameterException();
+		}
+
 		try (Connection conn = getConnection()) {
 			conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 
@@ -94,6 +98,10 @@ public class MultiTableDatabaseImpl extends AbstractMySqlDatabase implements
 	@Override
 	public boolean unregisterFromActivity(int id, String username)
 			throws InvalidParameterException, DatabaseUnkownFailureException {
+		if (!isValidId(id) || username == null) {
+			throw new InvalidParameterException();
+		}
+
 		try (Connection conn = getConnection()) {
 			conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 
@@ -103,7 +111,7 @@ public class MultiTableDatabaseImpl extends AbstractMySqlDatabase implements
 				return false;
 			}
 			try {
-				assert (usersDB.isUserExists(username, conn));
+				// assert (usersDB.isUserExists(username, conn));
 				assert (usersDB.isUserExists(activity.getUsername(), conn));
 			} catch (
 					DatabaseUnkownFailureException
@@ -144,6 +152,10 @@ public class MultiTableDatabaseImpl extends AbstractMySqlDatabase implements
 	@Override
 	public void deleteUser(String username) throws InvalidParameterException,
 			DatabaseUnkownFailureException {
+		if (username == null) {
+			throw new InvalidParameterException();
+		}
+
 		try (Connection conn = getConnection()) {
 			conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 
@@ -189,6 +201,9 @@ public class MultiTableDatabaseImpl extends AbstractMySqlDatabase implements
 	@Override
 	public void deleteActivity(int id) throws DatabaseUnkownFailureException,
 			InvalidParameterException {
+		if (!isValidId(id)) {
+			throw new InvalidParameterException();
+		}
 		try (Connection conn = getConnection()) {
 			conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 
@@ -209,6 +224,9 @@ public class MultiTableDatabaseImpl extends AbstractMySqlDatabase implements
 			ReflexiveFriendshipException {
 		if (username1 == null || username2 == null) {
 			throw new InvalidParameterException();
+		}
+		if (username1.equalsIgnoreCase(username2)) {
+			throw new ReflexiveFriendshipException();
 		}
 
 		try (Connection conn = getConnection()) {
@@ -239,9 +257,11 @@ public class MultiTableDatabaseImpl extends AbstractMySqlDatabase implements
 
 	private int addPaidActivity(DBPaidActivity activity)
 			throws InvalidParameterException, DatabaseUnkownFailureException {
-		if (activity == null || activity.getUsername() == null) {
+		if (activity == null || activity.getUsername() == null
+				|| activity.getCapacity() <= 0 || activity.getDistance() <= 0) {
 			throw new InvalidParameterException();
 		}
+
 		int $ = -1;
 		try (Connection conn = getConnection()) {
 			conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
@@ -265,6 +285,10 @@ public class MultiTableDatabaseImpl extends AbstractMySqlDatabase implements
 			throw new InvalidParameterException();
 		}
 		return $;
+	}
+
+	private boolean isValidId(int id) {
+		return id > 0;
 	}
 
 }
