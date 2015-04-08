@@ -14,17 +14,26 @@
 		UsersDatabase userDB =
 			(UsersDatabase) getServletContext().getAttribute("userDB");
 		DBUser res = userDB.getUser(username);
-		System.out.println(res.toString());
-		String name = res.getName();
-		System.out.println(name);
-		int balance = res.getBalance();
+		String name = null;
+		int balance = -1;
+		if (res != null)
+		{
+			name = res.getName();
+			balance = res.getBalance();
+		}
 	%>
-	Username: <%= username %>
+	Username:
+	<%=username%>
 	<br>
-	<br> Name: <%= name %>
+	<br> Name:
+	<%=name%>
 	<br>
-	<br> Balance: <%= balance %>
+	<br> Balance:
+	<%=balance%>
 	<br>
 	<br>
+	<form action="/HW5/DeleteProfile" method="post">
+		<input type="submit" name="deleteButton" value="Delete Profile" />
+	</form>
 </body>
 </html>
