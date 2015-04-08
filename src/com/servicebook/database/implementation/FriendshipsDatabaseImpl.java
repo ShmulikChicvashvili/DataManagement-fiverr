@@ -14,8 +14,6 @@ import java.util.List;
 
 import org.apache.tomcat.dbcp.dbcp.BasicDataSource;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import com.mysql.jdbc.MysqlErrorNumbers;
 import com.servicebook.database.AbstractMySqlDatabase;
 import com.servicebook.database.FriendshipsDatabase;
