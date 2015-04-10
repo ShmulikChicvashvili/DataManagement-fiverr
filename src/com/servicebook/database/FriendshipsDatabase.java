@@ -1,16 +1,24 @@
+
 package com.servicebook.database;
+
 
 import java.sql.Connection;
 import java.util.List;
 
 import com.servicebook.database.exceptions.DatabaseUnkownFailureException;
-import com.servicebook.database.exceptions.friendships.*;
+import com.servicebook.database.exceptions.friendships.ElementAlreadyExistsException;
+import com.servicebook.database.exceptions.friendships.InvalidParamsException;
+import com.servicebook.database.exceptions.friendships.ReflexiveFriendshipException;
 import com.servicebook.database.primitives.DBUser;
+
+
+
 
 /**
  * The Interface FriendshipsDatabase.
  */
-public interface FriendshipsDatabase {
+public interface FriendshipsDatabase
+{
 
 	/**
 	 * Adds a friendship relationship to the database. users must differ by
@@ -32,9 +40,11 @@ public interface FriendshipsDatabase {
 	 *             the reflexive friendship exception
 	 */
 	public void addFriendship(DBUser user1, DBUser user2, Connection conn)
-			throws ElementAlreadyExistsException,
-			DatabaseUnkownFailureException, InvalidParamsException,
-			ReflexiveFriendshipException;
+		throws ElementAlreadyExistsException,
+		DatabaseUnkownFailureException,
+		InvalidParamsException,
+		ReflexiveFriendshipException;
+
 
 	/**
 	 * Adds a friendship relationship to the database. Usernames can't be equal.
@@ -55,10 +65,15 @@ public interface FriendshipsDatabase {
 	 * @throws ReflexiveFriendshipException
 	 *             the reflexive friendship exception
 	 */
-	public void addFriendship(String username1, String username2,
-			Connection conn) throws ElementAlreadyExistsException,
-			DatabaseUnkownFailureException, InvalidParamsException,
-			ReflexiveFriendshipException;
+	public void addFriendship(
+		String username1,
+		String username2,
+		Connection conn)
+		throws ElementAlreadyExistsException,
+		DatabaseUnkownFailureException,
+		InvalidParamsException,
+		ReflexiveFriendshipException;
+
 
 	/**
 	 * Gets the friends for the given user.
@@ -70,7 +85,9 @@ public interface FriendshipsDatabase {
 	 * @throws DatabaseUnkownFailureException
 	 */
 	public List<DBUser> getFriends(String username)
-			throws InvalidParamsException, DatabaseUnkownFailureException;
+		throws InvalidParamsException,
+		DatabaseUnkownFailureException;
+
 
 	/**
 	 * Gets the friends for the given user.
@@ -81,8 +98,31 @@ public interface FriendshipsDatabase {
 	 * @throws InvalidParamsException
 	 * @throws DatabaseUnkownFailureException
 	 */
-	public List<DBUser> getFriends(DBUser user) throws InvalidParamsException,
-			DatabaseUnkownFailureException;
+	public List<DBUser> getFriends(DBUser user)
+		throws InvalidParamsException,
+		DatabaseUnkownFailureException;
+
+
+	/**
+	 * Gets users at a maximum distance (over friends graph) from the given
+	 * user.
+	 *
+	 * @param username
+	 *            the username of the user to be addressed
+	 * @param maxDist
+	 *            the maximum distance to look (either 1 or 2).
+	 * @return the friends at a maximum distance of dist, ordered first by the
+	 *         distance and second by their username
+	 * @throws InvalidParamsException
+	 *             a null string was passed, or the distance requested is
+	 *             neither 1 nor 2.
+	 * @throws DatabaseUnkownFailureException
+	 *             An unknown SQL exception was caught.
+	 */
+	public List<DBUser> getFriendsMaxDist(String username, int maxDist)
+		throws InvalidParamsException,
+		DatabaseUnkownFailureException;
+
 
 	/**
 	 * Checks if the users are friends.
@@ -98,7 +138,9 @@ public interface FriendshipsDatabase {
 	 *             the database unknown failure exception
 	 */
 	public boolean areFriends(String username1, String username2)
-			throws InvalidParamsException, DatabaseUnkownFailureException;
+		throws InvalidParamsException,
+		DatabaseUnkownFailureException;
+
 
 	/**
 	 * Checks if the users are friends.
@@ -115,9 +157,13 @@ public interface FriendshipsDatabase {
 	 * @throws DatabaseUnkownFailureException
 	 *             the database unknown failure exception
 	 */
-	public boolean areFriends(String username1, String username2,
-			Connection conn) throws InvalidParamsException,
-			DatabaseUnkownFailureException;
+	public boolean areFriends(
+		String username1,
+		String username2,
+		Connection conn)
+		throws InvalidParamsException,
+		DatabaseUnkownFailureException;
+
 
 	/**
 	 * Delete all user's friendships.
@@ -132,5 +178,6 @@ public interface FriendshipsDatabase {
 	 *             the database unknown failure exception
 	 */
 	public void deleteFriendships(String username, Connection conn)
-			throws InvalidParamsException, DatabaseUnkownFailureException;
+		throws InvalidParamsException,
+		DatabaseUnkownFailureException;
 }
