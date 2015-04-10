@@ -331,11 +331,27 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		int start,
 		int amount)
 		throws InvalidParameterException,
-		DatabaseUnkownFailureException,
-		FriendshipsTableNotExist
+		DatabaseUnkownFailureException
 	{
-		// TODO Auto-generated method stub
-		return null;
+		final List<DBPaidService> $ = new ArrayList<DBPaidService>();
+		final List<DBPaidActivity> services =
+			getActivitiesUserRegistered(
+				username,
+				start,
+				amount,
+				ActivityType.SERVICE);
+
+		for (final DBPaidActivity service : services)
+		{
+			assert service instanceof DBPaidService;
+			if (!(service instanceof DBPaidService))
+			{
+				continue;
+			}
+			$.add((DBPaidService) service);
+		}
+
+		return $;
 	}
 
 
@@ -343,16 +359,32 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	 * com.servicebook.database.PaidActivitiesDatabase#getTasksUserRegistered
 	 * (java.lang.String, int, int) */
 	@Override
-	public List<DBPaidService> getTasksUserRegistered(
+	public List<DBPaidTask> getTasksUserRegistered(
 		String username,
 		int start,
 		int amount)
 		throws InvalidParameterException,
-		DatabaseUnkownFailureException,
-		FriendshipsTableNotExist
+		DatabaseUnkownFailureException
 	{
-		// TODO Auto-generated method stub
-		return null;
+		final List<DBPaidTask> $ = new ArrayList<DBPaidTask>();
+		final List<DBPaidActivity> tasks =
+			getActivitiesUserRegistered(
+				username,
+				start,
+				amount,
+				ActivityType.TASK);
+
+		for (final DBPaidActivity task : tasks)
+		{
+			assert task instanceof DBPaidTask;
+			if (!(task instanceof DBPaidTask))
+			{
+				continue;
+			}
+			$.add((DBPaidTask) task);
+		}
+
+		return $;
 	}
 
 
@@ -771,6 +803,72 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 
 
 	/**
+	 * Gets the activities the user registered to. The activities are ordered by
+	 * their title.
+	 *
+	 * @param username
+	 *            the user's username
+	 * @param start
+	 *            the index for the first activity.
+	 * @param amount
+	 *            the maximum amount of activities to retrieve.
+	 * @param type
+	 *            the type of the activity {@link ActivityType}
+	 * @return the activities the user is registered to.
+	 * @throws InvalidParameterException
+	 *             In case a null was passed, or the ranges are bad.
+	 * @throws DatabaseUnkownFailureException
+	 *             In case of an unknown SQL exception
+	 */
+	private List<DBPaidActivity> getActivitiesUserRegistered(
+		String username,
+		int start,
+		int amount,
+		ActivityType type)
+		throws InvalidParameterException,
+		DatabaseUnkownFailureException
+	{
+		if (username == null || !isStartAmountInRanges(start, amount)) { throw new InvalidParameterException(); }
+
+		final List<DBPaidActivity> $ = new ArrayList<DBPaidActivity>();
+		try (
+			Connection conn = getConnection();
+			PreparedStatement stmt =
+				conn.prepareStatement(getActivitiesUserRegisteredQuery))
+		{
+			conn
+				.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+
+			stmt.setString(1, type.toDB());
+			stmt.setString(2, username);
+			stmt.setInt(3, start);
+			stmt.setInt(4, amount);
+
+			final ResultSet rs = stmt.executeQuery();
+
+			while (rs.next())
+			{
+				assert type.toDB().equals(
+					rs.getString(ActivityTableColumn.TYPE.columnName()));
+
+				final DBPaidActivity activity = rsRowToActivity(rs);
+				$.add(activity);
+			}
+
+			// ResultSet rs closes automatically when `stmt` closes
+		} catch (final SQLException e)
+		{
+			throw new DatabaseUnkownFailureException(e);
+		}
+
+		assert $.size() <= amount;
+
+		return $;
+
+	}
+
+
+	/**
 	 * Gets the activities offered by user. The activities are ordered by their
 	 * title.
 	 *
@@ -913,10 +1011,17 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 					+ registrationTable
 					+ "."
 					+ RegistrationTableColumn.ID.columnName()
-					+ ")",
+					+ ") ",
 				activityTable,
 				registrationTable,
 				RegistrationTableColumn.USERNAME.columnName());
+
+		final String getActivitySuffix =
+			String.format(
+				" GROUP BY %s.`%s` ORDER BY `%s` LIMIT ?,?",
+				activityTable,
+				ActivityTableColumn.ID.columnName(),
+				ActivityTableColumn.TITLE.columnName());
 
 		getActivityQuery =
 			getActivityPrefix
@@ -929,15 +1034,25 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 
 		getActivitiesOfferedByUserQuery =
 			getActivityPrefix
-				+ String
-					.format(
-						" WHERE %s.`%s`=? AND `%s`=? GROUP BY %s.`%s`  ORDER BY `%s` LIMIT ?,?",
-						activityTable,
-						ActivityTableColumn.USERNAME.columnName(),
-						ActivityTableColumn.TYPE.columnName(),
-						activityTable,
-						ActivityTableColumn.ID.columnName(),
-						ActivityTableColumn.TITLE.columnName());
+				+ String.format(
+					" WHERE %s.`%s`=? AND `%s`=? " + getActivitySuffix,
+					activityTable,
+					ActivityTableColumn.USERNAME.columnName(),
+					ActivityTableColumn.TYPE.columnName());
+
+		getActivitiesUserRegisteredQuery =
+			getActivityPrefix
+				+ String.format(
+					" WHERE `%s`=? AND EXISTS (SELECT * FROM %s WHERE %s.%s=%s.%s AND %s.%s=?) "
+						+ getActivitySuffix,
+					ActivityTableColumn.TYPE.columnName(),
+					registrationTable,
+					registrationTable,
+					RegistrationTableColumn.ID.columnName(),
+					activityTable,
+					ActivityTableColumn.ID.columnName(),
+					registrationTable,
+					RegistrationTableColumn.USERNAME.columnName());
 
 		getActivitiesOfferedToUserQuery =
 			String.format(
@@ -986,15 +1101,13 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 					+ RegistrationTableColumn.USERNAME.columnName()
 					+ "=?) "
 					// count number of registered and limit result
-					+ "GROUP BY %s  ORDER BY `%s` LIMIT ?,?",
+					+ getActivitySuffix,
 				activityTable,
 				registrationTable,
 				RegistrationTableColumn.USERNAME.columnName(),
 				friendsTableInfo.tableName,
 				friendsTableInfo.userColumn,
-				ActivityTableColumn.TYPE.columnName(),
-				activityTable + "." + ActivityTableColumn.ID.columnName(),
-				ActivityTableColumn.TITLE.columnName());
+				ActivityTableColumn.TYPE.columnName());
 
 		registerToActivityQuery =
 			String.format(
@@ -1092,6 +1205,20 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	 *
 	 */
 	private String getActivitiesOfferedByUserQuery;
+
+	/**
+	 * The get activities user registered query.
+	 *
+	 * @param type
+	 *            Enum
+	 * @param username
+	 *            String
+	 * @param offset
+	 *            int
+	 * @param amount
+	 *            int
+	 */
+	private String getActivitiesUserRegisteredQuery;
 
 	/**
 	 * The get activities offered to user query.
