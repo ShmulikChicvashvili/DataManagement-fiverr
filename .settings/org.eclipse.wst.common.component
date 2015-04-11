@@ -2,6 +2,9 @@
     <wb-module deploy-name="HW5">
         <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
+        <dependent-module archiveName="mysql-connector-java-5.1.34-bin.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/HW5/mysql-connector-java-5.1.34-bin.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
         <property name="context-root" value="HW5"/>
         <property name="java-output-path" value="/HW5/build/classes"/>
     </wb-module>

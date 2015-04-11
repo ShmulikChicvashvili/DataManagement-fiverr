@@ -9,32 +9,52 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Insert title here</title>
+<script
+	src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script type="text/javascript">
+	function postFriendships(user1, user2,index) {
+		var url = '/HW5/AddFriend';
+		var posting = $.post(url, {
+			first_username : user1,
+			second_username : user2
+		});
+		
+		posting.done(function(data) {
+			$("#result_div"+index).empty().append(data);
+			if(data == "Friend Added") {
+				document.getElementById("add_friend"+index).disabled = true;
+			}
+		});
+	}
+</script>
 </head>
 <body>
-	<%
-		UsersDatabase userDB =
-			(UsersDatabase) getServletContext().getAttribute("userDB");
-		List<DBUser> users = userDB.getUsers(0, 20);
-		for (DBUser u : users)
-		{
-			String username = u.getUsername();
-			String name = u.getName();
-			int balance = u.getBalance();
-	%>
+	<ul>
+		<%
+			UsersDatabase userDB =
+				(UsersDatabase) getServletContext().getAttribute("userDB");
+			List<DBUser> users = userDB.getUsers(0, 20);
+			int index = 0;
+			for (DBUser u : users)
+			{
+				String username = u.getUsername();
+				String name = u.getName();
+				int balance = u.getBalance();
+		%>
 
-	<form id="friendshipForm">
+		<li>Username: <%=username%> &emsp; Name: <%=name%> &emsp;
+			Balance: <%=balance%> &emsp;
+			<button id='add_friend<%=index%>'
+				onclick='postFriendships("<%=(String) session.getAttribute("username")%>", "<%=username%>","<%=index%>")'>Add
+				Friend</button>
+			<div id="result_div<%=index%>"></div>
+		</li>
 
-		Username:<input type="text" name="username" value="<%=username%>"
-			readonly /><br /> <br /> name:<input type="text" name="name"
-			value="<%=name%>" readonly /><br /> <br /> balance:<input
-			type="text" name="balance" value="<%=balance%>" /> <br /> <br /> <input
-			type="submit" value="add friend" readonly>
+		<%
+			index++;
+			}
+		%>
 
-
-	</form>
-
-	<%
-		}
-	%>
+	</ul>
 </body>
 </html>

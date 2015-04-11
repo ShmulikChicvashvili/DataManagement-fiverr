@@ -866,6 +866,17 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		return $;
 
 	}
+	
+	public int getUserOfferedActivitiesCount(String username) {
+		int $ = 0;
+		if(username == null) { throw new InvalidParameterException(); }
+		
+		String sqlExpression = "SELECT COUNT(*) FROM servicebook_db.activities JOIN servicebook_db.friendships ON (servicebook_db.activities.username = servicebook_db.friendships.first_username AND servicebook_db.friendships.second_username = ?);";
+		try(Connection conn = getConnection();
+			PreparedStatement prpdStmt = )
+		
+		return $;
+	}
 
 
 	/**
