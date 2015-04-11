@@ -517,7 +517,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		throws InvalidParameterException,
 		DatabaseUnkownFailureException
 	{
-		final int $ = -1;
+		int $ = -1;
 		if (username == null) { throw new InvalidParameterException(); }
 
 		try (
@@ -527,6 +527,13 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		{
 			conn
 				.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+			stmt.setString(1, username);
+			final ResultSet rs = stmt.executeQuery();
+
+			if (rs.next())
+			{
+				$ = rs.getInt(1);
+			}
 		} catch (final SQLException e)
 		{
 			throw new DatabaseUnkownFailureException(e);
@@ -542,7 +549,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		throws InvalidParameterException,
 		DatabaseUnkownFailureException
 	{
-		final int $ = -1;
+		int $ = -1;
 		if (username == null) { throw new InvalidParameterException(); }
 
 		try (
@@ -552,6 +559,14 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		{
 			conn
 				.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+			stmt.setString(1, username);
+			stmt.setString(2, username);
+			final ResultSet rs = stmt.executeQuery();
+
+			if (rs.next())
+			{
+				$ = rs.getInt(1);
+			}
 		} catch (final SQLException e)
 		{
 			throw new DatabaseUnkownFailureException(e);
@@ -567,7 +582,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		throws InvalidParameterException,
 		DatabaseUnkownFailureException
 	{
-		final int $ = -1;
+		int $ = -1;
 		if (username == null) { throw new InvalidParameterException(); }
 
 		try (
@@ -577,6 +592,13 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		{
 			conn
 				.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+			stmt.setString(1, username);
+			final ResultSet rs = stmt.executeQuery();
+
+			if (rs.next())
+			{
+				$ = rs.getInt(1);
+			}
 		} catch (final SQLException e)
 		{
 			throw new DatabaseUnkownFailureException(e);
