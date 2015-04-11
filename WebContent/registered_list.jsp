@@ -31,54 +31,74 @@
 <title>Insert title here</title>
 </head>
 <body>
-	<%
-		PaidActivitiesDatabase activitiesDB =
-			(PaidActivitiesDatabase) getServletContext().getAttribute(
-				"activitiesDB");
-		List<DBPaidService> registeredServices =
-			activitiesDB.getServicesUserRegistered(
-				(String) session.getAttribute("username"),
-				0,
-				10);
-		List<DBPaidTask> registeredTasks =
-			activitiesDB.getTasksUserRegistered(
-				(String) session.getAttribute("username"),
-				0,
-				10);
-		for (int i = 0; i < Math.max(
-			registeredServices.size(),
-			registeredTasks.size()); i++)
-		{
-	%>
-	<%
-		if (i < registeredServices.size())
+	<ul>
+		<%
+			PaidActivitiesDatabase activitiesDB =
+				(PaidActivitiesDatabase) getServletContext().getAttribute(
+					"activitiesDB");
+			int totalCount = 0;
+			int perPage = 10;
+			int pageStart = 0;
+			String start = request.getParameter("start");
+			if (start != null) pageStart = Integer.parseInt(start);
+			if (pageStart < 0) pageStart = 0;
+			totalCount =
+				activitiesDB.getActivitiesUserRegisteredCount((String) session
+					.getAttribute("username"));
+			if (pageStart > totalCount) pageStart = pageStart - perPage;
+		%>
+		<a href="<%=request.getRequestURL()%>?start=<%=pageStart - 10%>">Previous</a>
+		<%=pageStart + 1%>
+		-
+		<%=pageStart + 10%>
+		<a href="<%=request.getRequestURL()%>?start=<%=pageStart + 10%>">Next</a>
+		<br />
+		<%
+			List<DBPaidService> registeredServices =
+				activitiesDB.getServicesUserRegistered(
+					(String) session.getAttribute("username"),
+					pageStart,
+					perPage);
+			List<DBPaidTask> registeredTasks =
+				activitiesDB.getTasksUserRegistered(
+					(String) session.getAttribute("username"),
+					pageStart,
+					perPage);
+			for (int i = 0; i < Math.max(
+				registeredServices.size(),
+				registeredTasks.size()); i++)
 			{
-	%>
-	<li id='Service<%=i%>'><h5>Service-</h5>Username:<%=registeredServices.get(i).getUsername()%>
-		&emsp; Title:<%=registeredServices.get(i).getTitle()%> &emsp;
-		Capacity:<%=registeredServices.get(i).getCapacity()%> &emsp; Number
-		registered:<%=registeredServices.get(i).getNumRegistered()%> &emsp;
-		<button
-			onclick='unregisterActivity("<%=registeredServices.get(i).getId()%>","<%=(String) session.getAttribute("username")%>","<%=i%>", "Service<%=i%>")'>Unregister
-			to service</button></li>
-	<%
-		}
-			if (i < registeredTasks.size())
-			{
-	%>
-	<li id='Task<%=i%>'><h5>Task-</h5>Username:<%=registeredTasks.get(i).getUsername()%>
-		&emsp; Title:<%=registeredTasks.get(i).getTitle()%> &emsp; Capacity:<%=registeredTasks.get(i).getCapacity()%>
-		&emsp; Number registered:<%=registeredTasks.get(i).getNumRegistered()%>
-		&emsp;
-		<button
-			onclick='unregisterActivity("<%=registeredTasks.get(i).getId()%>","<%=(String) session.getAttribute("username")%>","<%=i%>", "Task<%=i%>")'>Unregister
-			to task</button></li>
-	<%
-		}
-	%>
-	<div id="result_div<%=i%>"></div>
-	<%
-		}
-	%>
+		%>
+		<%
+			if (i < registeredServices.size())
+				{
+		%>
+		<li id='Service<%=i%>'><h5>Service-</h5>Username:<%=registeredServices.get(i).getUsername()%>
+			&emsp; Title:<%=registeredServices.get(i).getTitle()%> &emsp;
+			Capacity:<%=registeredServices.get(i).getCapacity()%> &emsp; Number
+			registered:<%=registeredServices.get(i).getNumRegistered()%> &emsp;
+			<button
+				onclick='unregisterActivity("<%=registeredServices.get(i).getId()%>","<%=(String) session.getAttribute("username")%>","<%=i%>", "Service<%=i%>")'>Unregister
+				to service</button></li>
+		<%
+			}
+				if (i < registeredTasks.size())
+				{
+		%>
+		<li id='Task<%=i%>'><h5>Task-</h5>Username:<%=registeredTasks.get(i).getUsername()%>
+			&emsp; Title:<%=registeredTasks.get(i).getTitle()%> &emsp; Capacity:<%=registeredTasks.get(i).getCapacity()%>
+			&emsp; Number registered:<%=registeredTasks.get(i).getNumRegistered()%>
+			&emsp;
+			<button
+				onclick='unregisterActivity("<%=registeredTasks.get(i).getId()%>","<%=(String) session.getAttribute("username")%>","<%=i%>", "Task<%=i%>")'>Unregister
+				to task</button></li>
+		<%
+			}
+		%>
+		<div id="result_div<%=i%>"></div>
+		<%
+			}
+		%>
+	</ul>
 </body>
 </html>

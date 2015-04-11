@@ -33,7 +33,23 @@
 		<%
 			UsersDatabase userDB =
 				(UsersDatabase) getServletContext().getAttribute("userDB");
-			List<DBUser> users = userDB.getUsers(0, 20);
+			int totalCount = 0;
+			int perPage = 10;
+			int pageStart = 0;
+			String start = request.getParameter("start");
+			if (start != null) pageStart = Integer.parseInt(start);
+			if (pageStart < 0) pageStart = 0;
+			totalCount = userDB.getUsersCount();
+			if (pageStart > totalCount) pageStart = pageStart - perPage;
+		%>
+		<a href="<%=request.getRequestURL()%>?start=<%=pageStart - 10%>">Previous</a>
+		<%=pageStart + 1%>
+		-
+		<%=pageStart + 10%>
+		<a href="<%=request.getRequestURL()%>?start=<%=pageStart + 10%>">Next</a>
+		<br />
+		<%
+			List<DBUser> users = userDB.getUsers(pageStart, perPage);
 			int index = 0;
 			for (DBUser u : users)
 			{

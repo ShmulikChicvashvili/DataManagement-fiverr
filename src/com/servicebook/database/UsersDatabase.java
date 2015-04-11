@@ -138,4 +138,10 @@ public interface UsersDatabase {
 	 */
 	public void deleteUser(Connection conn, String username)
 			throws InvalidParamsException, DatabaseUnkownFailureException;
+	
+	/**
+	 * @return
+	 * @throws DatabaseUnkownFailureException
+	 */
+	public int getUsersCount() throws DatabaseUnkownFailureException;
 }

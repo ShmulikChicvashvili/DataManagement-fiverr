@@ -19,7 +19,7 @@
 
 		posting.done(function(data) {
 			if (data == "") {
-				var elementToRemove = "#"+element;
+				var elementToRemove = "#" + element;
 				$(elementToRemove).remove();
 			} else {
 				$("#result_div" + index).empty().append(data);
@@ -36,16 +36,34 @@
 			PaidActivitiesDatabase activitiesDB =
 				(PaidActivitiesDatabase) getServletContext().getAttribute(
 					"activitiesDB");
+			int totalCount = 0;
+			int perPage = 10;
+			int pageStart = 0;
+			String start = request.getParameter("start");
+			if (start != null) pageStart = Integer.parseInt(start);
+			if (pageStart < 0) pageStart = 0;
+			totalCount =
+				activitiesDB.getActivitiesOfferedByUserCount((String) session
+					.getAttribute("username"));
+			if (pageStart > totalCount) pageStart = pageStart - perPage;
+		%>
+		<a href="<%=request.getRequestURL()%>?start=<%=pageStart - 10%>">Previous</a>
+		<%=pageStart + 1%>
+		-
+		<%=pageStart + 10%>
+		<a href="<%=request.getRequestURL()%>?start=<%=pageStart + 10%>">Next</a>
+		<br />
+		<%
 			List<DBPaidService> services =
 				activitiesDB.getServicesOfferedByUser(
 					(String) session.getAttribute("username"),
-					0,
-					10);
+					pageStart,
+					perPage);
 			List<DBPaidTask> tasks =
 				activitiesDB.getTasksOfferedByUser(
 					(String) session.getAttribute("username"),
-					0,
-					10);
+					pageStart,
+					perPage);
 			for (int i = 0; i < Math.max(tasks.size(), services.size()); i++)
 			{
 				if (i < services.size())

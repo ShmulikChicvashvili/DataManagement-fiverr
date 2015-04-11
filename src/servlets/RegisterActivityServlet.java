@@ -65,9 +65,14 @@ public class RegisterActivityServlet extends HttpServlet
 			(MultiTableDatabase) getServletContext().getAttribute(
 				"multiTableDB");
 		PrintWriter output = response.getWriter();
+		boolean res = false;
 		try
 		{
-			multiTableDB.registerToActivity(id, username);
+			res = multiTableDB.registerToActivity(id, username);
+			if (res == false)
+			{
+				output.write("Couldn't finish registration");
+			}
 		} catch (DatabaseUnkownFailureException e)
 		{
 			output.write("Unknown failure occured");
@@ -76,10 +81,10 @@ public class RegisterActivityServlet extends HttpServlet
 		{
 			output.write("Invalid parameters");
 			return;
-		} finally {
+		} finally
+		{
 			output.close();
 		}
-		response.getWriter().write("Registered successfuly");
 		output.close();
 	}
 	
