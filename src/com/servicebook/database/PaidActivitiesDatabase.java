@@ -381,4 +381,10 @@ public interface PaidActivitiesDatabase
 			throws InvalidParameterException,
 			DatabaseUnkownFailureException,
 			ElementNotExistException;
+	
+	public int getActivitiesUserRegisteredCount(String username);
+	
+	public int getActivitiesOfferedToUserCount(String username);
+	
+	public int getActivitiesOfferedByUserCount(String username);
 }
