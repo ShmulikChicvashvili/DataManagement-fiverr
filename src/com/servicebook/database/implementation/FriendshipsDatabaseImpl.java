@@ -1,8 +1,9 @@
 /**
- * 
+ *
  */
 
 package com.servicebook.database.implementation;
+
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,71 +25,98 @@ import com.servicebook.database.exceptions.friendships.ReflexiveFriendshipExcept
 import com.servicebook.database.exceptions.friendships.TableCreationException;
 import com.servicebook.database.primitives.DBUser;
 
+
+
+
 /**
  * @author Shmulik
  *
  */
-public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
-		FriendshipsDatabase {
-
+public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase
+	implements
+		FriendshipsDatabase
+{
+	
 	@Override
 	public boolean areFriends(String username1, String username2)
-			throws InvalidParamsException, DatabaseUnkownFailureException {
+		throws InvalidParamsException,
+		DatabaseUnkownFailureException
+	{
 		boolean $ = false;
-
-		try (Connection conn = getConnection()) {
-			conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-
+		
+		try (Connection conn = getConnection())
+		{
+			conn
+				.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+			
 			$ = areFriends(username1, username2, conn);
-		} catch (SQLException e) {
+		} catch (final SQLException e)
+		{
 			throw new DatabaseUnkownFailureException(e);
 		}
-
+		
 		return $;
 	}
-
+	
+	
 	@Override
-	public boolean areFriends(String username1, String username2,
-			Connection conn) throws InvalidParamsException,
-			DatabaseUnkownFailureException {
-		if (username1 == null || username2 == null || isConnClosed(conn)) {
-			throw new InvalidParamsException();
-		}
+	public boolean areFriends(
+		String username1,
+		String username2,
+		Connection conn)
+		throws InvalidParamsException,
+		DatabaseUnkownFailureException
+	{
+		if (username1 == null || username2 == null || isConnClosed(conn)) { throw new InvalidParamsException(); }
 		boolean $ = false;
-		try (PreparedStatement stmt = conn.prepareStatement(areFriendsQuery)) {
+		try (PreparedStatement stmt = conn.prepareStatement(areFriendsQuery))
+		{
 			stmt.setString(1, username1);
 			stmt.setString(2, username2);
-			ResultSet rs = stmt.executeQuery();
-
-			if (rs.next()) {
+			final ResultSet rs = stmt.executeQuery();
+			
+			if (rs.next())
+			{
 				$ = rs.getBoolean(1);
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e)
+		{
 			throw new DatabaseUnkownFailureException(e);
 		}
 		return $;
 	}
-
+	
+	
 	@Override
 	public void deleteFriendships(String username, Connection conn)
-			throws InvalidParamsException, DatabaseUnkownFailureException {
-		if (username == null || isConnClosed(conn)) {
-			throw new InvalidParamsException();
-		}
-		try (PreparedStatement stmt = conn
-				.prepareStatement(deleteUserFriendsQuery)) {
+		throws InvalidParamsException,
+		DatabaseUnkownFailureException
+	{
+		if (username == null || isConnClosed(conn)) { throw new InvalidParamsException(); }
+		try (
+			PreparedStatement stmt =
+				conn.prepareStatement(deleteUserFriendsQuery))
+		{
 			stmt.setString(1, username);
 			stmt.executeUpdate();
-		} catch (SQLException e) {
+		} catch (final SQLException e)
+		{
 			throw new DatabaseUnkownFailureException(e);
 		}
 	}
-
-	private enum FriendshipsColumns {
-		FIRST_USERNAME, SECOND_USERNAME
+	
+	
+	
+	private enum FriendshipsColumns
+	{
+		FIRST_USERNAME,
+		SECOND_USERNAME
 	}
-
-	private enum UsersColumns {
+	
+	
+	
+	private enum UsersColumns
+	{
 		/**
 		 * Username column representation
 		 */
@@ -106,7 +134,9 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
 		 */
 		BALANCE
 	}
-
+	
+	
+	
 	/**
 	 * @param friendshipsTable
 	 *            The table to be created
@@ -119,205 +149,383 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
 	 * @throws TableCreationException
 	 *             exception thrown in case of failure in creating the database
 	 */
-	public FriendshipsDatabaseImpl(String friendshipsTable, String usersTable,
-			String schema, BasicDataSource datasource)
-			throws TableCreationException {
+	public FriendshipsDatabaseImpl(
+		String friendshipsTable,
+		String usersTable,
+		String schema,
+		BasicDataSource datasource) throws TableCreationException
+	{
 		super(schema, datasource);
 		this.friendshipsTable = schema + "." + "`" + friendshipsTable + "`";
 		this.usersTable = schema + "." + "`" + usersTable + "`";
 		initQueries();
-
-		try (Connection conn = getConnection();
-				Statement stmt = conn.createStatement()) {
+		
+		try (
+			Connection conn = getConnection();
+			Statement stmt = conn.createStatement())
+		{
 			stmt.execute(creationQuery);
 			conn.commit();
-		} catch (final SQLException e) {
-			if (e.getErrorCode() != 1061) {
-				throw new TableCreationException(e);
-			}
+		} catch (final SQLException e)
+		{
+			if (e.getErrorCode() != 1061) { throw new TableCreationException(e); }
 		}
 	}
-
-	/*
-	 * (non-Javadoc) @see
+	
+	
+	/* (non-Javadoc) @see
 	 * com.servicebook.database.FriendshipsDatabase#addFriendship
-	 * (java.lang.String, java.lang.String)
-	 */
+	 * (java.lang.String, java.lang.String) */
 	@Override
-	public void addFriendship(String username1, String username2,
-			Connection conn) throws InvalidParamsException,
-			ReflexiveFriendshipException, ElementAlreadyExistsException,
-			DatabaseUnkownFailureException {
-		if (username1 == null || username2 == null) {
-			throw new InvalidParamsException();
-		}
-
-		if (username1.equalsIgnoreCase(username2)) {
-			throw new ReflexiveFriendshipException();
-		}
-
+	public void addFriendship(
+		String username1,
+		String username2,
+		Connection conn)
+		throws InvalidParamsException,
+		ReflexiveFriendshipException,
+		ElementAlreadyExistsException,
+		DatabaseUnkownFailureException
+	{
+		if (username1 == null || username2 == null) { throw new InvalidParamsException(); }
+		
+		if (username1.equalsIgnoreCase(username2)) { throw new ReflexiveFriendshipException(); }
+		
 		insertByUsername(username1, username2, conn);
 	}
-
-	/*
-	 * (non-Javadoc) @see
+	
+	
+	/* (non-Javadoc) @see
 	 * com.servicebook.database.FriendshipsDatabase#addFriendship
 	 * (com.servicebook.database.primitives.DBUser,
-	 * com.servicebook.database.primitives.DBUser)
-	 */
+	 * com.servicebook.database.primitives.DBUser) */
 	@Override
 	public void addFriendship(DBUser user1, DBUser user2, Connection conn)
-			throws ElementAlreadyExistsException,
-			DatabaseUnkownFailureException, InvalidParamsException,
-			ReflexiveFriendshipException {
-		if (isUserNull(user1) || isUserNull(user2)) {
-			throw new InvalidParamsException();
-		}
+		throws ElementAlreadyExistsException,
+		DatabaseUnkownFailureException,
+		InvalidParamsException,
+		ReflexiveFriendshipException
+	{
+		if (isUserNull(user1) || isUserNull(user2)) { throw new InvalidParamsException(); }
 		addFriendship(user1.getUsername(), user2.getUsername(), conn);
 	}
-
-	/*
-	 * (non-Javadoc) @see
-	 * com.servicebook.database.FriendshipsDatabase#getFriends(java.lang.String)
-	 */
+	
+	
+	/* (non-Javadoc) @see
+	 * com.servicebook.database.FriendshipsDatabase#getFriends(java.lang.String) */
 	@Override
 	public List<DBUser> getFriends(String username)
-			throws InvalidParamsException, DatabaseUnkownFailureException {
-		if (username == null) {
-			throw new InvalidParamsException();
-		}
+		throws InvalidParamsException,
+		DatabaseUnkownFailureException
+	{
+		if (username == null) { throw new InvalidParamsException(); }
 		return getByUsername(username);
 	}
-
-	/*
-	 * (non-Javadoc) @see
+	
+	
+	/* (non-Javadoc) @see
 	 * com.servicebook.database.FriendshipsDatabase#getFriends
-	 * (com.servicebook.database.primitives.DBUser)
-	 */
+	 * (com.servicebook.database.primitives.DBUser) */
 	@Override
-	public List<DBUser> getFriends(DBUser user) throws InvalidParamsException,
-			DatabaseUnkownFailureException {
-		if (isUserNull(user)) {
-			throw new InvalidParamsException();
-		}
+	public List<DBUser> getFriends(DBUser user)
+		throws InvalidParamsException,
+		DatabaseUnkownFailureException
+	{
+		if (isUserNull(user)) { throw new InvalidParamsException(); }
 		return getFriends(user.getUsername());
 	}
-
-	private void initQueries() {
-		creationQuery = String
-				.format("CREATE TABLE IF NOT EXISTS %s (`%s` VARCHAR(255) NOT NULL, `%s` VARCHAR(255) NOT NULL, PRIMARY KEY(`%s`, `%s`))",
-						friendshipsTable, FriendshipsColumns.FIRST_USERNAME
-								.toString().toLowerCase(),
-						FriendshipsColumns.SECOND_USERNAME.toString()
-								.toLowerCase(),
-						FriendshipsColumns.FIRST_USERNAME.toString()
-								.toLowerCase(),
-						FriendshipsColumns.SECOND_USERNAME.toString()
-								.toLowerCase());
-
-		insertionQuery = String.format("INSERT INTO %s (%s, %s) VALUES(?, ?)",
-				friendshipsTable, FriendshipsColumns.FIRST_USERNAME.toString()
-						.toLowerCase(), FriendshipsColumns.SECOND_USERNAME
-						.toString().toLowerCase());
-
-		gettingQuery = String
-				.format("SELECT %s, %s, %s, %s FROM (SELECT * FROM %s WHERE %s = ?) O JOIN %s ON (O.%s = %s.%s)",
-						UsersColumns.USERNAME.toString().toLowerCase(),
-						UsersColumns.PASSWORD.toString().toLowerCase(),
-						UsersColumns.NAME.toString().toLowerCase(),
-						UsersColumns.BALANCE.toString().toLowerCase(),
-						friendshipsTable, FriendshipsColumns.FIRST_USERNAME
-								.toString().toLowerCase(), usersTable,
-						FriendshipsColumns.SECOND_USERNAME.toString()
-								.toLowerCase(), usersTable,
-						UsersColumns.USERNAME.toString().toLowerCase());
-
-		areFriendsQuery = String
-				.format("SELECT CASE WHEN EXISTS (SELECT * FROM %s WHERE %s=? AND %s=?) THEN 'TRUE' ELSE 'FALSE' END;",
-						friendshipsTable, FriendshipsColumns.FIRST_USERNAME
-								.toString().toLowerCase(),
-						FriendshipsColumns.SECOND_USERNAME.toString()
-								.toLowerCase());
-
-		deleteUserFriendsQuery = String.format(
-				"DELETE FROM %s WHERE ? IN (%s.%s,%s.%s);", friendshipsTable,
-				friendshipsTable, FriendshipsColumns.FIRST_USERNAME.toString()
-						.toLowerCase(), friendshipsTable,
-				FriendshipsColumns.SECOND_USERNAME.toString().toLowerCase());
-
-	}
-
-	private void insertByUsername(String username1, String username2,
-			Connection conn) throws ElementAlreadyExistsException,
-			DatabaseUnkownFailureException, InvalidParamsException {
-		if (isConnClosed(conn)) {
-			throw new InvalidParamsException();
+	
+	
+	/* (non-Javadoc) @see
+	 * com.servicebook.database.FriendshipsDatabase#getFriendsMaxDist
+	 * (java.lang.String, int) */
+	@Override
+	public List<DBUser> getFriendsMaxDist(String username, int maxDist)
+		throws InvalidParamsException,
+		DatabaseUnkownFailureException
+	{
+		if (username == null || maxDist < 1 || maxDist > 2) { throw new InvalidParamsException(); }
+		
+		final List<DBUser> $ = new ArrayList<DBUser>();
+		if (maxDist == 1)
+		{
+			try (
+				Connection conn = getConnection();
+				PreparedStatement stmt =
+					conn.prepareStatement(getFriendsDistOneQuery))
+			{
+				stmt.setString(1, username);
+				
+				final ResultSet rs = stmt.executeQuery();
+				
+				while (rs.next())
+				{
+					final DBUser u = rsRow2DBUser(rs);
+					$.add(u);
+				}
+				
+			} catch (final SQLException e)
+			{
+				throw new DatabaseUnkownFailureException(e);
+			}
+		} else
+		{
+			try (
+				Connection conn = getConnection();
+				PreparedStatement stmt =
+					conn.prepareStatement(getFriendsDistTwoQuery))
+			{
+				stmt.setString(1, username);
+				stmt.setString(2, username);
+				stmt.setString(3, username);
+				
+				final ResultSet rs = stmt.executeQuery();
+				
+				while (rs.next())
+				{
+					final DBUser u = rsRow2DBUser(rs);
+					$.add(u);
+				}
+				
+			} catch (final SQLException e)
+			{
+				throw new DatabaseUnkownFailureException(e);
+			}
 		}
-
-		try (PreparedStatement prpdStmt = conn.prepareStatement(insertionQuery)) {
+		
+		return $;
+	}
+	
+	
+	private void initQueries()
+	{
+		creationQuery =
+			String
+				.format(
+					"CREATE TABLE IF NOT EXISTS %s (`%s` VARCHAR(255) NOT NULL, `%s` VARCHAR(255) NOT NULL, PRIMARY KEY(`%s`, `%s`))",
+					friendshipsTable,
+					FriendshipsColumns.FIRST_USERNAME.toString().toLowerCase(),
+					FriendshipsColumns.SECOND_USERNAME.toString().toLowerCase(),
+					FriendshipsColumns.FIRST_USERNAME.toString().toLowerCase(),
+					FriendshipsColumns.SECOND_USERNAME.toString().toLowerCase());
+		
+		insertionQuery =
+			String.format(
+				"INSERT INTO %s (%s, %s) VALUES(?, ?)",
+				friendshipsTable,
+				FriendshipsColumns.FIRST_USERNAME.toString().toLowerCase(),
+				FriendshipsColumns.SECOND_USERNAME.toString().toLowerCase());
+		
+		gettingQuery =
+			String
+				.format(
+					"SELECT %s, %s, %s, %s FROM (SELECT %s FROM %s WHERE %s = ?) O JOIN %s ON (O.%s = %s.%s)",
+					UsersColumns.USERNAME.toString().toLowerCase(),
+					UsersColumns.PASSWORD.toString().toLowerCase(),
+					UsersColumns.NAME.toString().toLowerCase(),
+					UsersColumns.BALANCE.toString().toLowerCase(),
+					FriendshipsColumns.SECOND_USERNAME.toString().toLowerCase(),
+					friendshipsTable,
+					FriendshipsColumns.FIRST_USERNAME.toString().toLowerCase(),
+					usersTable,
+					FriendshipsColumns.SECOND_USERNAME.toString().toLowerCase(),
+					usersTable,
+					UsersColumns.USERNAME.toString().toLowerCase());
+		
+		areFriendsQuery =
+			String
+				.format(
+					"SELECT CASE WHEN EXISTS (SELECT * FROM %s WHERE %s=? AND %s=?) THEN 'TRUE' ELSE 'FALSE' END;",
+					friendshipsTable,
+					FriendshipsColumns.FIRST_USERNAME.toString().toLowerCase(),
+					FriendshipsColumns.SECOND_USERNAME.toString().toLowerCase());
+		
+		deleteUserFriendsQuery =
+			String.format(
+				"DELETE FROM %s WHERE ? IN (%s.%s,%s.%s);",
+				friendshipsTable,
+				friendshipsTable,
+				FriendshipsColumns.FIRST_USERNAME.toString().toLowerCase(),
+				friendshipsTable,
+				FriendshipsColumns.SECOND_USERNAME.toString().toLowerCase());
+		
+		getFriendsDistOneQuery = gettingQuery;
+		
+		final String getFriendsDistTwoSubQuery =
+			""
+				+ String
+					.format(
+						"SELECT %s,1 AS dist FROM %s WHERE %s=?",
+						FriendshipsColumns.SECOND_USERNAME
+							.toString()
+							.toLowerCase(),
+						friendshipsTable,
+						FriendshipsColumns.FIRST_USERNAME
+							.toString()
+							.toLowerCase())
+				+ " UNION ALL "
+				+ String
+					.format(
+						"SELECT %s.%s,2 AS dist "
+							+ "FROM (SELECT %s FROM %s WHERE %s=?) O JOIN %s ON (O.%s=%s.%s)",
+						friendshipsTable,
+						FriendshipsColumns.SECOND_USERNAME
+							.toString()
+							.toLowerCase(),
+						FriendshipsColumns.SECOND_USERNAME
+							.toString()
+							.toLowerCase(),
+						friendshipsTable,
+						FriendshipsColumns.FIRST_USERNAME
+							.toString()
+							.toLowerCase(),
+						friendshipsTable,
+						FriendshipsColumns.SECOND_USERNAME
+							.toString()
+							.toLowerCase(),
+						friendshipsTable,
+						FriendshipsColumns.FIRST_USERNAME
+							.toString()
+							.toLowerCase())
+				+ "";
+		getFriendsDistTwoQuery =
+			String
+				.format(
+					" SELECT %s.* FROM %s JOIN (%s) O ON (%s.%s=O.%s) WHERE %s.%s<>? GROUP BY %s ORDER BY %s,%s",
+					usersTable,
+					usersTable,
+					getFriendsDistTwoSubQuery,
+					usersTable,
+					UsersColumns.USERNAME.toString().toLowerCase(),
+					FriendshipsColumns.SECOND_USERNAME.toString().toLowerCase(),
+					usersTable,
+					UsersColumns.USERNAME.toString().toLowerCase(),
+					FriendshipsColumns.SECOND_USERNAME.toString().toLowerCase(),
+					"MIN(dist)",
+					FriendshipsColumns.SECOND_USERNAME.toString().toLowerCase());
+	}
+	
+	
+	private void insertByUsername(
+		String username1,
+		String username2,
+		Connection conn)
+		throws ElementAlreadyExistsException,
+		DatabaseUnkownFailureException,
+		InvalidParamsException
+	{
+		if (isConnClosed(conn)) { throw new InvalidParamsException(); }
+		
+		try (PreparedStatement prpdStmt = conn.prepareStatement(insertionQuery))
+		{
 			prpdStmt.setString(1, username1);
 			prpdStmt.setString(2, username2);
 			prpdStmt.executeUpdate();
 			prpdStmt.setString(1, username2);
 			prpdStmt.setString(2, username1);
 			prpdStmt.executeUpdate();
-		} catch (SQLException e) {
-			if (e.getErrorCode() == MysqlErrorNumbers.ER_DUP_ENTRY) {
-				throw new ElementAlreadyExistsException(e);
-			}
-
+		} catch (final SQLException e)
+		{
+			if (e.getErrorCode() == MysqlErrorNumbers.ER_DUP_ENTRY) { throw new ElementAlreadyExistsException(
+				e); }
+			
 			throw new DatabaseUnkownFailureException(e);
 		}
 	}
-
+	
+	
 	private List<DBUser> getByUsername(String username)
-			throws DatabaseUnkownFailureException {
-		ArrayList<DBUser> $ = new ArrayList<>();
-
-		try (Connection conn = getConnection();
-				PreparedStatement prpdStmt = conn
-						.prepareStatement(gettingQuery)) {
-			conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-
+		throws DatabaseUnkownFailureException
+	{
+		final ArrayList<DBUser> $ = new ArrayList<>();
+		
+		try (
+			Connection conn = getConnection();
+			PreparedStatement prpdStmt = conn.prepareStatement(gettingQuery))
+		{
+			conn
+				.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+			
 			prpdStmt.setString(1, username);
-			ResultSet res = prpdStmt.executeQuery();
-
-			while (res.next()) {
-				DBUser u = new DBUser(res.getString(UsersColumns.USERNAME
-						.toString().toLowerCase()),
-						res.getString(UsersColumns.PASSWORD.toString()
-								.toLowerCase()),
-						res.getString(UsersColumns.NAME.toString()
-								.toLowerCase()),
-						res.getInt(UsersColumns.BALANCE.toString()
-								.toLowerCase()));
-
+			final ResultSet res = prpdStmt.executeQuery();
+			
+			while (res.next())
+			{
+				final DBUser u = rsRow2DBUser(res);
+				
 				$.add(u);
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e)
+		{
 			throw new DatabaseUnkownFailureException(e);
 		}
-
+		
 		return $;
 	}
-
-	private static boolean isUserNull(DBUser u) {
-		return (u == null || u.getUsername() == null || u.getPassword() == null || u
-				.getName() == null);
+	
+	
+	/**
+	 * @param res
+	 * @return
+	 * @throws SQLException
+	 */
+	private DBUser rsRow2DBUser(final ResultSet res) throws SQLException
+	{
+		final DBUser u =
+			new DBUser(res.getString(UsersColumns.USERNAME
+				.toString()
+				.toLowerCase()), res.getString(UsersColumns.PASSWORD
+				.toString()
+				.toLowerCase()), res.getString(UsersColumns.NAME
+				.toString()
+				.toLowerCase()), res.getInt(UsersColumns.BALANCE
+				.toString()
+				.toLowerCase()));
+		return u;
 	}
-
+	
+	
+	private static boolean isUserNull(DBUser u)
+	{
+		return u == null
+			|| u.getUsername() == null
+			|| u.getPassword() == null
+			|| u.getName() == null;
+	}
+	
+	
+	
 	private final String friendshipsTable;
-
+	
 	private final String usersTable;
-
+	
 	private String creationQuery;
-
+	
 	private String insertionQuery;
-
+	
 	private String gettingQuery;
-
+	
 	private String areFriendsQuery;
-
+	
 	private String deleteUserFriendsQuery;
-
+	
+	/**
+	 * The get friends dist one query.
+	 *
+	 * @param username
+	 *            String
+	 */
+	private String getFriendsDistOneQuery;
+	
+	/**
+	 * The get friends dist two query.
+	 *
+	 * @param username
+	 *            String
+	 * @param username
+	 *            String
+	 * @param username
+	 *            String
+	 */
+	private String getFriendsDistTwoQuery;
+	
 }

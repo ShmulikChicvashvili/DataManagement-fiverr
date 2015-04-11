@@ -10,6 +10,33 @@
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="mysql-connector-java-5.1.34-bin.jar"/>
+	<classpathentry kind="lib" path="mysql-connector-java-5.1.34-bin.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="org.restlet.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://restlet.com/technical-resources/restlet-framework/javadocs/2.3/jee/api/"/>
+			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="org.restlet.ext.servlet.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://restlet.com/technical-resources/restlet-framework/javadocs/2.3/jee/ext/"/>
+			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="org.restlet.ext.json.jar">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="json-20141113.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://www.json.org/javadoc/"/>
+			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
