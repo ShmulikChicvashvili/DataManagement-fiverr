@@ -49,18 +49,18 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 			this.userColumn = userColumn;
 			this.friendColumn = friendColumn;
 		}
-
-
-
+		
+		
+		
 		public String tableName;
-
+		
 		public String userColumn;
-
+		
 		public String friendColumn;
 	}
-
-
-
+	
+	
+	
 	private enum ActivityTableColumn
 	{
 		ID,
@@ -69,15 +69,15 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		CAPACITY,
 		DISTANCE,
 		TYPE;
-
+		
 		public String columnName()
 		{
 			return toString().toLowerCase();
 		}
 	}
-
-
-
+	
+	
+	
 	private enum ActivityType
 	{
 		SERVICE
@@ -96,25 +96,25 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 				return "TASK";
 			}
 		};
-
+		
 		public abstract String toDB();
 	}
-
-
-
+	
+	
+	
 	private enum RegistrationTableColumn
 	{
 		ID,
 		USERNAME;
-
+		
 		public String columnName()
 		{
 			return toString().toLowerCase();
 		}
 	}
-
-
-
+	
+	
+	
 	public PaidActivitiesDatabaseImpl(
 		String activityTable,
 		String registrationTable,
@@ -127,31 +127,31 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		super(schema, datasource);
 		this.activityTable = this.schema + ".`" + activityTable + "`";
 		this.registrationTable = this.schema + ".`" + registrationTable + "`";
-
+		
 		friendsTableInfo =
 			new FriendsTableInfo(
 				this.schema + ".`" + friendsTableName + "`",
 				friendsTableUsernameColumn,
 				friendsTableFriendColumn);
-
+		
 		initializeQueries();
-
+		
 		try (
 			Connection conn = getConnection();
 			Statement stmt = conn.createStatement())
 		{
-
+			
 			stmt.execute(genActivityTableCreationQuery());
 			stmt.execute(genRegistrationTableCreationQuery());
-
+			
 			conn.commit();
 		} catch (final SQLException e)
 		{
 			throw new TableCreationException(e);
 		}
 	}
-
-
+	
+	
 	@Override
 	public int addPaidService(DBPaidService service, Connection conn)
 		throws InvalidParameterException,
@@ -159,8 +159,8 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	{
 		return AddPaidActivity(service, ActivityType.SERVICE, conn);
 	}
-
-
+	
+	
 	@Override
 	public int addPaidTask(DBPaidTask task, Connection conn)
 		throws DatabaseUnkownFailureException,
@@ -168,28 +168,28 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	{
 		return AddPaidActivity(task, ActivityType.TASK, conn);
 	}
-
-
+	
+	
 	@Override
 	public void deletePaidActivity(int id, Connection conn)
 		throws DatabaseUnkownFailureException,
 		InvalidParameterException
 	{
 		if (!isValidId(id) || isConnClosed(conn)) { throw new InvalidParameterException(); }
-
+		
 		try (
 			PreparedStatement stmt = conn.prepareStatement(deleteActivityQuery))
 		{
 			stmt.setInt(1, id);
-
+			
 			stmt.executeUpdate();
 		} catch (final SQLException e)
 		{
 			throw new DatabaseUnkownFailureException(e);
 		}
 	}
-
-
+	
+	
 	@Override
 	public void deleteUserPaidActivities(String username, Connection conn)
 		throws InvalidParameterException,
@@ -201,37 +201,37 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 				conn.prepareStatement(deleteAllUserActivitiesQuery))
 		{
 			stmt.setString(1, username);
-
+			
 			stmt.executeUpdate();
 		} catch (final SQLException e)
 		{
 			throw new DatabaseUnkownFailureException(e);
 		}
-
+		
 	}
-
-
+	
+	
 	@Override
 	public void deleteUserRegistrations(String username, Connection conn)
 		throws InvalidParameterException,
 		DatabaseUnkownFailureException
 	{
 		if (username == null || isConnClosed(conn)) { throw new InvalidParameterException(); }
-
+		
 		try (
 			PreparedStatement stmt =
 				conn.prepareStatement(deleteUserRegistrationsQuery))
 		{
 			stmt.setString(1, username);
-
+			
 			stmt.executeUpdate();
 		} catch (final SQLException e)
 		{
 			throw new DatabaseUnkownFailureException(e);
 		}
 	}
-
-
+	
+	
 	@Override
 	public ActivityStatus getActivityStatus(int id)
 		throws DatabaseUnkownFailureException,
@@ -239,37 +239,37 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	{
 		if (!isValidId(id)) { throw new InvalidParameterException(); }
 		ActivityStatus $ = ActivityStatus.NOT_EXIST;
-
+		
 		try (Connection conn = getConnection())
 		{
 			conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-
+			
 			$ = getActivityStatus(id, conn);
 		} catch (final SQLException e)
 		{
 			throw new DatabaseUnkownFailureException(e);
 		}
-
+		
 		return $;
 	}
-
-
+	
+	
 	@Override
 	public ActivityStatus getActivityStatus(int id, Connection conn)
 		throws DatabaseUnkownFailureException,
 		InvalidParameterException
 	{
 		if (!isValidId(id) || isConnClosed(conn)) { throw new InvalidParameterException(); }
-
+		
 		ActivityStatus $ = ActivityStatus.NOT_EXIST;
 		try (
 			PreparedStatement stmt =
 				conn.prepareStatement(getActivityStatusQuery))
 		{
 			stmt.setInt(1, id);
-
+			
 			final ResultSet rs = stmt.executeQuery();
-
+			
 			if (rs.next())
 			{
 				final String type =
@@ -285,31 +285,31 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 					assert false;
 				}
 			}
-
+			
 		} catch (final SQLException e)
 		{
 			throw new DatabaseUnkownFailureException(e);
 		}
-
+		
 		return $;
 	}
-
-
+	
+	
 	@Override
 	public DBPaidActivity getActivity(int id, Connection conn)
 		throws InvalidParameterException,
 		DatabaseUnkownFailureException
 	{
 		if (!isValidId(id) || isConnClosed(conn)) { throw new InvalidParameterException(); }
-
+		
 		DBPaidActivity $ = null;
-
+		
 		try (PreparedStatement stmt = conn.prepareStatement(getActivityQuery))
 		{
 			stmt.setInt(1, id);
-
+			
 			final ResultSet rs = stmt.executeQuery();
-
+			
 			if (rs.next())
 			{
 				$ = rsRowToActivity(rs);
@@ -320,8 +320,8 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		}
 		return $;
 	}
-
-
+	
+	
 	/* (non-Javadoc) @see
 	 * com.servicebook.database.PaidActivitiesDatabase#getServicesUserRegistered
 	 * (java.lang.String, int, int) */
@@ -340,7 +340,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 				start,
 				amount,
 				ActivityType.SERVICE);
-
+		
 		for (final DBPaidActivity service : services)
 		{
 			assert service instanceof DBPaidService;
@@ -350,11 +350,11 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 			}
 			$.add((DBPaidService) service);
 		}
-
+		
 		return $;
 	}
-
-
+	
+	
 	/* (non-Javadoc) @see
 	 * com.servicebook.database.PaidActivitiesDatabase#getTasksUserRegistered
 	 * (java.lang.String, int, int) */
@@ -373,7 +373,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 				start,
 				amount,
 				ActivityType.TASK);
-
+		
 		for (final DBPaidActivity task : tasks)
 		{
 			assert task instanceof DBPaidTask;
@@ -383,11 +383,11 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 			}
 			$.add((DBPaidTask) task);
 		}
-
+		
 		return $;
 	}
-
-
+	
+	
 	@Override
 	public List<DBPaidService> getServicesOfferedByUser(
 		String username,
@@ -403,7 +403,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 				start,
 				amount,
 				ActivityType.SERVICE);
-
+		
 		for (final DBPaidActivity service : services)
 		{
 			assert service instanceof DBPaidService;
@@ -413,11 +413,11 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 			}
 			$.add((DBPaidService) service);
 		}
-
+		
 		return $;
 	}
-
-
+	
+	
 	@Override
 	public List<DBPaidService> getServicesOfferedToUser(
 		String username,
@@ -434,7 +434,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 				start,
 				amount,
 				ActivityType.SERVICE);
-
+		
 		for (final DBPaidActivity service : services)
 		{
 			assert service instanceof DBPaidService;
@@ -444,11 +444,11 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 			}
 			$.add((DBPaidService) service);
 		}
-
+		
 		return $;
 	}
-
-
+	
+	
 	@Override
 	public List<DBPaidTask> getTasksOfferedByUser(
 		String username,
@@ -464,7 +464,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 				start,
 				amount,
 				ActivityType.TASK);
-
+		
 		for (final DBPaidActivity task : tasks)
 		{
 			assert task instanceof DBPaidTask;
@@ -474,11 +474,11 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 			}
 			$.add((DBPaidTask) task);
 		}
-
+		
 		return $;
 	}
-
-
+	
+	
 	@Override
 	public List<DBPaidTask> getTasksOfferedToUser(
 		String username,
@@ -495,7 +495,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 				start,
 				amount,
 				ActivityType.TASK);
-
+		
 		for (final DBPaidActivity task : tasks)
 		{
 			assert task instanceof DBPaidTask;
@@ -505,11 +505,48 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 			}
 			$.add((DBPaidTask) task);
 		}
-
+		
 		return $;
 	}
-
-
+	
+	
+	/* (non-Javadoc) @see com.servicebook.database.PaidActivitiesDatabase#
+	 * getActivitiesUserRegisteredCount(java.lang.String) */
+	@Override
+	public int getActivitiesUserRegisteredCount(String username)
+		throws InvalidParameterException,
+		DatabaseUnkownFailureException
+	{
+		final int $ = -1;
+		if (username == null) { throw new InvalidParameterException(); }
+		return 0;
+	}
+	
+	
+	/* (non-Javadoc) @see com.servicebook.database.PaidActivitiesDatabase#
+	 * getActivitiesOfferedToUserCount(java.lang.String) */
+	@Override
+	public int getActivitiesOfferedToUserCount(String username)
+		throws InvalidParameterException,
+		DatabaseUnkownFailureException
+	{
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	
+	
+	/* (non-Javadoc) @see com.servicebook.database.PaidActivitiesDatabase#
+	 * getActivitiesOfferedByUserCount(java.lang.String) */
+	@Override
+	public int getActivitiesOfferedByUserCount(String username)
+		throws InvalidParameterException,
+		DatabaseUnkownFailureException
+	{
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	
+	
 	@Override
 	public void registerToActivity(int id, String username, Connection conn)
 		throws ElementAlreadyExistException,
@@ -517,7 +554,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		InvalidParameterException
 	{
 		if (!isValidId(id) || username == null || isConnClosed(conn)) { throw new InvalidParameterException(); }
-
+		
 		try (
 			PreparedStatement stmt =
 				conn.prepareStatement(registerToActivityQuery))
@@ -532,8 +569,8 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 			throw new DatabaseUnkownFailureException(e);
 		}
 	}
-
-
+	
+	
 	@Override
 	public
 		void
@@ -543,7 +580,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 			ElementNotExistException
 	{
 		if (!isValidId(id) || username == null || isConnClosed(conn)) { throw new InvalidParameterException(); }
-
+		
 		try (
 			PreparedStatement stmt =
 				conn.prepareStatement(unregisterFromActivityQuery))
@@ -551,16 +588,16 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 			stmt.setInt(1, id);
 			stmt.setString(2, username);
 			final int numDeleted = stmt.executeUpdate();
-
+			
 			if (numDeleted == 0) { throw new ElementNotExistException(); }
-
+			
 		} catch (final SQLException e)
 		{
 			throw new DatabaseUnkownFailureException(e);
 		}
 	}
-
-
+	
+	
 	/**
 	 * adds the activity to the database.
 	 *
@@ -588,9 +625,9 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 			|| activity.getCapacity() <= 0
 			|| activity.getDistance() <= 0
 			|| isConnClosed(conn)) { throw new InvalidParameterException(); }
-
+		
 		int $ = -1;
-
+		
 		assert activity.getDistance() == 1;
 		try (
 			PreparedStatement stmt =
@@ -603,10 +640,10 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 			stmt.setShort(3, activity.getCapacity());
 			stmt.setShort(4, activity.getDistance());
 			stmt.setString(5, type.toDB());
-
+			
 			stmt.executeUpdate();
 			final ResultSet rs = stmt.getGeneratedKeys();
-
+			
 			if (rs.next())
 			{
 				$ = rs.getInt(1);
@@ -616,11 +653,11 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		{
 			throw new DatabaseUnkownFailureException(e);
 		}
-
+		
 		return $;
 	}
-
-
+	
+	
 	private String genActivityTableCreationQuery()
 	{
 		final String $ =
@@ -643,11 +680,11 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 				ActivityTableColumn.TYPE.columnName(),
 				ActivityTableColumn.ID.columnName(),
 				ActivityTableColumn.USERNAME.columnName());
-
+		
 		return $;
 	}
-
-
+	
+	
 	private String genRegistrationTableCreationQuery()
 	{
 		final String $ =
@@ -661,11 +698,11 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 				RegistrationTableColumn.USERNAME.columnName(),
 				RegistrationTableColumn.ID.columnName(),
 				RegistrationTableColumn.USERNAME.columnName());
-
+		
 		return $;
 	}
-
-
+	
+	
 	/**
 	 * Converts a resultset row to an activity
 	 *
@@ -689,7 +726,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		final short distance =
 			rs.getShort(ActivityTableColumn.DISTANCE.columnName());
 		final short numRegistered = rs.getShort(queryNumRegisteredField);
-
+		
 		final String typeString =
 			rs.getString(ActivityTableColumn.TYPE.columnName());
 		ActivityType type;
@@ -703,13 +740,13 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		{
 			return null;
 		}
-
+		
 		DBPaidActivity $ = null;
-
+		
 		switch (type)
 		{
 			case SERVICE:
-
+				
 				$ =
 					new DBPaidService(
 						id,
@@ -732,8 +769,8 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		}
 		return $;
 	}
-
-
+	
+	
 	/**
 	 * Gets the activities offered by user. The activities are ordered by their
 	 * title.
@@ -761,7 +798,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		DatabaseUnkownFailureException
 	{
 		if (username == null || !isStartAmountInRanges(start, amount)) { throw new InvalidParameterException(); }
-
+		
 		final List<DBPaidActivity> $ = new ArrayList<DBPaidActivity>();
 		try (
 			Connection conn = getConnection();
@@ -770,38 +807,38 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		{
 			conn
 				.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-
+			
 			stmt.setString(1, username);
 			stmt.setString(2, type.toDB());
 			stmt.setInt(3, start);
 			stmt.setInt(4, amount);
-
+			
 			final ResultSet rs = stmt.executeQuery();
-
+			
 			while (rs.next())
 			{
 				assert username.equals(rs
 					.getString(ActivityTableColumn.USERNAME.columnName()));
 				assert type.toDB().equals(
 					rs.getString(ActivityTableColumn.TYPE.columnName()));
-
+				
 				final DBPaidActivity activity = rsRowToActivity(rs);
 				$.add(activity);
 			}
-
+			
 			// ResultSet rs closes automatically when `stmt` closes
 		} catch (final SQLException e)
 		{
 			throw new DatabaseUnkownFailureException(e);
 		}
-
+		
 		assert $.size() <= amount;
-
+		
 		return $;
-
+		
 	}
-
-
+	
+	
 	/**
 	 * Gets the activities the user registered to. The activities are ordered by
 	 * their title.
@@ -829,7 +866,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		DatabaseUnkownFailureException
 	{
 		if (username == null || !isStartAmountInRanges(start, amount)) { throw new InvalidParameterException(); }
-
+		
 		final List<DBPaidActivity> $ = new ArrayList<DBPaidActivity>();
 		try (
 			Connection conn = getConnection();
@@ -838,47 +875,36 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		{
 			conn
 				.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-
+			
 			stmt.setString(1, type.toDB());
 			stmt.setString(2, username);
 			stmt.setInt(3, start);
 			stmt.setInt(4, amount);
-
+			
 			final ResultSet rs = stmt.executeQuery();
-
+			
 			while (rs.next())
 			{
 				assert type.toDB().equals(
 					rs.getString(ActivityTableColumn.TYPE.columnName()));
-
+				
 				final DBPaidActivity activity = rsRowToActivity(rs);
 				$.add(activity);
 			}
-
+			
 			// ResultSet rs closes automatically when `stmt` closes
 		} catch (final SQLException e)
 		{
 			throw new DatabaseUnkownFailureException(e);
 		}
-
+		
 		assert $.size() <= amount;
-
+		
 		return $;
-
+		
 	}
 	
-	public int getUserOfferedActivitiesCount(String username) {
-		int $ = 0;
-		if(username == null) { throw new InvalidParameterException(); }
-		
-		String sqlExpression = "SELECT COUNT(*) FROM servicebook_db.activities JOIN servicebook_db.friendships ON (servicebook_db.activities.username = servicebook_db.friendships.first_username AND servicebook_db.friendships.second_username = ?);";
-		try(Connection conn = getConnection();
-			PreparedStatement prpdStmt = )
-		
-		return $;
-	}
-
-
+	
 	/**
 	 * Gets the activities offered by user. The activities are ordered by their
 	 * title.
@@ -909,7 +935,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		FriendshipsTableNotExist
 	{
 		if (username == null || !isStartAmountInRanges(start, amount)) { throw new InvalidParameterException(); }
-
+		
 		final List<DBPaidActivity> $ = new ArrayList<DBPaidActivity>();
 		try (
 			Connection conn = getConnection();
@@ -918,15 +944,15 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		{
 			conn
 				.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-
+			
 			stmt.setString(1, username);
 			stmt.setString(2, type.toDB());
 			stmt.setString(3, username);
 			stmt.setInt(4, start);
 			stmt.setInt(5, amount);
-
+			
 			final ResultSet rs = stmt.executeQuery();
-
+			
 			while (rs.next())
 			{
 				assert type.toDB().equals(
@@ -934,7 +960,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 				final DBPaidActivity activity = rsRowToActivity(rs);
 				$.add(activity);
 			}
-
+			
 			// ResultSet rs closes automatically when `stmt` closes
 		} catch (final SQLException e)
 		{
@@ -942,13 +968,13 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 				e); }
 			throw new DatabaseUnkownFailureException(e);
 		}
-
+		
 		assert $.size() <= amount;
-
+		
 		return $;
 	}
-
-
+	
+	
 	private void initializeQueries()
 	{
 		addActivityQuery =
@@ -961,7 +987,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 				ActivityTableColumn.CAPACITY.columnName(),
 				ActivityTableColumn.DISTANCE.columnName(),
 				ActivityTableColumn.TYPE.columnName());
-
+		
 		final String deleteQueryPrefix =
 			String.format(
 				"DELETE %s,%s FROM %s LEFT OUTER JOIN %s ON ("
@@ -977,35 +1003,35 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 				registrationTable,
 				activityTable,
 				registrationTable);
-
+		
 		deleteActivityQuery =
 			deleteQueryPrefix
 				+ String.format(
 					"WHERE %s.`%s`=?;",
 					activityTable,
 					ActivityTableColumn.ID.columnName());
-
+		
 		deleteAllUserActivitiesQuery =
 			deleteQueryPrefix
 				+ String.format(
 					"WHERE %s.`%s`=?;",
 					activityTable,
 					ActivityTableColumn.USERNAME.columnName());
-
+		
 		deleteUserRegistrationsQuery =
 			String.format(
 				"DELETE FROM %s WHERE %s.`%s`=?;",
 				registrationTable,
 				registrationTable,
 				RegistrationTableColumn.USERNAME.columnName());
-
+		
 		getActivityStatusQuery =
 			String.format(
 				"SELECT %s FROM %s WHERE `%s`=?",
 				ActivityTableColumn.TYPE.columnName(),
 				activityTable,
 				ActivityTableColumn.ID.columnName());
-
+		
 		final String getActivityPrefix =
 			String.format(
 				"SELECT %s.*, count(%s.%s) AS "
@@ -1026,14 +1052,14 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 				activityTable,
 				registrationTable,
 				RegistrationTableColumn.USERNAME.columnName());
-
+		
 		final String getActivitySuffix =
 			String.format(
 				" GROUP BY %s.`%s` ORDER BY `%s` LIMIT ?,?",
 				activityTable,
 				ActivityTableColumn.ID.columnName(),
 				ActivityTableColumn.TITLE.columnName());
-
+		
 		getActivityQuery =
 			getActivityPrefix
 				+ String.format(
@@ -1042,7 +1068,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 					ActivityTableColumn.ID.columnName(),
 					activityTable,
 					ActivityTableColumn.ID);
-
+		
 		getActivitiesOfferedByUserQuery =
 			getActivityPrefix
 				+ String.format(
@@ -1050,7 +1076,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 					activityTable,
 					ActivityTableColumn.USERNAME.columnName(),
 					ActivityTableColumn.TYPE.columnName());
-
+		
 		getActivitiesUserRegisteredQuery =
 			getActivityPrefix
 				+ String.format(
@@ -1064,7 +1090,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 					ActivityTableColumn.ID.columnName(),
 					registrationTable,
 					RegistrationTableColumn.USERNAME.columnName());
-
+		
 		getActivitiesOfferedToUserQuery =
 			String.format(
 				"SELECT %s.*, count(%s.%s) AS "
@@ -1119,14 +1145,14 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 				friendsTableInfo.tableName,
 				friendsTableInfo.userColumn,
 				ActivityTableColumn.TYPE.columnName());
-
+		
 		registerToActivityQuery =
 			String.format(
 				"INSERT INTO %s (%s,%s) VALUES (?,?)",
 				registrationTable,
 				RegistrationTableColumn.ID.columnName(),
 				RegistrationTableColumn.USERNAME.columnName());
-
+		
 		unregisterFromActivityQuery =
 			String.format(
 				"DELETE FROM %s WHERE `%s`=? and `%s`=?",
@@ -1134,27 +1160,27 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 				RegistrationTableColumn.ID.columnName(),
 				RegistrationTableColumn.USERNAME.columnName());
 	}
-
-
+	
+	
 	private boolean isStartAmountInRanges(int start, int amount)
 	{
 		return start >= 0 && amount > 0;
 	}
-
-
+	
+	
 	private boolean isValidId(int id)
 	{
 		return id >= 0;
 	}
-
-
-
+	
+	
+	
 	private final String activityTable;
-
+	
 	private final String registrationTable;
-
+	
 	private final FriendsTableInfo friendsTableInfo;
-
+	
 	/**
 	 * The add activity query.
 	 *
@@ -1170,7 +1196,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	 *            Enum
 	 */
 	private String addActivityQuery;
-
+	
 	/**
 	 * The get activity query.
 	 *
@@ -1178,7 +1204,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	 *            int
 	 */
 	private String getActivityQuery;
-
+	
 	/**
 	 * The delete activity query.
 	 *
@@ -1186,7 +1212,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	 *            int
 	 */
 	private String deleteActivityQuery;
-
+	
 	/**
 	 * The delete all user activities query.
 	 *
@@ -1194,7 +1220,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	 *            String
 	 */
 	private String deleteAllUserActivitiesQuery;
-
+	
 	/**
 	 * The delete user registrations query.
 	 *
@@ -1202,7 +1228,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	 *            String
 	 */
 	private String deleteUserRegistrationsQuery;
-
+	
 	/**
 	 * the get activity status query.
 	 *
@@ -1210,13 +1236,15 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	 *            int
 	 */
 	private String getActivityStatusQuery;
-
+	
 	/**
 	 * The get activities offered by user query.
 	 *
 	 */
 	private String getActivitiesOfferedByUserQuery;
-
+	
+	private String getActivitiesOfferedByUserCountQuery;
+	
 	/**
 	 * The get activities user registered query.
 	 *
@@ -1230,7 +1258,9 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	 *            int
 	 */
 	private String getActivitiesUserRegisteredQuery;
-
+	
+	private String getActivitiesUserRegisteredCountQuery;
+	
 	/**
 	 * The get activities offered to user query.
 	 *
@@ -1246,9 +1276,11 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	 *            int
 	 */
 	private String getActivitiesOfferedToUserQuery;
-
+	
+	private String getActivitiesOfferedToUserCountQuery;
+	
 	private final String queryNumRegisteredField = "numRegistered";
-
+	
 	/**
 	 * The registration to an activity query
 	 *
@@ -1258,7 +1290,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	 *            String
 	 */
 	private String registerToActivityQuery;
-
+	
 	/**
 	 * The unregister from an activity query
 	 *
@@ -1268,5 +1300,5 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	 *            String
 	 */
 	private String unregisterFromActivityQuery;
-
+	
 }
