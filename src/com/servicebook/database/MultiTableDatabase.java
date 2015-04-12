@@ -102,6 +102,9 @@ public interface MultiTableDatabase {
 	 */
 	public void deleteActivity(int id) throws DatabaseUnkownFailureException,
 			InvalidParameterException;
+	
+	public void deleteUserActivities(String username) throws DatabaseUnkownFailureException,
+	InvalidParameterException;
 
 	/**
 	 * Adds a friendship relationship to the database. users must differ by

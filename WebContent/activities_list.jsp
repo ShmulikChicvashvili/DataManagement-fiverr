@@ -26,6 +26,14 @@
 			}
 		});
 	}
+	function removeAllActivities(username) {
+		var url = '/HW5/RemoveAllActivities';
+		var posting = $.post(url, {username:username});
+		
+		posting.done(function(data) {
+			window.location.href = "/HW5/my_activities.jsp";
+		});
+	}
 </script>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Insert title here</title>
@@ -95,7 +103,9 @@
 		<%
 			}
 		%>
-
+		<Button
+			onclick='removeAllActivities("<%=(String) session.getAttribute("username")%>")'>Remove
+			all activities</Button>
 	</ul>
 </body>
 </html>
