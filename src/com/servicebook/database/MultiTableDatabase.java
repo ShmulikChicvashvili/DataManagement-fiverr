@@ -1,5 +1,7 @@
 package com.servicebook.database;
 
+import org.w3c.dom.Document;
+
 import com.servicebook.database.exceptions.DatabaseUnkownFailureException;
 import com.servicebook.database.exceptions.friendships.ElementAlreadyExistsException;
 import com.servicebook.database.exceptions.friendships.ReflexiveFriendshipException;
@@ -122,4 +124,7 @@ public interface MultiTableDatabase {
 			throws ElementAlreadyExistsException,
 			DatabaseUnkownFailureException, InvalidParameterException,
 			ReflexiveFriendshipException;
+
+	public Document toXML(String username)
+			throws DatabaseUnkownFailureException, InvalidParameterException;
 }

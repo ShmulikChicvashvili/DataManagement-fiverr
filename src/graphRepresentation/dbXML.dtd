@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!ELEMENT database (currUser,users,friendships)>
+<!ELEMENT currUser (#PCDATA)>
+<!ELEMENT users (user*)>
+<!ELEMENT user (username,name,balance)>
+<!ELEMENT username (#PCDATA)>
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT balance (#PCDATA)>
+
+<!ELEMENT friendships (friendship)*>
+<!ELEMENT friendship (username,username)>
+
+<!ATTLIST user isOffering (y|n) "n">

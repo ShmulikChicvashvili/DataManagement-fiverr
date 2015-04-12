@@ -1,6 +1,4 @@
-
 package com.servicebook.database.implementation;
-
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,7 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.tomcat.dbcp.dbcp.BasicDataSource;
 
@@ -25,32 +25,21 @@ import com.servicebook.database.primitives.DBPaidActivity;
 import com.servicebook.database.primitives.DBPaidService;
 import com.servicebook.database.primitives.DBPaidTask;
 
-
-
-
-public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
-	implements
-		PaidActivitiesDatabase
-{
-	private class FriendsTableInfo
-	{
+public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
+		PaidActivitiesDatabase {
+	private class FriendsTableInfo {
 		/**
 		 * @param tableName
 		 * @param userColumn
 		 * @param friendColumn
 		 */
-		public FriendsTableInfo(
-			String tableName,
-			String userColumn,
-			String friendColumn)
-		{
+		public FriendsTableInfo(String tableName, String userColumn,
+				String friendColumn) {
 			super();
 			this.tableName = tableName;
 			this.userColumn = userColumn;
 			this.friendColumn = friendColumn;
 		}
-
-
 
 		public String tableName;
 
@@ -59,40 +48,24 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		public String friendColumn;
 	}
 
+	private enum ActivityTableColumn {
+		ID, TITLE, USERNAME, CAPACITY, DISTANCE, TYPE;
 
-
-	private enum ActivityTableColumn
-	{
-		ID,
-		TITLE,
-		USERNAME,
-		CAPACITY,
-		DISTANCE,
-		TYPE;
-
-		public String columnName()
-		{
+		public String columnName() {
 			return toString().toLowerCase();
 		}
 	}
 
-
-
-	private enum ActivityType
-	{
-		SERVICE
-		{
+	private enum ActivityType {
+		SERVICE {
 			@Override
-			public String toDB()
-			{
+			public String toDB() {
 				return "SERVICE";
 			}
 		},
-		TASK
-		{
+		TASK {
 			@Override
-			public String toDB()
-			{
+			public String toDB() {
 				return "TASK";
 			}
 		};
@@ -100,252 +73,195 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		public abstract String toDB();
 	}
 
+	private enum RegistrationTableColumn {
+		ID, USERNAME;
 
-
-	private enum RegistrationTableColumn
-	{
-		ID,
-		USERNAME;
-
-		public String columnName()
-		{
+		public String columnName() {
 			return toString().toLowerCase();
 		}
 	}
 
-
-
-	public PaidActivitiesDatabaseImpl(
-		String activityTable,
-		String registrationTable,
-		String schema,
-		BasicDataSource datasource,
-		String friendsTableName,
-		String friendsTableUsernameColumn,
-		String friendsTableFriendColumn) throws TableCreationException
-	{
+	public PaidActivitiesDatabaseImpl(String activityTable,
+			String registrationTable, String schema,
+			BasicDataSource datasource, String friendsTableName,
+			String friendsTableUsernameColumn, String friendsTableFriendColumn)
+			throws TableCreationException {
 		super(schema, datasource);
 		this.activityTable = this.schema + ".`" + activityTable + "`";
 		this.registrationTable = this.schema + ".`" + registrationTable + "`";
 
-		friendsTableInfo =
-			new FriendsTableInfo(
-				this.schema + ".`" + friendsTableName + "`",
-				friendsTableUsernameColumn,
+		friendsTableInfo = new FriendsTableInfo(this.schema + ".`"
+				+ friendsTableName + "`", friendsTableUsernameColumn,
 				friendsTableFriendColumn);
 
 		initializeQueries();
 
-		try (
-			Connection conn = getConnection();
-			Statement stmt = conn.createStatement())
-		{
+		try (Connection conn = getConnection();
+				Statement stmt = conn.createStatement()) {
 
 			stmt.execute(genActivityTableCreationQuery());
 			stmt.execute(genRegistrationTableCreationQuery());
 
 			conn.commit();
-		} catch (final SQLException e)
-		{
+		} catch (final SQLException e) {
 			throw new TableCreationException(e);
 		}
 	}
 
-
 	@Override
 	public int addPaidService(DBPaidService service, Connection conn)
-		throws InvalidParameterException,
-		DatabaseUnkownFailureException
-	{
+			throws InvalidParameterException, DatabaseUnkownFailureException {
 		return AddPaidActivity(service, ActivityType.SERVICE, conn);
 	}
 
-
 	@Override
 	public int addPaidTask(DBPaidTask task, Connection conn)
-		throws DatabaseUnkownFailureException,
-		InvalidParameterException
-	{
+			throws DatabaseUnkownFailureException, InvalidParameterException {
 		return AddPaidActivity(task, ActivityType.TASK, conn);
 	}
 
-
 	@Override
 	public void deletePaidActivity(int id, Connection conn)
-		throws DatabaseUnkownFailureException,
-		InvalidParameterException
-	{
-		if (!isValidId(id) || isConnClosed(conn)) { throw new InvalidParameterException(); }
+			throws DatabaseUnkownFailureException, InvalidParameterException {
+		if (!isValidId(id) || isConnClosed(conn)) {
+			throw new InvalidParameterException();
+		}
 
-		try (
-			PreparedStatement stmt = conn.prepareStatement(deleteActivityQuery))
-		{
+		try (PreparedStatement stmt = conn
+				.prepareStatement(deleteActivityQuery)) {
 			stmt.setInt(1, id);
 
 			stmt.executeUpdate();
-		} catch (final SQLException e)
-		{
+		} catch (final SQLException e) {
 			throw new DatabaseUnkownFailureException(e);
 		}
 	}
-
 
 	@Override
 	public void deleteUserPaidActivities(String username, Connection conn)
-		throws InvalidParameterException,
-		DatabaseUnkownFailureException
-	{
-		if (username == null || isConnClosed(conn)) { throw new InvalidParameterException(); }
-		try (
-			PreparedStatement stmt =
-				conn.prepareStatement(deleteAllUserActivitiesQuery))
-		{
+			throws InvalidParameterException, DatabaseUnkownFailureException {
+		if (username == null || isConnClosed(conn)) {
+			throw new InvalidParameterException();
+		}
+		try (PreparedStatement stmt = conn
+				.prepareStatement(deleteAllUserActivitiesQuery)) {
 			stmt.setString(1, username);
 
 			stmt.executeUpdate();
-		} catch (final SQLException e)
-		{
+		} catch (final SQLException e) {
 			throw new DatabaseUnkownFailureException(e);
 		}
 
 	}
-
 
 	@Override
 	public void deleteUserRegistrations(String username, Connection conn)
-		throws InvalidParameterException,
-		DatabaseUnkownFailureException
-	{
-		if (username == null || isConnClosed(conn)) { throw new InvalidParameterException(); }
+			throws InvalidParameterException, DatabaseUnkownFailureException {
+		if (username == null || isConnClosed(conn)) {
+			throw new InvalidParameterException();
+		}
 
-		try (
-			PreparedStatement stmt =
-				conn.prepareStatement(deleteUserRegistrationsQuery))
-		{
+		try (PreparedStatement stmt = conn
+				.prepareStatement(deleteUserRegistrationsQuery)) {
 			stmt.setString(1, username);
 
 			stmt.executeUpdate();
-		} catch (final SQLException e)
-		{
+		} catch (final SQLException e) {
 			throw new DatabaseUnkownFailureException(e);
 		}
 	}
 
-
 	@Override
 	public ActivityStatus getActivityStatus(int id)
-		throws DatabaseUnkownFailureException,
-		InvalidParameterException
-	{
-		if (!isValidId(id)) { throw new InvalidParameterException(); }
+			throws DatabaseUnkownFailureException, InvalidParameterException {
+		if (!isValidId(id)) {
+			throw new InvalidParameterException();
+		}
 		ActivityStatus $ = ActivityStatus.NOT_EXIST;
 
-		try (Connection conn = getConnection())
-		{
+		try (Connection conn = getConnection()) {
 			conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
 			$ = getActivityStatus(id, conn);
-		} catch (final SQLException e)
-		{
+		} catch (final SQLException e) {
 			throw new DatabaseUnkownFailureException(e);
 		}
 
 		return $;
 	}
 
-
 	@Override
 	public ActivityStatus getActivityStatus(int id, Connection conn)
-		throws DatabaseUnkownFailureException,
-		InvalidParameterException
-	{
-		if (!isValidId(id) || isConnClosed(conn)) { throw new InvalidParameterException(); }
+			throws DatabaseUnkownFailureException, InvalidParameterException {
+		if (!isValidId(id) || isConnClosed(conn)) {
+			throw new InvalidParameterException();
+		}
 
 		ActivityStatus $ = ActivityStatus.NOT_EXIST;
-		try (
-			PreparedStatement stmt =
-				conn.prepareStatement(getActivityStatusQuery))
-		{
+		try (PreparedStatement stmt = conn
+				.prepareStatement(getActivityStatusQuery)) {
 			stmt.setInt(1, id);
 
 			final ResultSet rs = stmt.executeQuery();
 
-			if (rs.next())
-			{
-				final String type =
-					rs.getString(ActivityTableColumn.TYPE.columnName());
-				if (type.equals(ActivityType.SERVICE.toDB()))
-				{
+			if (rs.next()) {
+				final String type = rs.getString(ActivityTableColumn.TYPE
+						.columnName());
+				if (type.equals(ActivityType.SERVICE.toDB())) {
 					$ = ActivityStatus.SERVICE;
-				} else if (type.equals(ActivityType.TASK.toDB()))
-				{
+				} else if (type.equals(ActivityType.TASK.toDB())) {
 					$ = ActivityStatus.TASK;
-				} else
-				{
+				} else {
 					assert false;
 				}
 			}
 
-		} catch (final SQLException e)
-		{
+		} catch (final SQLException e) {
 			throw new DatabaseUnkownFailureException(e);
 		}
 
 		return $;
 	}
-
 
 	@Override
 	public DBPaidActivity getActivity(int id, Connection conn)
-		throws InvalidParameterException,
-		DatabaseUnkownFailureException
-	{
-		if (!isValidId(id) || isConnClosed(conn)) { throw new InvalidParameterException(); }
+			throws InvalidParameterException, DatabaseUnkownFailureException {
+		if (!isValidId(id) || isConnClosed(conn)) {
+			throw new InvalidParameterException();
+		}
 
 		DBPaidActivity $ = null;
 
-		try (PreparedStatement stmt = conn.prepareStatement(getActivityQuery))
-		{
+		try (PreparedStatement stmt = conn.prepareStatement(getActivityQuery)) {
 			stmt.setInt(1, id);
 
 			final ResultSet rs = stmt.executeQuery();
 
-			if (rs.next())
-			{
+			if (rs.next()) {
 				$ = rsRowToActivity(rs);
 			}
-		} catch (final SQLException e)
-		{
+		} catch (final SQLException e) {
 			throw new DatabaseUnkownFailureException(e);
 		}
 		return $;
 	}
 
-
-	/* (non-Javadoc) @see
+	/*
+	 * (non-Javadoc) @see
 	 * com.servicebook.database.PaidActivitiesDatabase#getServicesUserRegistered
-	 * (java.lang.String, int, int) */
+	 * (java.lang.String, int, int)
+	 */
 	@Override
-	public List<DBPaidService> getServicesUserRegistered(
-		String username,
-		int start,
-		int amount)
-		throws InvalidParameterException,
-		DatabaseUnkownFailureException
-	{
+	public List<DBPaidService> getServicesUserRegistered(String username,
+			int start, int amount) throws InvalidParameterException,
+			DatabaseUnkownFailureException {
 		final List<DBPaidService> $ = new ArrayList<DBPaidService>();
-		final List<DBPaidActivity> services =
-			getActivitiesUserRegistered(
-				username,
-				start,
-				amount,
-				ActivityType.SERVICE);
+		final List<DBPaidActivity> services = getActivitiesUserRegistered(
+				username, start, amount, ActivityType.SERVICE);
 
-		for (final DBPaidActivity service : services)
-		{
+		for (final DBPaidActivity service : services) {
 			assert service instanceof DBPaidService;
-			if (!(service instanceof DBPaidService))
-			{
+			if (!(service instanceof DBPaidService)) {
 				continue;
 			}
 			$.add((DBPaidService) service);
@@ -354,31 +270,22 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		return $;
 	}
 
-
-	/* (non-Javadoc) @see
+	/*
+	 * (non-Javadoc) @see
 	 * com.servicebook.database.PaidActivitiesDatabase#getTasksUserRegistered
-	 * (java.lang.String, int, int) */
+	 * (java.lang.String, int, int)
+	 */
 	@Override
-	public List<DBPaidTask> getTasksUserRegistered(
-		String username,
-		int start,
-		int amount)
-		throws InvalidParameterException,
-		DatabaseUnkownFailureException
-	{
+	public List<DBPaidTask> getTasksUserRegistered(String username, int start,
+			int amount) throws InvalidParameterException,
+			DatabaseUnkownFailureException {
 		final List<DBPaidTask> $ = new ArrayList<DBPaidTask>();
-		final List<DBPaidActivity> tasks =
-			getActivitiesUserRegistered(
-				username,
-				start,
-				amount,
-				ActivityType.TASK);
+		final List<DBPaidActivity> tasks = getActivitiesUserRegistered(
+				username, start, amount, ActivityType.TASK);
 
-		for (final DBPaidActivity task : tasks)
-		{
+		for (final DBPaidActivity task : tasks) {
 			assert task instanceof DBPaidTask;
-			if (!(task instanceof DBPaidTask))
-			{
+			if (!(task instanceof DBPaidTask)) {
 				continue;
 			}
 			$.add((DBPaidTask) task);
@@ -387,28 +294,17 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		return $;
 	}
 
-
 	@Override
-	public List<DBPaidService> getServicesOfferedByUser(
-		String username,
-		int start,
-		int amount)
-		throws InvalidParameterException,
-		DatabaseUnkownFailureException
-	{
+	public List<DBPaidService> getServicesOfferedByUser(String username,
+			int start, int amount) throws InvalidParameterException,
+			DatabaseUnkownFailureException {
 		final List<DBPaidService> $ = new ArrayList<DBPaidService>();
-		final List<DBPaidActivity> services =
-			getActivitiesOfferedByUser(
-				username,
-				start,
-				amount,
-				ActivityType.SERVICE);
+		final List<DBPaidActivity> services = getActivitiesOfferedByUser(
+				username, start, amount, ActivityType.SERVICE);
 
-		for (final DBPaidActivity service : services)
-		{
+		for (final DBPaidActivity service : services) {
 			assert service instanceof DBPaidService;
-			if (!(service instanceof DBPaidService))
-			{
+			if (!(service instanceof DBPaidService)) {
 				continue;
 			}
 			$.add((DBPaidService) service);
@@ -417,29 +313,17 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		return $;
 	}
 
-
 	@Override
-	public List<DBPaidService> getServicesOfferedToUser(
-		String username,
-		int start,
-		int amount)
-		throws InvalidParameterException,
-		DatabaseUnkownFailureException,
-		FriendshipsTableNotExist
-	{
+	public List<DBPaidService> getServicesOfferedToUser(String username,
+			int start, int amount) throws InvalidParameterException,
+			DatabaseUnkownFailureException, FriendshipsTableNotExist {
 		final List<DBPaidService> $ = new ArrayList<DBPaidService>();
-		final List<DBPaidActivity> services =
-			getActivitiesOfferedToUser(
-				username,
-				start,
-				amount,
-				ActivityType.SERVICE);
+		final List<DBPaidActivity> services = getActivitiesOfferedToUser(
+				username, start, amount, ActivityType.SERVICE);
 
-		for (final DBPaidActivity service : services)
-		{
+		for (final DBPaidActivity service : services) {
 			assert service instanceof DBPaidService;
-			if (!(service instanceof DBPaidService))
-			{
+			if (!(service instanceof DBPaidService)) {
 				continue;
 			}
 			$.add((DBPaidService) service);
@@ -448,28 +332,17 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		return $;
 	}
 
-
 	@Override
-	public List<DBPaidTask> getTasksOfferedByUser(
-		String username,
-		int start,
-		int amount)
-		throws DatabaseUnkownFailureException,
-		InvalidParameterException
-	{
+	public List<DBPaidTask> getTasksOfferedByUser(String username, int start,
+			int amount) throws DatabaseUnkownFailureException,
+			InvalidParameterException {
 		final List<DBPaidTask> $ = new ArrayList<DBPaidTask>();
-		final List<DBPaidActivity> tasks =
-			getActivitiesOfferedByUser(
-				username,
-				start,
-				amount,
-				ActivityType.TASK);
+		final List<DBPaidActivity> tasks = getActivitiesOfferedByUser(username,
+				start, amount, ActivityType.TASK);
 
-		for (final DBPaidActivity task : tasks)
-		{
+		for (final DBPaidActivity task : tasks) {
 			assert task instanceof DBPaidTask;
-			if (!(task instanceof DBPaidTask))
-			{
+			if (!(task instanceof DBPaidTask)) {
 				continue;
 			}
 			$.add((DBPaidTask) task);
@@ -478,29 +351,17 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		return $;
 	}
 
-
 	@Override
-	public List<DBPaidTask> getTasksOfferedToUser(
-		String username,
-		int start,
-		int amount)
-		throws InvalidParameterException,
-		DatabaseUnkownFailureException,
-		FriendshipsTableNotExist
-	{
+	public List<DBPaidTask> getTasksOfferedToUser(String username, int start,
+			int amount) throws InvalidParameterException,
+			DatabaseUnkownFailureException, FriendshipsTableNotExist {
 		final List<DBPaidTask> $ = new ArrayList<DBPaidTask>();
-		final List<DBPaidActivity> tasks =
-			getActivitiesOfferedToUser(
-				username,
-				start,
-				amount,
-				ActivityType.TASK);
+		final List<DBPaidActivity> tasks = getActivitiesOfferedToUser(username,
+				start, amount, ActivityType.TASK);
 
-		for (final DBPaidActivity task : tasks)
-		{
+		for (final DBPaidActivity task : tasks) {
 			assert task instanceof DBPaidTask;
-			if (!(task instanceof DBPaidTask))
-			{
+			if (!(task instanceof DBPaidTask)) {
 				continue;
 			}
 			$.add((DBPaidTask) task);
@@ -509,154 +370,159 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		return $;
 	}
 
-
-	/* (non-Javadoc) @see com.servicebook.database.PaidActivitiesDatabase#
-	 * getActivitiesUserRegisteredCount(java.lang.String) */
+	/*
+	 * (non-Javadoc) @see com.servicebook.database.PaidActivitiesDatabase#
+	 * getActivitiesUserRegisteredCount(java.lang.String)
+	 */
 	@Override
 	public int getActivitiesUserRegisteredCount(String username)
-		throws InvalidParameterException,
-		DatabaseUnkownFailureException
-	{
+			throws InvalidParameterException, DatabaseUnkownFailureException {
 		int $ = -1;
-		if (username == null) { throw new InvalidParameterException(); }
+		if (username == null) {
+			throw new InvalidParameterException();
+		}
 
-		try (
-			Connection conn = getConnection();
-			PreparedStatement stmt =
-				conn.prepareStatement(getActivitiesUserRegisteredCountQuery))
-		{
-			conn
-				.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+		try (Connection conn = getConnection();
+				PreparedStatement stmt = conn
+						.prepareStatement(getActivitiesUserRegisteredCountQuery)) {
+			conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 			stmt.setString(1, username);
 			final ResultSet rs = stmt.executeQuery();
 
-			if (rs.next())
-			{
+			if (rs.next()) {
 				$ = rs.getInt(1);
 			}
-		} catch (final SQLException e)
-		{
+		} catch (final SQLException e) {
 			throw new DatabaseUnkownFailureException(e);
 		}
 		return $;
 	}
 
-
-	/* (non-Javadoc) @see com.servicebook.database.PaidActivitiesDatabase#
-	 * getActivitiesOfferedToUserCount(java.lang.String) */
+	/*
+	 * (non-Javadoc) @see com.servicebook.database.PaidActivitiesDatabase#
+	 * getActivitiesOfferedToUserCount(java.lang.String)
+	 */
 	@Override
 	public int getActivitiesOfferedToUserCount(String username)
-		throws InvalidParameterException,
-		DatabaseUnkownFailureException
-	{
+			throws InvalidParameterException, DatabaseUnkownFailureException {
 		int $ = -1;
-		if (username == null) { throw new InvalidParameterException(); }
+		if (username == null) {
+			throw new InvalidParameterException();
+		}
 
-		try (
-			Connection conn = getConnection();
-			PreparedStatement stmt =
-				conn.prepareStatement(getActivitiesOfferedToUserCountQuery))
-		{
-			conn
-				.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+		try (Connection conn = getConnection();
+				PreparedStatement stmt = conn
+						.prepareStatement(getActivitiesOfferedToUserCountQuery)) {
+			conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 			stmt.setString(1, username);
 			stmt.setString(2, username);
 			final ResultSet rs = stmt.executeQuery();
 
-			if (rs.next())
-			{
+			if (rs.next()) {
 				$ = rs.getInt(1);
 			}
-		} catch (final SQLException e)
-		{
+		} catch (final SQLException e) {
 			throw new DatabaseUnkownFailureException(e);
 		}
 		return $;
 	}
 
-
-	/* (non-Javadoc) @see com.servicebook.database.PaidActivitiesDatabase#
-	 * getActivitiesOfferedByUserCount(java.lang.String) */
+	/*
+	 * (non-Javadoc) @see com.servicebook.database.PaidActivitiesDatabase#
+	 * getActivitiesOfferedByUserCount(java.lang.String)
+	 */
 	@Override
 	public int getActivitiesOfferedByUserCount(String username)
-		throws InvalidParameterException,
-		DatabaseUnkownFailureException
-	{
+			throws InvalidParameterException, DatabaseUnkownFailureException {
 		int $ = -1;
-		if (username == null) { throw new InvalidParameterException(); }
+		if (username == null) {
+			throw new InvalidParameterException();
+		}
 
-		try (
-			Connection conn = getConnection();
-			PreparedStatement stmt =
-				conn.prepareStatement(getActivitiesOfferedByUserCountQuery))
-		{
-			conn
-				.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+		try (Connection conn = getConnection();
+				PreparedStatement stmt = conn
+						.prepareStatement(getActivitiesOfferedByUserCountQuery)) {
+			conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 			stmt.setString(1, username);
 			final ResultSet rs = stmt.executeQuery();
 
-			if (rs.next())
-			{
+			if (rs.next()) {
 				$ = rs.getInt(1);
 			}
-		} catch (final SQLException e)
-		{
+		} catch (final SQLException e) {
 			throw new DatabaseUnkownFailureException(e);
 		}
 		return $;
 	}
-
 
 	@Override
 	public void registerToActivity(int id, String username, Connection conn)
-		throws ElementAlreadyExistException,
-		DatabaseUnkownFailureException,
-		InvalidParameterException
-	{
-		if (!isValidId(id) || username == null || isConnClosed(conn)) { throw new InvalidParameterException(); }
+			throws ElementAlreadyExistException,
+			DatabaseUnkownFailureException, InvalidParameterException {
+		if (!isValidId(id) || username == null || isConnClosed(conn)) {
+			throw new InvalidParameterException();
+		}
 
-		try (
-			PreparedStatement stmt =
-				conn.prepareStatement(registerToActivityQuery))
-		{
+		try (PreparedStatement stmt = conn
+				.prepareStatement(registerToActivityQuery)) {
 			stmt.setInt(1, id);
 			stmt.setString(2, username);
 			stmt.executeUpdate();
-		} catch (final SQLException e)
-		{
-			if (e.getErrorCode() == MysqlErrorNumbers.ER_DUP_ENTRY) { throw new ElementAlreadyExistException(
-				e); }
+		} catch (final SQLException e) {
+			if (e.getErrorCode() == MysqlErrorNumbers.ER_DUP_ENTRY) {
+				throw new ElementAlreadyExistException(e);
+			}
 			throw new DatabaseUnkownFailureException(e);
 		}
 	}
 
-
 	@Override
-	public
-		void
-		unregisterFromActivity(int id, String username, Connection conn)
-			throws DatabaseUnkownFailureException,
-			InvalidParameterException,
-			ElementNotExistException
-	{
-		if (!isValidId(id) || username == null || isConnClosed(conn)) { throw new InvalidParameterException(); }
+	public void unregisterFromActivity(int id, String username, Connection conn)
+			throws DatabaseUnkownFailureException, InvalidParameterException,
+			ElementNotExistException {
+		if (!isValidId(id) || username == null || isConnClosed(conn)) {
+			throw new InvalidParameterException();
+		}
 
-		try (
-			PreparedStatement stmt =
-				conn.prepareStatement(unregisterFromActivityQuery))
-		{
+		try (PreparedStatement stmt = conn
+				.prepareStatement(unregisterFromActivityQuery)) {
 			stmt.setInt(1, id);
 			stmt.setString(2, username);
 			final int numDeleted = stmt.executeUpdate();
 
-			if (numDeleted == 0) { throw new ElementNotExistException(); }
+			if (numDeleted == 0) {
+				throw new ElementNotExistException();
+			}
 
-		} catch (final SQLException e)
-		{
+		} catch (final SQLException e) {
 			throw new DatabaseUnkownFailureException(e);
 		}
 	}
 
+	@Override
+	public Set<String> getOfferingUsers(String username, Connection conn)
+			throws InvalidParameterException, DatabaseUnkownFailureException {
+		if (username == null || isConnClosed(conn)) {
+			throw new InvalidParameterException();
+		}
+
+		Set<String> $ = new HashSet<String>();
+		try (PreparedStatement stmt = conn
+				.prepareStatement(getOfferingUsersQuery)) {
+			stmt.setString(1, username);
+			stmt.setString(2, username);
+
+			ResultSet rs = stmt.executeQuery();
+
+			while (rs.next()) {
+				$.add(rs.getString(1));
+			}
+		} catch (SQLException e) {
+			throw new DatabaseUnkownFailureException(e);
+		}
+
+		return $;
+	}
 
 	/**
 	 * adds the activity to the database.
@@ -674,27 +540,19 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	 * @throws DatabaseUnkownFailureException
 	 *             In case an unexpected SQL error occurs
 	 */
-	private int AddPaidActivity(
-		DBPaidActivity activity,
-		ActivityType type,
-		Connection conn)
-		throws InvalidParameterException,
-		DatabaseUnkownFailureException
-	{
-		if (activity == null
-			|| activity.getCapacity() <= 0
-			|| activity.getDistance() <= 0
-			|| isConnClosed(conn)) { throw new InvalidParameterException(); }
+	private int AddPaidActivity(DBPaidActivity activity, ActivityType type,
+			Connection conn) throws InvalidParameterException,
+			DatabaseUnkownFailureException {
+		if (activity == null || activity.getCapacity() <= 0
+				|| activity.getDistance() <= 0 || isConnClosed(conn)) {
+			throw new InvalidParameterException();
+		}
 
 		int $ = -1;
 
 		assert activity.getDistance() == 1;
-		try (
-			PreparedStatement stmt =
-				conn.prepareStatement(
-					addActivityQuery,
-					Statement.RETURN_GENERATED_KEYS))
-		{
+		try (PreparedStatement stmt = conn.prepareStatement(addActivityQuery,
+				Statement.RETURN_GENERATED_KEYS)) {
 			stmt.setString(1, activity.getTitle());
 			stmt.setString(2, activity.getUsername());
 			stmt.setShort(3, activity.getCapacity());
@@ -704,35 +562,26 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 			stmt.executeUpdate();
 			final ResultSet rs = stmt.getGeneratedKeys();
 
-			if (rs.next())
-			{
+			if (rs.next()) {
 				$ = rs.getInt(1);
 				activity.setId($);
 			}
-		} catch (final SQLException e)
-		{
+		} catch (final SQLException e) {
 			throw new DatabaseUnkownFailureException(e);
 		}
 
 		return $;
 	}
 
-
-	private String genActivityTableCreationQuery()
-	{
-		final String $ =
-			String.format(
-				"CREATE TABLE IF NOT EXISTS %s ("
-					+ "`%s` INT UNSIGNED NOT NULL AUTO_INCREMENT,"
-					+ "`%s` VARCHAR(255) NOT NULL,"
-					+ "`%s` VARCHAR(255) NOT NULL,"
-					+ "`%s` SMALLINT UNSIGNED NOT NULL,"
-					+ "`%s` SMALLINT UNSIGNED NOT NULL,"
-					+ "`%s` ENUM('SERVICE','TASK') NOT NULL,"
-					+ "PRIMARY KEY (`%s`),"
-					+ "INDEX `USERNAME` (`%s` ASC))",
-				activityTable,
-				ActivityTableColumn.ID.columnName(),
+	private String genActivityTableCreationQuery() {
+		final String $ = String.format("CREATE TABLE IF NOT EXISTS %s ("
+				+ "`%s` INT UNSIGNED NOT NULL AUTO_INCREMENT,"
+				+ "`%s` VARCHAR(255) NOT NULL," + "`%s` VARCHAR(255) NOT NULL,"
+				+ "`%s` SMALLINT UNSIGNED NOT NULL,"
+				+ "`%s` SMALLINT UNSIGNED NOT NULL,"
+				+ "`%s` ENUM('SERVICE','TASK') NOT NULL,"
+				+ "PRIMARY KEY (`%s`)," + "INDEX `USERNAME` (`%s` ASC))",
+				activityTable, ActivityTableColumn.ID.columnName(),
 				ActivityTableColumn.TITLE.columnName(),
 				ActivityTableColumn.USERNAME.columnName(),
 				ActivityTableColumn.CAPACITY.columnName(),
@@ -744,16 +593,10 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		return $;
 	}
 
-
-	private String genRegistrationTableCreationQuery()
-	{
-		final String $ =
-			String.format(
-				"CREATE TABLE IF NOT EXISTS %s ("
-					+ "`%s` INT UNSIGNED NOT NULL,"
-					+ "`%s` VARCHAR(255) NOT NULL,"
-					+ "PRIMARY KEY (`%s`, `%s`));",
-				registrationTable,
+	private String genRegistrationTableCreationQuery() {
+		final String $ = String.format("CREATE TABLE IF NOT EXISTS %s ("
+				+ "`%s` INT UNSIGNED NOT NULL," + "`%s` VARCHAR(255) NOT NULL,"
+				+ "PRIMARY KEY (`%s`, `%s`));", registrationTable,
 				RegistrationTableColumn.ID.columnName(),
 				RegistrationTableColumn.USERNAME.columnName(),
 				RegistrationTableColumn.ID.columnName(),
@@ -761,7 +604,6 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 
 		return $;
 	}
-
 
 	/**
 	 * Converts a resultset row to an activity
@@ -774,62 +616,44 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	 *             the SQL exception
 	 */
 	private DBPaidActivity rsRowToActivity(final ResultSet rs)
-		throws SQLException
-	{
+			throws SQLException {
 		final int id = rs.getInt(ActivityTableColumn.ID.columnName());
-		final String title =
-			rs.getString(ActivityTableColumn.TITLE.columnName());
-		final String username =
-			rs.getString(ActivityTableColumn.USERNAME.columnName());
-		final short capacity =
-			rs.getShort(ActivityTableColumn.CAPACITY.columnName());
-		final short distance =
-			rs.getShort(ActivityTableColumn.DISTANCE.columnName());
+		final String title = rs.getString(ActivityTableColumn.TITLE
+				.columnName());
+		final String username = rs.getString(ActivityTableColumn.USERNAME
+				.columnName());
+		final short capacity = rs.getShort(ActivityTableColumn.CAPACITY
+				.columnName());
+		final short distance = rs.getShort(ActivityTableColumn.DISTANCE
+				.columnName());
 		final short numRegistered = rs.getShort(queryNumRegisteredField);
 
-		final String typeString =
-			rs.getString(ActivityTableColumn.TYPE.columnName());
+		final String typeString = rs.getString(ActivityTableColumn.TYPE
+				.columnName());
 		ActivityType type;
-		if (typeString.equals(ActivityType.SERVICE.toDB()))
-		{
+		if (typeString.equals(ActivityType.SERVICE.toDB())) {
 			type = ActivityType.SERVICE;
-		} else if (typeString.equals(ActivityType.TASK.toDB()))
-		{
+		} else if (typeString.equals(ActivityType.TASK.toDB())) {
 			type = ActivityType.TASK;
-		} else
-		{
+		} else {
 			return null;
 		}
 
 		DBPaidActivity $ = null;
 
-		switch (type)
-		{
-			case SERVICE:
+		switch (type) {
+		case SERVICE:
 
-				$ =
-					new DBPaidService(
-						id,
-						title,
-						username,
-						capacity,
-						distance,
-						numRegistered);
-				break;
-			case TASK:
-				$ =
-					new DBPaidTask(
-						id,
-						title,
-						username,
-						capacity,
-						distance,
-						numRegistered);
-				break;
+			$ = new DBPaidService(id, title, username, capacity, distance,
+					numRegistered);
+			break;
+		case TASK:
+			$ = new DBPaidTask(id, title, username, capacity, distance,
+					numRegistered);
+			break;
 		}
 		return $;
 	}
-
 
 	/**
 	 * Gets the activities offered by user. The activities are ordered by their
@@ -849,24 +673,18 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	 * @throws DatabaseUnkownFailureException
 	 *             In case of an unknown SQL exception
 	 */
-	private List<DBPaidActivity> getActivitiesOfferedByUser(
-		String username,
-		int start,
-		int amount,
-		ActivityType type)
-		throws InvalidParameterException,
-		DatabaseUnkownFailureException
-	{
-		if (username == null || !isStartAmountInRanges(start, amount)) { throw new InvalidParameterException(); }
+	private List<DBPaidActivity> getActivitiesOfferedByUser(String username,
+			int start, int amount, ActivityType type)
+			throws InvalidParameterException, DatabaseUnkownFailureException {
+		if (username == null || !isStartAmountInRanges(start, amount)) {
+			throw new InvalidParameterException();
+		}
 
 		final List<DBPaidActivity> $ = new ArrayList<DBPaidActivity>();
-		try (
-			Connection conn = getConnection();
-			PreparedStatement stmt =
-				conn.prepareStatement(getActivitiesOfferedByUserQuery))
-		{
-			conn
-				.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+		try (Connection conn = getConnection();
+				PreparedStatement stmt = conn
+						.prepareStatement(getActivitiesOfferedByUserQuery)) {
+			conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 
 			stmt.setString(1, username);
 			stmt.setString(2, type.toDB());
@@ -875,20 +693,18 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 
 			final ResultSet rs = stmt.executeQuery();
 
-			while (rs.next())
-			{
+			while (rs.next()) {
 				assert username.equals(rs
-					.getString(ActivityTableColumn.USERNAME.columnName()));
+						.getString(ActivityTableColumn.USERNAME.columnName()));
 				assert type.toDB().equals(
-					rs.getString(ActivityTableColumn.TYPE.columnName()));
+						rs.getString(ActivityTableColumn.TYPE.columnName()));
 
 				final DBPaidActivity activity = rsRowToActivity(rs);
 				$.add(activity);
 			}
 
 			// ResultSet rs closes automatically when `stmt` closes
-		} catch (final SQLException e)
-		{
+		} catch (final SQLException e) {
 			throw new DatabaseUnkownFailureException(e);
 		}
 
@@ -897,7 +713,6 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		return $;
 
 	}
-
 
 	/**
 	 * Gets the activities the user registered to. The activities are ordered by
@@ -917,24 +732,18 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	 * @throws DatabaseUnkownFailureException
 	 *             In case of an unknown SQL exception
 	 */
-	private List<DBPaidActivity> getActivitiesUserRegistered(
-		String username,
-		int start,
-		int amount,
-		ActivityType type)
-		throws InvalidParameterException,
-		DatabaseUnkownFailureException
-	{
-		if (username == null || !isStartAmountInRanges(start, amount)) { throw new InvalidParameterException(); }
+	private List<DBPaidActivity> getActivitiesUserRegistered(String username,
+			int start, int amount, ActivityType type)
+			throws InvalidParameterException, DatabaseUnkownFailureException {
+		if (username == null || !isStartAmountInRanges(start, amount)) {
+			throw new InvalidParameterException();
+		}
 
 		final List<DBPaidActivity> $ = new ArrayList<DBPaidActivity>();
-		try (
-			Connection conn = getConnection();
-			PreparedStatement stmt =
-				conn.prepareStatement(getActivitiesUserRegisteredQuery))
-		{
-			conn
-				.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+		try (Connection conn = getConnection();
+				PreparedStatement stmt = conn
+						.prepareStatement(getActivitiesUserRegisteredQuery)) {
+			conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 
 			stmt.setString(1, type.toDB());
 			stmt.setString(2, username);
@@ -943,18 +752,16 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 
 			final ResultSet rs = stmt.executeQuery();
 
-			while (rs.next())
-			{
+			while (rs.next()) {
 				assert type.toDB().equals(
-					rs.getString(ActivityTableColumn.TYPE.columnName()));
+						rs.getString(ActivityTableColumn.TYPE.columnName()));
 
 				final DBPaidActivity activity = rsRowToActivity(rs);
 				$.add(activity);
 			}
 
 			// ResultSet rs closes automatically when `stmt` closes
-		} catch (final SQLException e)
-		{
+		} catch (final SQLException e) {
 			throw new DatabaseUnkownFailureException(e);
 		}
 
@@ -963,7 +770,6 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		return $;
 
 	}
-
 
 	/**
 	 * Gets the activities offered by user. The activities are ordered by their
@@ -985,25 +791,19 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	 * @throws FriendshipsTableNotExist
 	 *             the friendships table does not exist
 	 */
-	private List<DBPaidActivity> getActivitiesOfferedToUser(
-		String username,
-		int start,
-		int amount,
-		ActivityType type)
-		throws InvalidParameterException,
-		DatabaseUnkownFailureException,
-		FriendshipsTableNotExist
-	{
-		if (username == null || !isStartAmountInRanges(start, amount)) { throw new InvalidParameterException(); }
+	private List<DBPaidActivity> getActivitiesOfferedToUser(String username,
+			int start, int amount, ActivityType type)
+			throws InvalidParameterException, DatabaseUnkownFailureException,
+			FriendshipsTableNotExist {
+		if (username == null || !isStartAmountInRanges(start, amount)) {
+			throw new InvalidParameterException();
+		}
 
 		final List<DBPaidActivity> $ = new ArrayList<DBPaidActivity>();
-		try (
-			Connection conn = getConnection();
-			PreparedStatement stmt =
-				conn.prepareStatement(getActivitiesOfferedToUserQuery))
-		{
-			conn
-				.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+		try (Connection conn = getConnection();
+				PreparedStatement stmt = conn
+						.prepareStatement(getActivitiesOfferedToUserQuery)) {
+			conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 
 			stmt.setString(1, username);
 			stmt.setString(2, type.toDB());
@@ -1013,19 +813,18 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 
 			final ResultSet rs = stmt.executeQuery();
 
-			while (rs.next())
-			{
+			while (rs.next()) {
 				assert type.toDB().equals(
-					rs.getString(ActivityTableColumn.TYPE.columnName()));
+						rs.getString(ActivityTableColumn.TYPE.columnName()));
 				final DBPaidActivity activity = rsRowToActivity(rs);
 				$.add(activity);
 			}
 
 			// ResultSet rs closes automatically when `stmt` closes
-		} catch (final SQLException e)
-		{
-			if (e.getErrorCode() == MysqlErrorNumbers.ER_NO_SUCH_TABLE) { throw new FriendshipsTableNotExist(
-				e); }
+		} catch (final SQLException e) {
+			if (e.getErrorCode() == MysqlErrorNumbers.ER_NO_SUCH_TABLE) {
+				throw new FriendshipsTableNotExist(e);
+			}
 			throw new DatabaseUnkownFailureException(e);
 		}
 
@@ -1034,255 +833,199 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 		return $;
 	}
 
-
-	private void initializeQueries()
-	{
-		addActivityQuery =
-			String.format(
+	private void initializeQueries() {
+		addActivityQuery = String.format(
 				"INSERT INTO %s (`%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?, ?);"
-				/* + " SELECT LAST_INSERT_ID()" */,
-				activityTable,
+				/* + " SELECT LAST_INSERT_ID()" */, activityTable,
 				ActivityTableColumn.TITLE.columnName(),
 				ActivityTableColumn.USERNAME.columnName(),
 				ActivityTableColumn.CAPACITY.columnName(),
 				ActivityTableColumn.DISTANCE.columnName(),
 				ActivityTableColumn.TYPE.columnName());
 
-		final String deleteQueryPrefix =
-			String.format(
-				"DELETE %s,%s FROM %s LEFT OUTER JOIN %s ON ("
-					+ activityTable
-					+ "."
-					+ ActivityTableColumn.ID.columnName()
-					+ "="
-					+ registrationTable
-					+ "."
-					+ RegistrationTableColumn.ID
-					+ ")",
-				activityTable,
-				registrationTable,
-				activityTable,
+		final String deleteQueryPrefix = String.format(
+				"DELETE %s,%s FROM %s LEFT OUTER JOIN %s ON (" + activityTable
+						+ "." + ActivityTableColumn.ID.columnName() + "="
+						+ registrationTable + "." + RegistrationTableColumn.ID
+						+ ")", activityTable, registrationTable, activityTable,
 				registrationTable);
 
-		deleteActivityQuery =
-			deleteQueryPrefix
-				+ String.format(
-					"WHERE %s.`%s`=?;",
-					activityTable,
-					ActivityTableColumn.ID.columnName());
+		deleteActivityQuery = deleteQueryPrefix
+				+ String.format("WHERE %s.`%s`=?;", activityTable,
+						ActivityTableColumn.ID.columnName());
 
-		deleteAllUserActivitiesQuery =
-			deleteQueryPrefix
-				+ String.format(
-					"WHERE %s.`%s`=?;",
-					activityTable,
-					ActivityTableColumn.USERNAME.columnName());
+		deleteAllUserActivitiesQuery = deleteQueryPrefix
+				+ String.format("WHERE %s.`%s`=?;", activityTable,
+						ActivityTableColumn.USERNAME.columnName());
 
-		deleteUserRegistrationsQuery =
-			String.format(
-				"DELETE FROM %s WHERE %s.`%s`=?;",
-				registrationTable,
+		deleteUserRegistrationsQuery = String.format(
+				"DELETE FROM %s WHERE %s.`%s`=?;", registrationTable,
 				registrationTable,
 				RegistrationTableColumn.USERNAME.columnName());
 
-		getActivityStatusQuery =
-			String.format(
+		getActivityStatusQuery = String.format(
 				"SELECT %s FROM %s WHERE `%s`=?",
-				ActivityTableColumn.TYPE.columnName(),
-				activityTable,
+				ActivityTableColumn.TYPE.columnName(), activityTable,
 				ActivityTableColumn.ID.columnName());
 
-		final String getActivityPrefix =
-			String.format(
-				"SELECT %s.*, count(%s.%s) AS "
-					+ queryNumRegisteredField
-					+ " FROM "
-					+ activityTable
-					+ " LEFT OUTER JOIN "
-					+ registrationTable
-					+ " ON ("
-					+ activityTable
-					+ "."
-					+ ActivityTableColumn.ID.columnName()
-					+ "="
-					+ registrationTable
-					+ "."
-					+ RegistrationTableColumn.ID.columnName()
-					+ ") ",
-				activityTable,
-				registrationTable,
+		final String getActivityPrefix = String.format(
+				"SELECT %s.*, count(%s.%s) AS " + queryNumRegisteredField
+						+ " FROM " + activityTable + " LEFT OUTER JOIN "
+						+ registrationTable + " ON (" + activityTable + "."
+						+ ActivityTableColumn.ID.columnName() + "="
+						+ registrationTable + "."
+						+ RegistrationTableColumn.ID.columnName() + ") ",
+				activityTable, registrationTable,
 				RegistrationTableColumn.USERNAME.columnName());
 
-		final String getActivitySuffix =
-			String.format(
-				" GROUP BY %s.`%s` ORDER BY `%s` LIMIT ?,?",
-				activityTable,
+		final String getActivitySuffix = String.format(
+				" GROUP BY %s.`%s` ORDER BY `%s` LIMIT ?,?", activityTable,
 				ActivityTableColumn.ID.columnName(),
 				ActivityTableColumn.TITLE.columnName());
 
-		getActivityQuery =
-			getActivityPrefix
-				+ String.format(
-					" WHERE %s.`%s`=? HAVING %s.`%s` IS NOT NULL",
-					activityTable,
-					ActivityTableColumn.ID.columnName(),
-					activityTable,
-					ActivityTableColumn.ID);
+		getActivityQuery = getActivityPrefix
+				+ String.format(" WHERE %s.`%s`=? HAVING %s.`%s` IS NOT NULL",
+						activityTable, ActivityTableColumn.ID.columnName(),
+						activityTable, ActivityTableColumn.ID);
 
-		getActivitiesOfferedByUserQuery =
-			getActivityPrefix
-				+ String.format(
-					" WHERE %s.`%s`=? AND `%s`=? " + getActivitySuffix,
-					activityTable,
-					ActivityTableColumn.USERNAME.columnName(),
-					ActivityTableColumn.TYPE.columnName());
+		getActivitiesOfferedByUserQuery = getActivityPrefix
+				+ String.format(" WHERE %s.`%s`=? AND `%s`=? "
+						+ getActivitySuffix, activityTable,
+						ActivityTableColumn.USERNAME.columnName(),
+						ActivityTableColumn.TYPE.columnName());
 
-		getActivitiesOfferedByUserCountQuery =
-			String.format(
-				"SELECT COUNT(*) FROM %s WHERE %s=?;",
-				activityTable,
+		getActivitiesOfferedByUserCountQuery = String.format(
+				"SELECT COUNT(*) FROM %s WHERE %s=?;", activityTable,
 				ActivityTableColumn.USERNAME.columnName());
 
-		getActivitiesUserRegisteredQuery =
-			getActivityPrefix
+		getActivitiesUserRegisteredQuery = getActivityPrefix
 				+ String.format(
-					" WHERE `%s`=? AND EXISTS (SELECT * FROM %s WHERE %s.%s=%s.%s AND %s.%s=?) "
-						+ getActivitySuffix,
-					ActivityTableColumn.TYPE.columnName(),
-					registrationTable,
-					registrationTable,
-					RegistrationTableColumn.ID.columnName(),
-					activityTable,
-					ActivityTableColumn.ID.columnName(),
-					registrationTable,
-					RegistrationTableColumn.USERNAME.columnName());
+						" WHERE `%s`=? AND EXISTS (SELECT * FROM %s WHERE %s.%s=%s.%s AND %s.%s=?) "
+								+ getActivitySuffix,
+						ActivityTableColumn.TYPE.columnName(),
+						registrationTable, registrationTable,
+						RegistrationTableColumn.ID.columnName(), activityTable,
+						ActivityTableColumn.ID.columnName(), registrationTable,
+						RegistrationTableColumn.USERNAME.columnName());
 
-		getActivitiesUserRegisteredCountQuery =
-			"SELECT COUNT(*) FROM "
-				+ registrationTable
-				+ " WHERE "
-				+ RegistrationTableColumn.USERNAME.columnName()
-				+ "=?";
+		getActivitiesUserRegisteredCountQuery = "SELECT COUNT(*) FROM "
+				+ registrationTable + " WHERE "
+				+ RegistrationTableColumn.USERNAME.columnName() + "=?";
 
-		getActivitiesOfferedToUserQuery =
-			String.format(
+		getActivitiesOfferedToUserQuery = String.format(
 				"SELECT %s.*, count(%s.%s) AS "
-					+ queryNumRegisteredField
-					+ " FROM "
-					// join friends with activities to get all 1-distance
-					// activities
-					+ activityTable
-					+ " JOIN "
-					+ friendsTableInfo.tableName
-					+ " ON ("
-					+ String.format(
-						"%s.%s=%s.%s",
-						activityTable,
-						ActivityTableColumn.USERNAME.columnName(),
-						friendsTableInfo.tableName,
-						friendsTableInfo.friendColumn) + ") LEFT OUTER JOIN "
-					// join on registrations to get number of registered users
-					+ registrationTable
-					+ " ON ("
-					+ activityTable
-					+ "."
-					+ ActivityTableColumn.ID.columnName()
-					+ "="
-					+ registrationTable
-					+ "."
-					+ RegistrationTableColumn.ID.columnName()
-					+ ")"
-					// username and type must correspond
-					+ " WHERE %s.`%s`=? AND `%s`=? "
-					// User is not registered to the activity
-					+ "AND NOT EXISTS (SELECT * FROM "
-					+ registrationTable
-					+ " WHERE "
-					+ registrationTable
-					+ "."
-					+ RegistrationTableColumn.ID.columnName()
-					+ "="
-					+ activityTable
-					+ "."
-					+ ActivityTableColumn.ID.columnName()
-					+ " AND "
-					+ registrationTable
-					+ "."
-					+ RegistrationTableColumn.USERNAME.columnName()
-					+ "=?) "
-					// count number of registered and limit result
-					+ getActivitySuffix,
-				activityTable,
-				registrationTable,
+						+ queryNumRegisteredField
+						+ " FROM "
+						// join friends with activities to get all 1-distance
+						// activities
+						+ activityTable
+						+ " JOIN "
+						+ friendsTableInfo.tableName
+						+ " ON ("
+						+ String.format("%s.%s=%s.%s", activityTable,
+								ActivityTableColumn.USERNAME.columnName(),
+								friendsTableInfo.tableName,
+								friendsTableInfo.friendColumn)
+						+ ") LEFT OUTER JOIN "
+						// join on registrations to get number of registered
+						// users
+						+ registrationTable
+						+ " ON ("
+						+ activityTable
+						+ "."
+						+ ActivityTableColumn.ID.columnName()
+						+ "="
+						+ registrationTable
+						+ "."
+						+ RegistrationTableColumn.ID.columnName()
+						+ ")"
+						// username and type must correspond
+						+ " WHERE %s.`%s`=? AND `%s`=? "
+						// User is not registered to the activity
+						+ "AND NOT EXISTS (SELECT * FROM " + registrationTable
+						+ " WHERE " + registrationTable + "."
+						+ RegistrationTableColumn.ID.columnName() + "="
+						+ activityTable + "."
+						+ ActivityTableColumn.ID.columnName() + " AND "
+						+ registrationTable + "."
+						+ RegistrationTableColumn.USERNAME.columnName()
+						+ "=?) "
+						// count number of registered and limit result
+						+ getActivitySuffix, activityTable, registrationTable,
 				RegistrationTableColumn.USERNAME.columnName(),
-				friendsTableInfo.tableName,
-				friendsTableInfo.userColumn,
+				friendsTableInfo.tableName, friendsTableInfo.userColumn,
 				ActivityTableColumn.TYPE.columnName());
 
-		getActivitiesOfferedToUserCountQuery =
-			String.format(
+		getActivitiesOfferedToUserCountQuery = String.format(
 				"SELECT COUNT(*) FROM "
-				// join friends with activities to get all 1-distance
-				// activities
-					+ activityTable
-					+ " JOIN "
-					+ friendsTableInfo.tableName
-					+ " ON "
-					+ String.format(
-						"(%s.%s=%s.%s)",
-						activityTable,
-						ActivityTableColumn.USERNAME.columnName(),
-						friendsTableInfo.tableName,
-						friendsTableInfo.friendColumn)
-					// choose only friends of the user
-					+ " WHERE %s.`%s`=?"
-					// choose only activities the username is not registered to
-					+ "AND NOT EXISTS (SELECT * FROM "
-					+ registrationTable
-					+ " WHERE "
-					+ registrationTable
-					+ "."
-					+ RegistrationTableColumn.ID.columnName()
-					+ "="
-					+ activityTable
-					+ "."
-					+ ActivityTableColumn.ID.columnName()
-					+ " AND "
-					+ registrationTable
-					+ "."
-					+ RegistrationTableColumn.USERNAME.columnName()
-					+ "=?) ",
-				friendsTableInfo.tableName,
+						// join friends with activities to get all 1-distance
+						// activities
+						+ activityTable
+						+ " JOIN "
+						+ friendsTableInfo.tableName
+						+ " ON "
+						+ String.format("(%s.%s=%s.%s)", activityTable,
+								ActivityTableColumn.USERNAME.columnName(),
+								friendsTableInfo.tableName,
+								friendsTableInfo.friendColumn)
+						// choose only friends of the user
+						+ " WHERE %s.`%s`=?"
+						// choose only activities the username is not registered
+						// to
+						+ "AND NOT EXISTS (SELECT * FROM " + registrationTable
+						+ " WHERE " + registrationTable + "."
+						+ RegistrationTableColumn.ID.columnName() + "="
+						+ activityTable + "."
+						+ ActivityTableColumn.ID.columnName() + " AND "
+						+ registrationTable + "."
+						+ RegistrationTableColumn.USERNAME.columnName()
+						+ "=?) ", friendsTableInfo.tableName,
 				friendsTableInfo.userColumn);
 
-		registerToActivityQuery =
-			String.format(
-				"INSERT INTO %s (%s,%s) VALUES (?,?)",
-				registrationTable,
+		registerToActivityQuery = String.format(
+				"INSERT INTO %s (%s,%s) VALUES (?,?)", registrationTable,
 				RegistrationTableColumn.ID.columnName(),
 				RegistrationTableColumn.USERNAME.columnName());
 
-		unregisterFromActivityQuery =
-			String.format(
-				"DELETE FROM %s WHERE `%s`=? and `%s`=?",
-				registrationTable,
+		unregisterFromActivityQuery = String.format(
+				"DELETE FROM %s WHERE `%s`=? and `%s`=?", registrationTable,
 				RegistrationTableColumn.ID.columnName(),
 				RegistrationTableColumn.USERNAME.columnName());
+
+		getOfferingUsersQuery = String.format(
+				"SELECT DISTINCT %s.%s FROM "
+						// join friends with activities to get all 1-distance
+						// activities
+						+ activityTable
+						+ " JOIN "
+						+ friendsTableInfo.tableName
+						+ " ON "
+						+ String.format("(%s.%s=%s.%s)", activityTable,
+								ActivityTableColumn.USERNAME.columnName(),
+								friendsTableInfo.tableName,
+								friendsTableInfo.friendColumn)
+						+ " WHERE %s.`%s`=?"
+						// choose only activities the username is not registered
+						// to
+						+ "AND NOT EXISTS (SELECT * FROM " + registrationTable
+						+ " WHERE " + registrationTable + "."
+						+ RegistrationTableColumn.ID.columnName() + "="
+						+ activityTable + "."
+						+ ActivityTableColumn.ID.columnName() + " AND "
+						+ registrationTable + "."
+						+ RegistrationTableColumn.USERNAME.columnName()
+						+ "=?) ", friendsTableInfo.tableName,
+				friendsTableInfo.friendColumn, friendsTableInfo.tableName,
+				friendsTableInfo.userColumn);
 	}
 
-
-	private boolean isStartAmountInRanges(int start, int amount)
-	{
+	private boolean isStartAmountInRanges(int start, int amount) {
 		return start >= 0 && amount > 0;
 	}
 
-
-	private boolean isValidId(int id)
-	{
+	private boolean isValidId(int id) {
 		return id >= 0;
 	}
-
-
 
 	private final String activityTable;
 
@@ -1409,5 +1152,7 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase
 	 *            String
 	 */
 	private String unregisterFromActivityQuery;
+
+	private String getOfferingUsersQuery;
 
 }
