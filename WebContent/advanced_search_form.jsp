@@ -11,9 +11,19 @@
 		var distance = $("input[type='radio']:checked").val();
 		var url = "/HW5/search/u/" + username + "?maxDist=" + distance;
 		var posting = $.get(url);
-		var ul = $('<ul>').appendTo("#result_div");
+		$("#result_div").empty();
 		posting.done(function(data) {
-			console.log(data);
+			if (data == "maxDist must be 1 or 2") {
+				$("#result_div").empty().append(data);
+			} else {
+				var ul = $('<ul>').appendTo("#result_div");
+				for ( var i in data) {
+					ul.append($(document.createElement('li')).text(
+							"Username: " + data[i].username + " " + "Name: "
+									+ data[i].name + " " + "Balance: "
+									+ data[i].balance));
+				}
+			}
 		});
 	}
 </script>
@@ -25,9 +35,8 @@
 	<input type="text" id="username" />
 	<br>
 	<br> Maximum Distance:
-	<input type="radio" id="distance" value="1" checked="checked" />1
-	<br>
-	<input type="radio" id="distance" value="2" />2
+	<input type="radio" name="distance" value="1" checked />1
+	<input type="radio" name="distance" value="2" />2
 	<br>
 	<br>
 	<div id="result_div"></div>
