@@ -73,7 +73,7 @@ public class graphSearch extends ServerResource
 			final JSONObject o = new JSONObject();
 			o.put("username", u.getUsername());
 			o.put("name", u.getName());
-			o.put("balance", u.getBalance());
+			o.put("balance", Integer.toString(u.getBalance()));
 			arr.put(o);
 		}
 
