@@ -18,7 +18,7 @@
 					</tr>
 					<tr>
 						<td style="background: #FFFFFF" height="80%"><%@include
-								file='advanced_search_form.jsp'%></td>
+								file='advanced_search_form.html'%></td>
 					</tr>
 				</table></td>
 		</tr>
