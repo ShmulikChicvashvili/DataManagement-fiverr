@@ -63,6 +63,26 @@ public interface UsersDatabase {
 			throws DatabaseUnkownFailureException, InvalidParamsException;
 
 	/**
+	 * Gets the users.
+	 *
+	 * @param start
+	 *            the offset to the first user. 0 is the first user.
+	 * @param amount
+	 *            the amount of users to retrieve from the database. -1 returns
+	 *            all users from 'start' to the end.
+	 * @param conn
+	 *            the conn
+	 * @return a list of up to 'amount' users, starting from 'start'. If no
+	 *         users match the criteria an empty list is returned.
+	 * @throws DatabaseUnkownFailureException
+	 *             Unknown failure exception
+	 * @throws InvalidParamsException
+	 *             Invalid parameters exception
+	 */
+	public List<DBUser> getUsers(int start, int amount, Connection conn)
+			throws DatabaseUnkownFailureException, InvalidParamsException;
+
+	/**
 	 * Checks if the user exists.
 	 *
 	 * @param username
@@ -138,7 +158,7 @@ public interface UsersDatabase {
 	 */
 	public void deleteUser(Connection conn, String username)
 			throws InvalidParamsException, DatabaseUnkownFailureException;
-	
+
 	/**
 	 * @return
 	 * @throws DatabaseUnkownFailureException
