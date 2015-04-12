@@ -574,33 +574,44 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 	}
 
 	private String genActivityTableCreationQuery() {
-		final String $ = String.format("CREATE TABLE IF NOT EXISTS %s ("
-				+ "`%s` INT UNSIGNED NOT NULL AUTO_INCREMENT,"
-				+ "`%s` VARCHAR(255) NOT NULL," + "`%s` VARCHAR(255) NOT NULL,"
-				+ "`%s` SMALLINT UNSIGNED NOT NULL,"
-				+ "`%s` SMALLINT UNSIGNED NOT NULL,"
-				+ "`%s` ENUM('SERVICE','TASK') NOT NULL,"
-				+ "PRIMARY KEY (`%s`)," + "INDEX `USERNAME` (`%s` ASC))",
-				activityTable, ActivityTableColumn.ID.columnName(),
-				ActivityTableColumn.TITLE.columnName(),
-				ActivityTableColumn.USERNAME.columnName(),
-				ActivityTableColumn.CAPACITY.columnName(),
-				ActivityTableColumn.DISTANCE.columnName(),
-				ActivityTableColumn.TYPE.columnName(),
-				ActivityTableColumn.ID.columnName(),
-				ActivityTableColumn.USERNAME.columnName());
+		final String $ = String
+				.format("CREATE TABLE IF NOT EXISTS %s ("
+						+ "`%s` INT UNSIGNED NOT NULL AUTO_INCREMENT,"
+						+ "`%s` VARCHAR(255) NOT NULL,"
+						+ "`%s` VARCHAR(255) NOT NULL,"
+						+ "`%s` SMALLINT UNSIGNED NOT NULL,"
+						+ "`%s` SMALLINT UNSIGNED NOT NULL,"
+						+ "`%s` ENUM('SERVICE','TASK') NOT NULL,"
+						+ "PRIMARY KEY (`%s`),"
+						+ "INDEX `USERNAME` (`%s` ASC),INDEX `USERNAME_TYPE` (`%s` ASC,`%s` ASC),INDEX `TYPE` (`%s` ASC))",
+						activityTable, ActivityTableColumn.ID.columnName(),
+						ActivityTableColumn.TITLE.columnName(),
+						ActivityTableColumn.USERNAME.columnName(),
+						ActivityTableColumn.CAPACITY.columnName(),
+						ActivityTableColumn.DISTANCE.columnName(),
+						ActivityTableColumn.TYPE.columnName(),
+						ActivityTableColumn.ID.columnName(),
+						ActivityTableColumn.USERNAME.columnName(),
+						ActivityTableColumn.USERNAME.columnName(),
+						ActivityTableColumn.TYPE.columnName(),
+						ActivityTableColumn.TYPE.columnName());
 
 		return $;
 	}
 
 	private String genRegistrationTableCreationQuery() {
-		final String $ = String.format("CREATE TABLE IF NOT EXISTS %s ("
-				+ "`%s` INT UNSIGNED NOT NULL," + "`%s` VARCHAR(255) NOT NULL,"
-				+ "PRIMARY KEY (`%s`, `%s`));", registrationTable,
-				RegistrationTableColumn.ID.columnName(),
-				RegistrationTableColumn.USERNAME.columnName(),
-				RegistrationTableColumn.ID.columnName(),
-				RegistrationTableColumn.USERNAME.columnName());
+		final String $ = String
+				.format("CREATE TABLE IF NOT EXISTS %s ("
+						+ "`%s` INT UNSIGNED NOT NULL,"
+						+ "`%s` VARCHAR(255) NOT NULL,"
+						+ "PRIMARY KEY (`%s`, `%s`),INDEX `ID` (`%s` ASC),INDEX `USERNAME` (`%s` ASC));",
+						registrationTable,
+						RegistrationTableColumn.ID.columnName(),
+						RegistrationTableColumn.USERNAME.columnName(),
+						RegistrationTableColumn.ID.columnName(),
+						RegistrationTableColumn.USERNAME.columnName(),
+						RegistrationTableColumn.ID.columnName(),
+						RegistrationTableColumn.USERNAME.columnName());
 
 		return $;
 	}

@@ -70,7 +70,6 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase implements
 		try (Connection conn = getConnection();
 				Statement stmt = conn.createStatement()) {
 			stmt.execute(creationQuery);
-			stmt.execute(indexingQuery);
 			conn.commit();
 		} catch (final SQLException e) {
 			if (e.getErrorCode() != 1061) {
@@ -378,10 +377,6 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase implements
 						Columns.BALANCE.toString().toLowerCase(),
 						Columns.USERNAME.toString().toLowerCase());
 
-		indexingQuery = String.format(
-				"CREATE INDEX indexed_username ON %s (`%s`) USING HASH", table,
-				Columns.USERNAME.toString().toLowerCase());
-
 		insertionQuery = String.format(
 				"INSERT INTO %s (%s, %s, %s, %s) VALUES (?, ?, ?, ?)", table,
 				Columns.USERNAME.toString().toLowerCase(), Columns.PASSWORD
@@ -423,11 +418,6 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase implements
 	 * The statement which will handle creation of the table
 	 */
 	private String creationQuery;
-
-	/**
-	 * The statement which will handle indexing of the database
-	 */
-	private String indexingQuery;
 
 	/**
 	 * The statement which will handle inserting to the database

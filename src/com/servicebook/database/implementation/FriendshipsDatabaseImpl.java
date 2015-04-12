@@ -284,9 +284,13 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
 
 	private void initQueries() {
 		creationQuery = String
-				.format("CREATE TABLE IF NOT EXISTS %s (`%s` VARCHAR(255) NOT NULL, `%s` VARCHAR(255) NOT NULL, PRIMARY KEY(`%s`, `%s`))",
+				.format("CREATE TABLE IF NOT EXISTS %s (`%s` VARCHAR(255) NOT NULL, `%s` VARCHAR(255) NOT NULL, PRIMARY KEY(`%s`, `%s`),INDEX `FIRST_USERNAME` (`%s` ASC),INDEX `SECOND_USERNAME` (`%s` ASC))",
 						friendshipsTable, FriendshipsColumns.FIRST_USERNAME
 								.toString().toLowerCase(),
+						FriendshipsColumns.SECOND_USERNAME.toString()
+								.toLowerCase(),
+						FriendshipsColumns.FIRST_USERNAME.toString()
+								.toLowerCase(),
 						FriendshipsColumns.SECOND_USERNAME.toString()
 								.toLowerCase(),
 						FriendshipsColumns.FIRST_USERNAME.toString()
