@@ -36,6 +36,9 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
 	@Override
 	public boolean areFriends(String username1, String username2)
 			throws InvalidParamsException, DatabaseUnkownFailureException {
+		if( !isValidStr(username1) ||  !isValidStr(username2)){
+			throw new InvalidParamsException();
+		}
 		boolean $ = false;
 
 		try (Connection conn = getConnection()) {
@@ -53,7 +56,7 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
 	public boolean areFriends(String username1, String username2,
 			Connection conn) throws InvalidParamsException,
 			DatabaseUnkownFailureException {
-		if (username1 == null || username2 == null || isConnClosed(conn)) {
+		if ( !isValidStr(username1) ||  !isValidStr(username2) || isConnClosed(conn)) {
 			throw new InvalidParamsException();
 		}
 		boolean $ = false;
@@ -150,7 +153,7 @@ public class FriendshipsDatabaseImpl extends AbstractMySqlDatabase implements
 			Connection conn) throws InvalidParamsException,
 			ReflexiveFriendshipException, ElementAlreadyExistsException,
 			DatabaseUnkownFailureException {
-		if (username1 == null || username2 == null) {
+		if ( !isValidStr(username1) ||  !isValidStr(username2)) {
 			throw new InvalidParamsException();
 		}
 

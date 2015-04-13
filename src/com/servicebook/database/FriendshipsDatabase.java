@@ -2,7 +2,6 @@ package com.servicebook.database;
 
 import java.sql.Connection;
 import java.util.List;
-import java.util.Set;
 
 import utils.Pair;
 

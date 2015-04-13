@@ -43,4 +43,8 @@ public abstract class AbstractMySqlDatabase {
 		}
 		return false;
 	}
+
+	protected boolean isValidStr(String str) {
+		return str != null && !str.isEmpty();
+	}
 }
