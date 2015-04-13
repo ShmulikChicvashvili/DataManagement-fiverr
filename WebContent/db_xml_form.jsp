@@ -24,6 +24,7 @@
 <title>Insert title here</title>
 </head>
 <body>
+<div class="col-md-6">
 	<label class="radio-inline"><input type="radio" name="type"
 		value="1" checked />All users </label>
 	<label class="radio-inline"> <input type="radio" name="type"
@@ -36,5 +37,6 @@
 	<br>
 	<button class="btn btn-default" onclick='postDbXML()'>Generate</button>
 	<div id="result_div"></div>
+</div>
 </body>
 </html>

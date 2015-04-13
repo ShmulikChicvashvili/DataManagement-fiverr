@@ -7,7 +7,15 @@
 <title>JSP Page.</title>
 </head>
 <body>
-	<h1>Welcome: ${username }</h1>
+	<div class="col-md-12">
+		<p>
+			Welcome, <%=(String)session.getAttribute("username") %>. We hope you will
+			enjoy your staying in the website. In this website you are welcomed to 
+			make new connection, offer activities and register to ones by exchanging
+			time.
+		</p>
+		
+	</div>
 
 </body>
 </html>

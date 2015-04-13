@@ -1,157 +1,178 @@
 <!DOCTYPE html>
 <html>
 <head>
+<style>
+div.img {
+	margin: 5px;
+	padding: 5px;
+	border: 1px solid #FFFFFF;
+	height: auto;
+	width: auto;
+	float: left;
+	text-align: center;
+}
+
+div.img img {
+	display: inline;
+	margin: 5px;
+	border: 1px solid #ffffff;
+}
+
+div.img a:hover img {
+	border: 1px solid #0000ff;
+}
+
+div.desc {
+	text-align: center;
+	font-weight: normal;
+	width: 120px;
+	margin: 5px;
+}
+</style>
 <meta charset="ISO-8859-1">
 <title>Insert title here</title>
 </head>
 <body>
-<table style="position: absolute; top: 0; bottom: 0; left: 0; right: 0;" cellpadding="0" cellspacing="0" height="100%" width="100%">
-		<tbody><tr valign="top">
-			<td style="background: #2B2E33" width="20%">
+	<table
+		style="position: absolute; top: 0; bottom: 0; left: 0; right: 0;"
+		cellpadding="0" cellspacing="0" height="100%" width="100%">
+		<tbody>
+			<tr valign="top">
+				<td style="background: #2B2E33" width="20%">
 
 
-<link href="css/custom-styles.css" rel="stylesheet">
-<link href="css/bootstrap.css" rel="stylesheet">
-<link href="css/bootstrap-theme.min.css" rel="stylesheet">
-<link href="css/font-awesome.css" rel="stylesheet">
-<meta charset="ISO-8859-1">
-<title>Insert title here</title>
+					<link href="css/custom-styles.css" rel="stylesheet">
+					<link href="css/bootstrap.css" rel="stylesheet">
+					<link href="css/bootstrap-theme.min.css" rel="stylesheet">
+					<link href="css/font-awesome.css" rel="stylesheet">
+					<meta charset="ISO-8859-1">
+					<title>Insert title here</title>
 
 
-<nav class="navbar navbar-default top-navbar" role="navigation" style="border-color: #2B2E33; background: #2B2E33;">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="/HW5/index.jsp"><b>fun</b>ctivity</a>
-            </div>
-</nav>
-<nav class="navbar-default navbar-side" role="navigation" style="background: #2B2E33">
-            <div class="sidebar-collapse">
-               <ul class="nav" id="main-menu">
+					<nav class="navbar navbar-default top-navbar" role="navigation"
+						style="border-color: #2B2E33; background: #2B2E33;">
+						<div class="navbar-header">
+							<a class="navbar-brand" href="/HW5/index.jsp"><b>fun</b>ctivity</a>
+						</div>
+					</nav>
+					<nav class="navbar-default navbar-side" role="navigation"
+						style="background: #2B2E33">
+						<div class="sidebar-collapse">
+							<ul class="nav" id="main-menu">
 
-                    <li>
-                        <a href="/HW5/users.jsp"> Users </a>
-                    </li>
-                    <li>
-                        <a href="/HW5/friends.jsp"> Friends </a>
-                    </li>
+								<li><a href="/HW5/users.jsp"> Users </a></li>
+								<li><a href="/HW5/friends.jsp"> Friends </a></li>
 
-                           <li>
-                        <a href="/HW5/offer_activity.jsp"> Offer Activity </a>
-                    </li>
-                    <li>
-                        <a href="/HW5/my_activities.jsp"> My Activities </a>
-                    </li>
-                           <li>
-                       <a href="/HW5/offered_activities.jsp"> Friends Activities </a> 
-                    </li>
-					<li>
-                        <a href="/HW5/registered_activities.jsp"> Registered Activities</a>
-                    </li>					
-                    <li>
-                        <a href="/HW5/search_user.jsp"> Search User </a>
-                    </li>
-					
-					<li>
-                        <a href="/HW5/advanced_search.jsp"> Advanced Search </a>
-                    </li>
-					<li>
-						<a href="/HW5/db_xml.jsp"> GraphML </a>
-					</li>
-					<li>
-                        <a href="/HW5/api.html"> API </a> 
-                    </li>
-					
-					<li>
-                        <a href="/HW5/about.html"> About </a>
-                    </li>
-					
-                </ul>
+								<li><a href="/HW5/offer_activity.jsp"> Offer Activity </a>
+								</li>
+								<li><a href="/HW5/my_activities.jsp"> My Activities </a></li>
+								<li><a href="/HW5/offered_activities.jsp"> Friends
+										Activities </a></li>
+								<li><a href="/HW5/registered_activities.jsp">
+										Registered Activities</a></li>
+								<li><a href="/HW5/search_user.jsp"> Search User </a></li>
 
-            </div>
-		
+								<li><a href="/HW5/advanced_search.jsp"> Advanced Search
+								</a></li>
+								<li><a href="/HW5/db_xml.jsp"> GraphML </a></li>
+								<li><a href="/HW5/api.html"> API </a></li>
 
-        </nav>
+								<li><a href="/HW5/about.html"> About </a></li>
+
+							</ul>
+
+						</div>
 
 
-</td>
-			<td width="80%"><table cellpadding="0" cellspacing="0" height="100%" width="100%">
-					<tbody><tr>
-						<td style="background: #F8F8F8" height="20%">
+					</nav>
 
 
- <link href="css/bootstrap.css" rel="stylesheet">
-
-	 <script src="http://code.jquery.com/jquery-1.9.1.min.js" type="text/javascript"></script>
-<script src="js/bootstrap.min.js"></script>
-    <!-- Metis Menu Js -->
-    <script src="js/jquery.metisMenu.js"></script>
-    <!-- Morris Chart Js -->
-    <script src="js/morris/raphael-2.1.0.min.js"></script>
-    <script src="js/morris/morris.js"></script>
-	
-	
-	<script src="js/easypiechart.js"></script>
-	<script src="js/easypiechart-data.js"></script>
-	
-	
-    <!-- Custom Js -->
-    <script src="js/custom-scripts.js"></script>
-<meta charset="ISO-8859-1">
-<title>Insert title here</title>
+				</td>
+				<td width="80%"><table cellpadding="0" cellspacing="0"
+						height="100%" width="100%">
+						<tbody>
+							<tr>
+								<td style="background: #F8F8F8" height="20%">
 
 
-<nav class="navbar navbar-default top-navbar" role="navigation" style="border-color: none;">
-           
-            <ul class="nav navbar-top-links navbar-right">
-               
-               
-              
-                <li><a href="/HW5/index.jsp"><i class="fa fa-home"></i> </a> </li>
-                <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#" id="menu1" aria-expanded="false">
-                        <i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>
-                    </a>
-                    <ul class="dropdown-menu dropdown-user">
-                        <li><a href="/HW5/my_profile.jsp"><i class="fa fa-user fa-fw"></i> User Profile</a>
-                        </li>
-                        <li class="divider"></li>
-                        <li><a href="/HW5/Logout"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
-                        </li>
-                    </ul>
-                    <!-- /.dropdown-user -->
-                </li>
-                <!-- /.dropdown -->
-            </ul>
-</nav>
+									<link href="css/bootstrap.css" rel="stylesheet"> <script
+										src="http://code.jquery.com/jquery-1.9.1.min.js"
+										type="text/javascript"></script> <script
+										src="js/bootstrap.min.js"></script> <!-- Metis Menu Js --> <script
+										src="js/jquery.metisMenu.js"></script> <!-- Morris Chart Js -->
+									<script src="js/morris/raphael-2.1.0.min.js"></script> <script
+										src="js/morris/morris.js"></script> <script
+										src="js/easypiechart.js"></script> <script
+										src="js/easypiechart-data.js"></script> <!-- Custom Js --> <script
+										src="js/custom-scripts.js"></script>
+									<meta charset="ISO-8859-1">
+									<title>Insert title here</title>
 
-</td>
-					</tr>
-					<tr>
-						<td style="background: #F8F8F8" height="80%">
+
+									<nav class="navbar navbar-default top-navbar" role="navigation"
+										style="border-color: none;">
+
+										<ul class="nav navbar-top-links navbar-right">
+
+
+
+											<li><a href="/HW5/index.jsp"><i class="fa fa-home"></i>
+											</a></li>
+											<li class="dropdown"><a class="dropdown-toggle"
+												data-toggle="dropdown" href="#" id="menu1"
+												aria-expanded="false"> <i class="fa fa-user fa-fw"></i>
+													<i class="fa fa-caret-down"></i>
+											</a>
+												<ul class="dropdown-menu dropdown-user">
+													<li><a href="/HW5/my_profile.jsp"><i
+															class="fa fa-user fa-fw"></i> User Profile</a></li>
+													<li class="divider"></li>
+													<li><a href="/HW5/Logout"><i
+															class="fa fa-sign-out fa-fw"></i> Logout</a></li>
+												</ul> <!-- /.dropdown-user --></li>
+											<!-- /.dropdown -->
+										</ul>
+									</nav>
+
+								</td>
+							</tr>
+							<tr>
+								<td style="background: #F8F8F8" height="80%">
 
 
 
 
 
 
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Insert title here</title>
-
-
-
-<img src="https://fbcdn-sphotos-h-a.akamaihd.net/hphotos-ak-xpf1/v/t1.0-9/10372522_4358191650885_4251704433673626738_n.jpg?oh=92a5bddf937281cddc44f0a2fa4f4a4f&oe=55AF6A0C&__gda__=1437649888_8c92b7a3ec5ea7be84303e738e86a3c4"> </img>
-<br>
-<img src="https://fbcdn-sphotos-d-a.akamaihd.net/hphotos-ak-xpa1/v/t1.0-9/1515022_10152815980477978_9116142407860109951_n.jpg?oh=3f8d7da80cca9e9c2edb99b1c65d7994&oe=55E2A2B3&__gda__=1440575961_82928e0642d64adcb59f54671fc71a42"> </img>
-<br>
-<p> Shmulik Merabi Chicvashvili, email: shmulikjkech@gmail.com </p>
-<p> Eyal The-Killer Tolchinsky, email: eyaltolchinsky@gmail.com </p>
-<p> The advanced features we implemented are:<br>1. Graph based search webservice.<br>2. Presenting Services, Tasks and Users with GraphML, using XSLT.</p>
-<p> We worked with mysql 5.6.19 </p>
-<button>Donate us money!!!</button>
-
-</td>
-					</tr>
-				</tbody></table></td>
-		</tr>
-	</tbody></table>
+									<meta http-equiv="Content-Type"
+										content="text/html; charset=ISO-8859-1">
+									<title>Insert title here</title>
+									<div class="col-md-12">
+										<div class="img">
+											<img
+												src="https://fbcdn-sphotos-h-a.akamaihd.net/hphotos-ak-xpf1/v/t1.0-9/10372522_4358191650885_4251704433673626738_n.jpg?oh=92a5bddf937281cddc44f0a2fa4f4a4f&oe=55AF6A0C&__gda__=1437649888_8c92b7a3ec5ea7be84303e738e86a3c4"
+												width="90" height="110"> </img> <br> <img
+												src="https://fbcdn-sphotos-d-a.akamaihd.net/hphotos-ak-xpa1/v/t1.0-9/1515022_10152815980477978_9116142407860109951_n.jpg?oh=3f8d7da80cca9e9c2edb99b1c65d7994&oe=55E2A2B3&__gda__=1440575961_82928e0642d64adcb59f54671fc71a42"
+												width="90" width="110"> </img> <br>
+										</div>
+										<p>Shmulik Merabi Chicvashvili, email:
+											shmulikjkech@gmail.com</p>
+										<p>Eyal The-Killer Tolchinsky, email:
+											eyaltolchinsky@gmail.com</p>
+										<p>
+											The advanced features we implemented are:<br>1. Graph
+											based search webservice.<br>2. Presenting Services,
+											Tasks and Users with GraphML, using XSLT.
+										</p>
+										<p>We worked with mysql 5.6.19</p>
+										<button class="btn btn-default">Donate us money!!!</button>
+									</div>
+								</td>
+							</tr>
+						</tbody>
+					</table></td>
+			</tr>
+		</tbody>
+	</table>
 </body>
 </html>
