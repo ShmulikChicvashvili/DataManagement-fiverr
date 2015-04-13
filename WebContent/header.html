@@ -1,12 +1,49 @@
 
 <html>
 <head>
+ <link href="css/bootstrap.css" rel="stylesheet" />
+
+	 <script src="http://code.jquery.com/jquery-1.9.1.min.js" type="text/javascript"></script>
+<script src="js/bootstrap.min.js"></script>
+    <!-- Metis Menu Js -->
+    <script src="js/jquery.metisMenu.js"></script>
+    <!-- Morris Chart Js -->
+    <script src="js/morris/raphael-2.1.0.min.js"></script>
+    <script src="js/morris/morris.js"></script>
+	
+	
+	<script src="js/easypiechart.js"></script>
+	<script src="js/easypiechart-data.js"></script>
+	
+	
+    <!-- Custom Js -->
+    <script src="js/custom-scripts.js"></script>
 <meta charset="ISO-8859-1">
 <title>Insert title here</title>
 </head>
 <body>
-<a href="/HW5/index.jsp"> Home </a>
-<a href="/HW5/my_profile.jsp" > Profile </a>
-<a href="/HW5/Logout"> Logout </a>
+<nav class="navbar navbar-default top-navbar" role="navigation" style="border-color: none;">
+           
+            <ul class="nav navbar-top-links navbar-right">
+               
+               
+              
+                
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#" id="menu1" aria-expanded="false">
+                        <i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-user">
+                        <li><a href="/HW5/my_profile.jsp"><i class="fa fa-user fa-fw"></i> User Profile</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li><a href="/HW5/Logout"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                        </li>
+                    </ul>
+                    <!-- /.dropdown-user -->
+                </li>
+                <!-- /.dropdown -->
+            </ul>
+</nav>
 </body>
 </html>

@@ -5,46 +5,136 @@
 <title>Insert title here</title>
 </head>
 <body>
-<table border="1" cellpadding="0" cellspacing="0" height="100%" width="100%">
+<table style="position: absolute; top: 0; bottom: 0; left: 0; right: 0;" cellpadding="0" cellspacing="0" height="100%" width="100%">
 		<tbody><tr valign="top">
-			<td width="20%">
+			<td style="background: #2B2E33" width="20%">
 
 
+<link href="css/custom-styles.css" rel="stylesheet">
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-theme.min.css" rel="stylesheet">
+<link href="css/font-awesome.css" rel="stylesheet">
 <meta charset="ISO-8859-1">
 <title>Insert title here</title>
 
 
-<a href="/HW5/users.jsp"> see all users </a> <br><br>
-<a href="/HW5/friends.jsp"> see all your friends </a> <br><br>
-<a href="/HW5/offer_activity.jsp"> offer new activity </a> <br><br>
-<a href="/HW5/my_activities.jsp"> manage activities offered by you </a> <br><br>
-<a href="/HW5/offered_activities.jsp"> see friends activities </a> <br><br>
-<a href="/HW5/registered_activities.jsp"> manage activities you registered </a> <br><br>
-<a href="/HW5/search_user.jsp"> search user </a> <br><br>
-<a href="/HW5/advanced_search.jsp"> advanced user </a> <br><br>
-<a href="/HW5/api.html"> api </a> <br><br>
-<a href="/HW5/about.html"> about </a> <br><br>
+<nav class="navbar navbar-default top-navbar" role="navigation" style="border-color: #2B2E33; background: #2B2E33;">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="/HW5/index.jsp"><b>fun</b>ctivity</a>
+            </div>
+</nav>
+<nav class="navbar-default navbar-side" role="navigation" style="background: #2B2E33">
+            <div class="sidebar-collapse">
+                <ul class="nav" id="main-menu">
+
+                    <li>
+                        <a href="/HW5/users.jsp"> Users </a>
+                    </li>
+                    <li>
+                        <a href="/HW5/friends.jsp"> Friends </a>
+                    </li>
+
+                           <li>
+                        <a href="/HW5/offer_activity.jsp"> offer new activity </a>
+                    </li>
+                    <li>
+                        <a href="/HW5/my_activities.jsp"> manage activities offered by you </a>
+                    </li>
+                           <li>
+                       <a href="/HW5/offered_activities.jsp"> see friends activities </a> 
+                    </li>
+					<li>
+                        <a href="/HW5/registered_activities.jsp"> manage activities you registered </a>
+                    </li>					
+                    <li>
+                        <a href="/HW5/search_user.jsp"> search user </a>
+                    </li>
+					
+					<li>
+                        <a href="/HW5/advanced_search.jsp"> advanced user </a>
+                    </li>
+					
+					<li>
+                        <a href="/HW5/api.html"> api </a> 
+                    </li>
+					
+					<li>
+                        <a href="/HW5/about.html"> about </a>
+                    </li>
+                </ul>
+
+            </div>
+		
+
+        </nav>
+
 
 </td>
-			<td width="80%"><table border="1" cellpadding="0" cellspacing="0" height="100%" width="100%">
+			<td width="80%"><table cellpadding="0" cellspacing="0" height="100%" width="100%">
 					<tbody><tr>
-						<td height="20%">
+						<td style="background: #F8F8F8" height="20%">
 
 
+ <link href="css/bootstrap.css" rel="stylesheet">
+
+	 <script src="http://code.jquery.com/jquery-1.9.1.min.js" type="text/javascript"></script>
+<script src="js/bootstrap.min.js"></script>
+    <!-- Metis Menu Js -->
+    <script src="js/jquery.metisMenu.js"></script>
+    <!-- Morris Chart Js -->
+    <script src="js/morris/raphael-2.1.0.min.js"></script>
+    <script src="js/morris/morris.js"></script>
+	
+	
+	<script src="js/easypiechart.js"></script>
+	<script src="js/easypiechart-data.js"></script>
+	
+	
+    <!-- Custom Js -->
+    <script src="js/custom-scripts.js"></script>
 <meta charset="ISO-8859-1">
 <title>Insert title here</title>
 
 
-<a href="/HW5/index.jsp"> Home </a>
-<a href="/HW5/my_profile.jsp"> Profile </a>
-<a href="/HW5/Logout"> Logout </a>
+<nav class="navbar navbar-default top-navbar" role="navigation" style="border-color: none;">
+           
+            <ul class="nav navbar-top-links navbar-right">
+               
+               
+              
+                
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#" id="menu1" aria-expanded="false">
+                        <i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-user">
+                        <li><a href="/HW5/my_profile.jsp"><i class="fa fa-user fa-fw"></i> User Profile</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li><a href="/HW5/Logout"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                        </li>
+                    </ul>
+                    <!-- /.dropdown-user -->
+                </li>
+                <!-- /.dropdown -->
+            </ul>
+</nav>
 
 </td>
 					</tr>
 					<tr>
-						<td style="background: #FFFFFF" height="80%">
+						<td style="background: #F8F8F8" height="80%">
 
-<p> Returns a JSONArray of users
+
+
+
+
+
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+
+
+	<p> Returns a JSONArray of users
 each user is a JSONObject containing the next fields:
 username - the user's username
 name - the user's name

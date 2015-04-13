@@ -76,6 +76,7 @@ public class LoginServlet extends HttpServlet
 			passwordCookie.setMaxAge(60 * 60 * 24 * 7);
 			response.addCookie(usernameCookie);
 			response.addCookie(passwordCookie);
+			output.write("success");
 			response.addHeader("NEED_REDIRECT", "true");
 		} else
 		{

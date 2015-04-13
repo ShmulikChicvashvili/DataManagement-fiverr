@@ -54,7 +54,6 @@
 		<a href="<%=request.getRequestURL()%>?start=<%=pageStart + 10%>">Next</a>
 		<br />
 		<%
-			System.out.println(pageStart + " " + totalCount);
 			List<DBPaidService> offeredServices =
 				activitiesDB.getServicesOfferedToUser(
 					(String) session.getAttribute("username"),

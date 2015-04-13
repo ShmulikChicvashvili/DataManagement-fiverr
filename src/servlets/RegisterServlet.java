@@ -99,6 +99,7 @@ public class RegisterServlet extends HttpServlet
 		resp.addCookie(usernameCookie);
 		resp.addCookie(passwordCookie);
 		// Finished handling session and cookies
+		output.write("success");
 		resp.addHeader("NEED_REDIRECT", "true");
 	}
 	

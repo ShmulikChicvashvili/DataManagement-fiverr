@@ -7,17 +7,19 @@
 <title>Insert title here</title>
 </head>
 <body>
-	<table border="1" height="100%" width="100%" cellspacing="0"
-		cellpadding="0">
+	<table height="100%" width="100%" cellspacing="0"
+		cellpadding="0"
+		style="position: absolute; top: 0; bottom: 0; left: 0; right: 0;">
 		<tr valign='top'>
-			<td width="20%"><%@include file='sidebar.html'%></td>
-			<td width="80%"><table border="1" height="100%" width="100%"
+			<td width="20%" style="background: #2B2E33"><%@include
+					file='sidebar.html'%></td>
+			<td width="80%"><table height="100%" width="100%"
 					cellspacing="0" cellpadding="0">
 					<tr>
-						<td height="20%"><%@include file='header.html'%></td>
+						<td height="20%" style="background: #F8F8F8"><%@include file='header.html'%></td>
 					</tr>
 					<tr>
-						<td style="background: #FFFFFF" height="80%"><%@include
+						<td style="background: #F8F8F8" height="80%"><%@include
 								file='friends_list.jsp'%></td>
 					</tr>
 				</table></td>

@@ -66,7 +66,9 @@ public class AuthenticationFilter implements Filter
 		if (uri.endsWith("login.html")
 			|| uri.endsWith("registration.html")
 			|| uri.endsWith("Register")
-			|| uri.endsWith("Login"))
+			|| uri.endsWith("Login")
+			|| uri.endsWith(".css")
+			|| uri.endsWith(".js"))
 		{
 			chain.doFilter(req, res);
 		} else if (authenticateSession(req))
