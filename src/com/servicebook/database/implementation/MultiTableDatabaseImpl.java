@@ -398,6 +398,7 @@ public class MultiTableDatabaseImpl extends AbstractMySqlDatabase implements
 	private int addPaidActivity(DBPaidActivity activity)
 			throws InvalidParameterException, DatabaseUnkownFailureException {
 		if (activity == null || activity.getUsername() == null
+				|| !isValidStr(activity.getTitle())
 				|| activity.getCapacity() <= 0 || activity.getDistance() <= 0) {
 			throw new InvalidParameterException();
 		}

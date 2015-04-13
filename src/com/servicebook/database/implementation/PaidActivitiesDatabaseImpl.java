@@ -543,8 +543,10 @@ public class PaidActivitiesDatabaseImpl extends AbstractMySqlDatabase implements
 	private int AddPaidActivity(DBPaidActivity activity, ActivityType type,
 			Connection conn) throws InvalidParameterException,
 			DatabaseUnkownFailureException {
-		if (activity == null || activity.getCapacity() <= 0
-				|| activity.getDistance() <= 0 || isConnClosed(conn)) {
+		if (activity == null || activity.getUsername() == null
+				|| !isValidStr(activity.getTitle())
+				|| activity.getCapacity() <= 0 || activity.getDistance() <= 0
+				|| isConnClosed(conn)) {
 			throw new InvalidParameterException();
 		}
 

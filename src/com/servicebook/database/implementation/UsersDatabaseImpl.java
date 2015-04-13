@@ -86,8 +86,9 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase implements
 	@Override
 	public void addUser(DBUser user) throws ElementAlreadyExistsException,
 			DatabaseUnkownFailureException, InvalidParamsException {
-		if (user == null || user.getUsername() == null
-				|| user.getPassword() == null || user.getName() == null) {
+		if (user == null || !isValidStr(user.getUsername())
+				|| !isValidStr(user.getPassword())
+				|| !isValidStr(user.getName())) {
 			throw new InvalidParamsException();
 		}
 
@@ -156,7 +157,7 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase implements
 	@Override
 	public List<DBUser> getUsers(int start, int amount)
 			throws DatabaseUnkownFailureException, InvalidParamsException {
-		if (start < 0 || amount < 0) {
+		if (start < 0 || amount < 1) {
 			throw new InvalidParamsException();
 		}
 		List<DBUser> $ = null;
@@ -179,7 +180,7 @@ public class UsersDatabaseImpl extends AbstractMySqlDatabase implements
 	@Override
 	public List<DBUser> getUsers(int start, int amount, Connection conn)
 			throws DatabaseUnkownFailureException, InvalidParamsException {
-		if (start < 0 || amount < 0 || isConnClosed(conn)) {
+		if (start < 0 || amount < 1 || isConnClosed(conn)) {
 			throw new InvalidParamsException();
 		}
 		ArrayList<DBUser> $ = new ArrayList<DBUser>();
