@@ -14,9 +14,9 @@
 			username : username,
 			type : type
 		});
-		
+
 		posting.done(function(data) {
-			$("#result_div").empty().append(data);
+			$("#result_div").empty().text(data);
 		});
 	}
 </script>
@@ -25,12 +25,12 @@
 </head>
 <body>
 	<label class="radio-inline"><input type="radio" name="type"
-		value="1" checked />1 </label>
+		value="1" checked />All users </label>
 	<label class="radio-inline"> <input type="radio" name="type"
-		value="2" />2
+		value="2" />Friends
 	</label>
 	<label class="radio-inline"> <input type="radio" name="type"
-		value="3" />3
+		value="3" />Friends with offers
 	</label>
 	<br>
 	<br>
