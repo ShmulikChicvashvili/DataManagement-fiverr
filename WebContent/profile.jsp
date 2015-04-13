@@ -22,18 +22,17 @@
 			balance = res.getBalance();
 		}
 	%>
-	Username:
-	<%=username%>
-	<br>
-	<br> Name:
-	<%=name%>
-	<br>
-	<br> Balance:
-	<%=balance%>
-	<br>
-	<br>
-	<form action="/HW5/DeleteProfile" method="post">
-		<input type="submit" name="deleteButton" value="Delete Profile" />
-	</form>
+	<div class="form-group" style="width: 50%; margin: 0px auto;">
+		<label>Username:
+		<%=username%></label>
+		<br> <br> <label>Name:
+		<%=name%></label>
+		<br> <br> <label>Balance:
+		<%=balance%></label>
+		<br> <br>
+		<form action="/HW5/DeleteProfile" method="post">
+			<button type="submit" class="btn btn-default">Delete Profile</button>
+		</form>
+	</div>
 </body>
 </html>

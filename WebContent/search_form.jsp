@@ -1,5 +1,6 @@
 <html>
 <head>
+<link href="assets/css/custom-styles.css" rel="stylesheet">
 <script
 	src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script type="text/javascript">
@@ -15,7 +16,7 @@
 			} else {
 				document.getElementById("add_friend").style.display = "block";
 			}
-			$("#result_div").empty().append(data);
+			$("#result_label").empty().append(data);
 		});
 	}
 	function addFriend(username) {
@@ -38,15 +39,23 @@
 <title>Insert title here</title>
 </head>
 <body>
-	Search for user:
-	<br>
-	<br> Enter username:
-	<input type="text" id="input_text" />
-	<button onclick="searchUser()">Search</button>
-	<div id="result_div"></div>
-	<button
-		onclick='addFriend("<%=(String) session.getAttribute("username")%>")'
-		style="display: none;" id="add_friend">Add Friend</button>
-	<div id="result_div_friend"></div>
+
+	<div class="col-lg-6">
+		<label>Search for user</label>
+		<div class="form-group input-group">
+			<input type="text" id="input_text" class="form-control"
+				placeholder="username"> <span class="input-group-btn">
+				<button class="btn btn-default" type="button" onclick="searchUser()">
+					<i class="fa fa-search"></i>
+				</button>
+			</span>
+		</div>
+		<div id="result_div"><label id="result_label"></label></div>
+		<button class="btn btn-default"
+			onclick='addFriend("<%=(String) session.getAttribute("username")%>")'
+			style="display: none;" id="add_friend">Add Friend</button>
+		<div id="result_div_friend"></div>
+	</div>
+
 </body>
 </html>

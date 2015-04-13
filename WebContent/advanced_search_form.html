@@ -13,12 +13,21 @@
 			if (data == "maxDist must be 1 or 2") {
 				$("#result_div").empty().append(data);
 			} else {
-				var ul = $('<ul>').appendTo("#result_div");
+				var table = $('<table class="table table-striped">').appendTo(
+						"#result_div");
+				var thead = $('<thead>').appendTo(table);
+				var tr = $('<tr>').appendTo(thead);
+				tr.append($('<th>').text('#'));
+				tr.append($('<th>').text('Username'));
+				tr.append($('<th>').text('Name'));
+				tr.append($('<th>').text('Balance'));
+				var tbody = $('<tbody>').appendTo(table);
 				for ( var i in data) {
-					ul.append($(document.createElement('li')).text(
-							"Username: " + data[i].username + " " + "Name: "
-									+ data[i].name + " " + "Balance: "
-									+ data[i].balance));
+					tr = $('<tr>').appendTo(tbody);
+					tr.append($('<td>').text(i));
+					tr.append($('<td>').text(data[i].username));
+					tr.append($('<td>').text(data[i].name));
+					tr.append($('<td>').text(data[i].balance));
 				}
 			}
 		});
@@ -28,15 +37,22 @@
 <title>Insert title here</title>
 </head>
 <body>
-	Username:
-	<input type="text" id="username" />
-	<br>
-	<br> Maximum Distance:
-	<input type="radio" name="distance" value="1" checked />1
-	<input type="radio" name="distance" value="2" />2
-	<br>
-	<br>
-	<div id="result_div"></div>
-	<button onclick="getFriends()">Search</button>
+	<div class="col-md-12">
+		Username: <input class="form-control" type="text" id="username" /> <br>
+		<br> Maximum Distance:<label class="radio-inline"><input
+			type="radio" name="distance" value="1" checked />1 </label> <label
+			class="radio-inline"> <input type="radio" name="distance"
+			value="2" />2
+		</label>
+		<button class="btn btn-default" onclick="getFriends()">Search</button>
+		<!--    Striped Rows Table  -->
+		<div class="panel panel-default">
+			<div class="panel-heading"></div>
+			<div class="panel-body">
+				<div id="result_div" class="table-responsive"></div>
+			</div>
+		</div>
+	</div>
+
 </body>
 </html>

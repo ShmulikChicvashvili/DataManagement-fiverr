@@ -27,13 +27,20 @@
 <title>Insert title here</title>
 </head>
 <body>
-		<input type="radio" name="activity" value="Task" checked />Task <br>
-		<input type="radio" name="activity" value="Service" />Service <br>
-		Title:<input type="text" name="title" /> <br> Capacity:<input
-			type="text" name="capacity" /> 
-		<button
+	<div class="col-lg-6">
+		<label>Offer Activity</label> <br>
+		<br>
+		<label class="radio-inline"><input type="radio"
+			name="activity" value="Task" checked />Task</label> <label
+			class="radio-inline"><input type="radio" name="activity"
+			value="Service" />Service</label><br><br> <input class="form-control"
+			placeholder="Title" type="text" name="title" /> <br> <input
+			type="text" class="form-control" placeholder="Capacity"
+			name="capacity" /><br>
+		<button class="btn btn-default"
 			onclick='postActivity("<%=(String) session.getAttribute("username")%>")'>
 			Offer the activity</button>
-	<div id="result_div"></div>
+		<div id="result_div"></div>
+	</div>
 </body>
 </html>

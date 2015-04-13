@@ -57,31 +57,29 @@ public class DeleteProfileServlet extends HttpServlet
 		HttpServletRequest request,
 		HttpServletResponse response) throws ServletException, IOException
 	{
-		if (request.getParameter("deleteButton") != null)
+		MultiTableDatabase multiTableDB =
+			(MultiTableDatabase) getServletContext().getAttribute(
+				"multiTableDB");
+		try
 		{
-			MultiTableDatabase multiTableDB =
-				(MultiTableDatabase) getServletContext().getAttribute(
-					"multiTableDB");
-			try
-			{
-				multiTableDB.deleteUser((String)request.getSession(false).getAttribute(
-					"username"));
-			} catch (DatabaseUnkownFailureException e)
-			{
-				//TODO: figure out what to do
-				return;
-			} catch (InvalidParameterException e)
-			{
-				//TODO: figure out what to do
-				return;
-			}
-			HttpSession session = request.getSession(false);
-			if (session != null)
-			{
-				session.invalidate();
-			}
-			response.sendRedirect("/HW5/login.html");
+			multiTableDB.deleteUser((String) request
+				.getSession(false)
+				.getAttribute("username"));
+		} catch (DatabaseUnkownFailureException e)
+		{
+			// TODO: figure out what to do
+			return;
+		} catch (InvalidParameterException e)
+		{
+			// TODO: figure out what to do
+			return;
 		}
+		HttpSession session = request.getSession(false);
+		if (session != null)
+		{
+			session.invalidate();
+		}
+		response.sendRedirect("/HW5/login.html");
 	}
 	
 }

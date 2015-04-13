@@ -31,74 +31,112 @@
 <title>Insert title here</title>
 </head>
 <body>
-	<ul>
-		<%
-			PaidActivitiesDatabase activitiesDB =
-				(PaidActivitiesDatabase) getServletContext().getAttribute(
-					"activitiesDB");
-			int totalCount = 0;
-			int perPage = 10;
-			int pageStart = 0;
-			String start = request.getParameter("start");
-			if (start != null) pageStart = Integer.parseInt(start);
-			if (pageStart < 0) pageStart = 0;
-			totalCount =
-				activitiesDB.getActivitiesUserRegisteredCount((String) session
-					.getAttribute("username"));
-			if (pageStart > totalCount) pageStart = pageStart - perPage;
-		%>
-		<a href="<%=request.getRequestURL()%>?start=<%=pageStart - 10%>">Previous</a>
-		<%=pageStart + 1%>
-		-
-		<%=pageStart + 10%>
-		<a href="<%=request.getRequestURL()%>?start=<%=pageStart + 10%>">Next</a>
-		<br />
-		<%
-			List<DBPaidService> registeredServices =
-				activitiesDB.getServicesUserRegistered(
-					(String) session.getAttribute("username"),
-					pageStart,
-					perPage);
-			List<DBPaidTask> registeredTasks =
-				activitiesDB.getTasksUserRegistered(
-					(String) session.getAttribute("username"),
-					pageStart,
-					perPage);
-			for (int i = 0; i < Math.max(
-				registeredServices.size(),
-				registeredTasks.size()); i++)
-			{
-		%>
-		<%
-			if (i < registeredServices.size())
-				{
-		%>
-		<li id='Service<%=i%>'><h5>Service-</h5>Username:<%=registeredServices.get(i).getUsername()%>
-			&emsp; Title:<%=registeredServices.get(i).getTitle()%> &emsp;
-			Capacity:<%=registeredServices.get(i).getCapacity()%> &emsp; Number
-			registered:<%=registeredServices.get(i).getNumRegistered()%> &emsp;
-			<button
-				onclick='unregisterActivity("<%=registeredServices.get(i).getId()%>","<%=(String) session.getAttribute("username")%>","<%=i%>", "Service<%=i%>")'>Unregister
-				to service</button></li>
-		<%
-			}
-				if (i < registeredTasks.size())
-				{
-		%>
-		<li id='Task<%=i%>'><h5>Task-</h5>Username:<%=registeredTasks.get(i).getUsername()%>
-			&emsp; Title:<%=registeredTasks.get(i).getTitle()%> &emsp; Capacity:<%=registeredTasks.get(i).getCapacity()%>
-			&emsp; Number registered:<%=registeredTasks.get(i).getNumRegistered()%>
-			&emsp;
-			<button
-				onclick='unregisterActivity("<%=registeredTasks.get(i).getId()%>","<%=(String) session.getAttribute("username")%>","<%=i%>", "Task<%=i%>")'>Unregister
-				to task</button></li>
-		<%
-			}
-		%>
-		<div id="result_div<%=i%>"></div>
-		<%
-			}
-		%>
-	</ul>
+	<div class="col-md-12">
+		<!--    Striped Rows Table  -->
+		<div class="panel panel-default">
+			<div class="panel-heading">Registered Activities</div>
+			<div class="panel-body">
+				<%
+					PaidActivitiesDatabase activitiesDB =
+						(PaidActivitiesDatabase) getServletContext().getAttribute(
+							"activitiesDB");
+					int totalCount = 0;
+					int perPage = 10;
+					int pageStart = 0;
+					String start = request.getParameter("start");
+					if (start != null) pageStart = Integer.parseInt(start);
+					if (pageStart < 0) pageStart = 0;
+					totalCount =
+						activitiesDB.getActivitiesUserRegisteredCount((String) session
+							.getAttribute("username"));
+					if (pageStart > totalCount) pageStart = pageStart - perPage;
+				%>
+				<div style="width: 30%; margin: 0px auto;">
+					<a href="<%=request.getRequestURL()%>?start=<%=pageStart - 10%>"><i
+						class="fa fa-arrow-circle-left"></i></a>
+					<%=pageStart + 1%>
+					-
+					<%=pageStart + 20%>
+					<a href="<%=request.getRequestURL()%>?start=<%=pageStart + 10%>"><i
+						class="fa fa-arrow-circle-right"></i></a>
+				</div>
+				<br />
+				<div class="table-responsive">
+					<table class="table table-striped">
+						<thead>
+							<tr>
+								<th>#</th>
+								<th>Type</th>
+								<th>Username</th>
+								<th>Title</th>
+								<th>Capacity</th>
+								<th>Number Registered</th>
+								<th>Register</th>
+							</tr>
+						</thead>
+						<tbody>
+
+							<%
+								List<DBPaidService> registeredServices =
+									activitiesDB.getServicesUserRegistered(
+										(String) session.getAttribute("username"),
+										pageStart,
+										perPage);
+								List<DBPaidTask> registeredTasks =
+									activitiesDB.getTasksUserRegistered(
+										(String) session.getAttribute("username"),
+										pageStart,
+										perPage);
+								int count = 0;
+								for (int i = 0; i < Math.max(
+									registeredServices.size(),
+									registeredTasks.size()); i++)
+								{
+							%>
+							<%
+								if (i < registeredServices.size())
+									{
+							%>
+							<tr id='Service<%=i%>'>
+								<td><%=count%></td>
+								<td>Service</td>
+								<td><%=registeredServices.get(i).getUsername()%></td>
+								<td><%=registeredServices.get(i).getTitle()%></td>
+								<td><%=registeredServices.get(i).getCapacity()%></td>
+								<td><%=registeredServices.get(i).getNumRegistered()%></td>
+								<td><button class="btn btn-default"
+										onclick='unregisterActivity("<%=registeredServices.get(i).getId()%>","<%=(String) session.getAttribute("username")%>","<%=i%>", "Service<%=i%>")'>Unregister
+									</button></td>
+							</tr>
+							<%
+								count++;
+									}
+									if (i < registeredTasks.size())
+									{
+							%>
+							<tr id='Task<%=i%>'>
+								<td><%=count%></td>
+								<td>Service</td>
+								<td><%=registeredTasks.get(i).getUsername()%></td>
+								<td><%=registeredTasks.get(i).getTitle()%></td>
+								<td><%=registeredTasks.get(i).getCapacity()%></td>
+								<td><%=registeredTasks.get(i).getNumRegistered()%></td>
+								<td><button class="btn btn-default"
+										onclick='unregisterActivity("<%=registeredTasks.get(i).getId()%>","<%=(String) session.getAttribute("username")%>","<%=i%>", "Task<%=i%>")'>Unregister
+									</button></td>
+							</tr>
+							<%
+								count++;
+									}
+								}
+							%>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<!--  End  Striped Rows Table  -->
+	</div>
+
 </body>
 </html>

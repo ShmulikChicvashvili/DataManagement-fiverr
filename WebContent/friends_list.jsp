@@ -10,30 +10,56 @@
 <title>Insert title here</title>
 </head>
 <body>
-	<ul>
-		<%
-			FriendshipsDatabase friendshipDB =
-				(FriendshipsDatabase) getServletContext().getAttribute(
-					"friendshipDB");
-			
-			List<DBUser> friends =
-				friendshipDB.getFriends((String) session
-					.getAttribute("username"));
-			for (DBUser u : friends)
-			{
-				String username = u.getUsername();
-				String name = u.getName();
-				int balance = u.getBalance();
-		%>
+	<div class="col-md-12">
+		<!--    Striped Rows Table  -->
+		<div class="panel panel-default">
+			<div class="panel-heading">My Friends</div>
+			<div class="panel-body">
+				<div class="table-responsive">
+					<table class="table table-striped">
+						<thead>
+							<tr>
+								<th>#</th>
+								<th>Username</th>
+								<th>Name</th>
+								<th>Balance</th>
+							</tr>
+						</thead>
+						<tbody>
+							<%
+								FriendshipsDatabase friendshipDB =
+									(FriendshipsDatabase) getServletContext().getAttribute(
+										"friendshipDB");
+								
+								List<DBUser> friends =
+									friendshipDB.getFriends((String) session
+										.getAttribute("username"));
+								int index = 0;
+								for (DBUser u : friends)
+								{
+									String username = u.getUsername();
+									String name = u.getName();
+									int balance = u.getBalance();
+							%>
+							<tr>
+								<td><%=index %></td>
+								<td><%=username %></td>
+								<td><%=name %></td>
+								<td><%=balance %></td>
+							</tr>
+							<%
+								index++;
+								}
+							%>
+						</tbody>
+					</table>
+				</div>
 
-		<li>Username: <%=username%> &emsp; Name: <%=name%> &emsp;
-			Balance: <%=balance%> &emsp;
-		</li>
-
-		<%
-			}
-		%>
-
-	</ul>
+			</div>
+		</div>
+		<!--End Advanced Tables -->
+	</div>
+	</div>
+	</div>
 </body>
 </html>

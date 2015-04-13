@@ -22,7 +22,7 @@
 				var elementToRemove = "#" + element;
 				$(elementToRemove).remove();
 			} else {
-				$("#result_div" + index).empty().append(data);
+				alert(data);
 			}
 		});
 	}
@@ -31,74 +31,113 @@
 <title>Insert title here</title>
 </head>
 <body>
-	<ul>
-		<%
-			PaidActivitiesDatabase activitiesDB =
-				(PaidActivitiesDatabase) getServletContext().getAttribute(
-					"activitiesDB");
-			int totalCount = 0;
-			int perPage = 10;
-			int pageStart = 0;
-			String start = request.getParameter("start");
-			if (start != null) pageStart = Integer.parseInt(start);
-			if (pageStart < 0) pageStart = 0;
-			totalCount =
-				activitiesDB.getActivitiesOfferedToUserCount((String) session
-					.getAttribute("username"));
-			if (pageStart > totalCount) pageStart = pageStart - perPage;
-		%>
-		<a href="<%=request.getRequestURL()%>?start=<%=pageStart - 10%>">Previous</a>
-		<%=pageStart + 1%>
-		-
-		<%=pageStart + 10%>
-		<a href="<%=request.getRequestURL()%>?start=<%=pageStart + 10%>">Next</a>
-		<br />
-		<%
-			List<DBPaidService> offeredServices =
-				activitiesDB.getServicesOfferedToUser(
-					(String) session.getAttribute("username"),
-					pageStart,
-					perPage);
-			List<DBPaidTask> offeredTasks =
-				activitiesDB.getTasksOfferedToUser(
-					(String) session.getAttribute("username"),
-					pageStart,
-					perPage);
-			for (int i = 0; i < Math.max(
-				offeredServices.size(),
-				offeredTasks.size()); i++)
-			{
-		%>
-		<%
-			if (i < offeredServices.size())
-				{
-		%>
-		<li id='Service<%=i%>'><h5>Service-</h5>Username:<%=offeredServices.get(i).getUsername()%>
-			&emsp; Title:<%=offeredServices.get(i).getTitle()%> &emsp; Capacity:<%=offeredServices.get(i).getCapacity()%>
-			&emsp; Number registered:<%=offeredServices.get(i).getNumRegistered()%>
-			&emsp;
-			<button
-				onclick='registerActivity("<%=offeredServices.get(i).getId()%>","<%=(String) session.getAttribute("username")%>","<%=i%>", "Service<%=i%>")'>Register
-				to service</button></li>
-		<%
-			}
-				if (i < offeredTasks.size())
-				{
-		%>
-		<li id='Task<%=i%>'><h5>Task-</h5>Username:<%=offeredTasks.get(i).getUsername()%>
-			&emsp; Title:<%=offeredTasks.get(i).getTitle()%> &emsp; Capacity:<%=offeredTasks.get(i).getCapacity()%>
-			&emsp; Number registered:<%=offeredTasks.get(i).getNumRegistered()%>
-			&emsp;
-			<button
-				onclick='registerActivity("<%=offeredTasks.get(i).getId()%>","<%=(String) session.getAttribute("username")%>","<%=i%>", "Task<%=i%>")'>Register
-				to task</button></li>
-		<%
-			}
-		%>
-		<div id="result_div<%=i%>"></div>
-		<%
-			}
-		%>
-	</ul>
+	<div class="col-md-12">
+		<!--    Striped Rows Table  -->
+		<div class="panel panel-default">
+			<div class="panel-heading">Offered Activities</div>
+			<div class="panel-body">
+				<%
+					PaidActivitiesDatabase activitiesDB =
+						(PaidActivitiesDatabase) getServletContext().getAttribute(
+							"activitiesDB");
+					int totalCount = 0;
+					int perPage = 10;
+					int pageStart = 0;
+					String start = request.getParameter("start");
+					if (start != null) pageStart = Integer.parseInt(start);
+					if (pageStart < 0) pageStart = 0;
+					totalCount =
+						activitiesDB.getActivitiesOfferedByUserCount((String) session
+							.getAttribute("username"));
+					if (pageStart > totalCount) pageStart = pageStart - perPage;
+				%>
+				<div style="width: 30%; margin: 0px auto;">
+					<a href="<%=request.getRequestURL()%>?start=<%=pageStart - 10%>"><i
+						class="fa fa-arrow-circle-left"></i></a>
+					<%=pageStart + 1%>
+					-
+					<%=pageStart + 20%>
+					<a href="<%=request.getRequestURL()%>?start=<%=pageStart + 10%>"><i
+						class="fa fa-arrow-circle-right"></i></a>
+				</div>
+				<br />
+
+				<div class="table-responsive">
+					<table class="table table-striped">
+						<thead>
+							<tr>
+								<th>#</th>
+								<th>Type</th>
+								<th>Username</th>
+								<th>Title</th>
+								<th>Capacity</th>
+								<th>Number Registered</th>
+								<th>Register</th>
+							</tr>
+						</thead>
+						<tbody>
+							<%
+								List<DBPaidService> offeredServices =
+									activitiesDB.getServicesOfferedToUser(
+										(String) session.getAttribute("username"),
+										pageStart,
+										perPage);
+								List<DBPaidTask> offeredTasks =
+									activitiesDB.getTasksOfferedToUser(
+										(String) session.getAttribute("username"),
+										pageStart,
+										perPage);
+								int count = 0;
+								for (int i = 0; i < Math.max(
+									offeredServices.size(),
+									offeredTasks.size()); i++)
+								{
+							%>
+							<%
+								if (i < offeredServices.size())
+									{
+							%>
+							<tr id='Service<%=i%>'>
+								<td><%=count%></td>
+								<td>Service</td>
+								<td><%=offeredServices.get(i).getUsername()%></td>
+								<td><%=offeredServices.get(i).getTitle()%></td>
+								<td><%=offeredServices.get(i).getCapacity()%></td>
+								<td><%=offeredServices.get(i).getNumRegistered()%></td>
+								<td><button class="btn btn-default"
+										onclick='registerActivity("<%=offeredServices.get(i).getId()%>","<%=(String) session.getAttribute("username")%>","<%=i%>", "Service<%=i%>")'>Register
+									</button></td>
+							</tr>
+							<%
+								count++;
+									}
+									if (i < offeredTasks.size())
+									{
+							%>
+							<tr id='Task<%=i%>'>
+								<td><%=count%></td>
+								<td>Task</td>
+								<td><%=offeredTasks.get(i).getUsername()%></td>
+								<td><%=offeredTasks.get(i).getTitle()%></td>
+								<td><%=offeredTasks.get(i).getCapacity()%></td>
+								<td><%=offeredTasks.get(i).getNumRegistered()%></td>
+								<td><button class="btn btn-default"
+										onclick='registerActivity("<%=offeredTasks.get(i).getId()%>","<%=(String) session.getAttribute("username")%>","<%=i%>", "Task<%=i%>")'>Register
+									</button></td>
+							</tr>
+							<%
+								count++;
+									}
+							%>
+							<%
+								}
+							%>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<!--  End  Striped Rows Table  -->
+	</div>
 </body>
 </html>
